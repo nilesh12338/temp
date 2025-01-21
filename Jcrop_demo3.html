@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCrop with Cropped Image Preview</title>
+    <!-- JCrop CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/0.9.12/css/jquery.Jcrop.min.css">
+    <style>
+        .preview img, .cropped-preview img {
+            max-width: 100%;
+        }
+		.target {max-width:300px;}
+    </style>
+</head>
+<body>
+    <h1>Multiple Image Upload and Crop Example</h1>
+
+    <!-- Table with Rows -->
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Upload Image</th>
+                <th>Preview</th>
+                <th>Cropped Image</th>
+                <th>Crop Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="image-row">
+                <td>
+                    <input type="file" class="uploadImage" accept="image/*">
+                </td>
+                <td class="preview">
+                    <img class="target" src="" alt="Uploaded Image" style="display:none;">
+                </td>
+                <td class="cropped-preview"></td>
+                <td>
+                    <form class="cropForm" style="display:none;">
+                        <input type="hidden" class="x" name="x">
+                        <input type="hidden" class="y" name="y">
+                        <input type="hidden" class="w" name="w">
+                        <input type="hidden" class="h" name="h">
+                        <button type="button" class="cropBtn">Crop</button>
+                    </form>
+                </td>
+            </tr>
+            <tr class="image-row">
+                <td>
+                    <input type="file" class="uploadImage" accept="image/*">
+                </td>
+                <td class="preview">
+                    <img class="target" src="" alt="Uploaded Image" style="display:none;">
+                </td>
+                <td class="cropped-preview"></td>
+                <td>
+                    <form class="cropForm" style="display:none;">
+                        <input type="hidden" class="x" name="x">
+                        <input type="hidden" class="y" name="y">
+                        <input type="hidden" class="w" name="w">
+                        <input type="hidden" class="h" name="h">
+                        <button type="button" class="cropBtn">Crop</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- JCrop and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            let jcropInstances = {};
+
+            // Handle file selection
+            $(document).on("change", ".uploadImage", function () {
+                const $row = $(this).closest(".image-row");
+                const $target = $row.find(".target");
+                const $cropForm = $row.find(".cropForm");
+                const file = this.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        $target.attr("src", event.target.result).show();
+
+                        // Initialize JCrop
+                        const instanceKey = $row.index();
+                        if (jcropInstances[instanceKey]) jcropInstances[instanceKey].destroy();
+
+                        $target.Jcrop({
+                            aspectRatio: 1,
+                            onSelect: function (c) {
+                                updateCropDetails($row, c);
+                            }
+                        }, function () {
+                            jcropInstances[instanceKey] = this;
+                        });
+
+                        $cropForm.show();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Update cropping details
+            function updateCropDetails($row, c) {
+                $row.find(".x").val(c.x);
+                $row.find(".y").val(c.y);
+                $row.find(".w").val(c.w);
+                $row.find(".h").val(c.h);
+            }
+
+            // Handle crop button click
+ $(document).on("click", ".cropBtn", function () {
+    const $row = $(this).closest(".image-row");
+    const $target = $row.find(".target")[0]; // The preview image
+    const $cropBtn = $(this); // The crop button
+    const instanceKey = $row.index(); // Key to identify the JCrop instance
+    const cropData = {
+        x: parseInt($row.find(".x").val()),
+        y: parseInt($row.find(".y").val()),
+        width: parseInt($row.find(".w").val()),
+        height: parseInt($row.find(".h").val())
+    };
+
+    if ($target && cropData.width && cropData.height) {
+        // Disable the crop button temporarily
+        $cropBtn.prop("disabled", true);
+
+        // Create a canvas to crop the image
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        canvas.width = cropData.width;
+        canvas.height = cropData.height;
+
+        const img = new Image();
+        img.src = $target.src;
+        img.onload = function () {
+            context.drawImage(
+                img,
+                cropData.x,
+                cropData.y,
+                cropData.width,
+                cropData.height,
+                0,
+                0,
+                cropData.width,
+                cropData.height
+            );
+
+            // Replace the preview image with the cropped image
+            const croppedImageUrl = canvas.toDataURL("image/png");
+            $target.src = croppedImageUrl;
+
+            // Destroy the JCrop instance to remove the selection
+            if (jcropInstances[instanceKey]) {
+                jcropInstances[instanceKey].destroy();
+                delete jcropInstances[instanceKey]; // Remove the reference
+            }
+
+            // Reinitialize JCrop for the new cropped image
+            $($target).Jcrop({
+                aspectRatio: 1,
+                onSelect: function (c) {
+                    updateCropDetails($row, c);
+                    $cropBtn.prop("disabled", false); // Enable the crop button on selection
+                }
+            }, function () {
+                jcropInstances[instanceKey] = this; // Store the new instance
+            });
+
+            // Hide the cropping form after cropping
+            $row.find(".cropForm").hide();
+        };
+    } else {
+        alert("Please select a cropping area first!");
+    }
+});
+
+// Function to update crop details
+function updateCropDetails($row, c) {
+    $row.find(".x").val(c.x);
+    $row.find(".y").val(c.y);
+    $row.find(".w").val(c.w);
+    $row.find(".h").val(c.h);
+}
+
+
+        });
+    </script>
+</body>
+</html>

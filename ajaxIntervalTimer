@@ -1,0 +1,48 @@
+// Declare the interval globally to ensure it persists across pages
+let ajaxInterval;
+
+function startInterval() {
+    // Clear any existing interval to avoid duplicate calls
+    clearInterval(ajaxInterval);
+
+    // Initialize the interval
+    ajaxInterval = setInterval(() => {
+        // Perform the AJAX call
+        $.ajax({
+            url: '/your-endpoint-url', // Replace with your AJAX endpoint
+            type: 'GET', // Adjust the HTTP method as needed
+            dataType: 'json', // Adjust the data type if needed
+            success: function(response) {
+                if (response.flag === "done") {
+                    clearInterval(ajaxInterval); // Stop the interval
+                    alert("It's done!"); // Notify the user
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error in AJAX call:', error);
+            }
+        });
+    }, 50000); // Set interval time to 50 seconds
+}
+
+// Bind the function to a button click
+$(document).on('click', '#startButton', function() {
+    startInterval();
+});
+
+// Optionally, ensure the function persists across user session and pages
+$(document).ready(function() {
+    if (sessionStorage.getItem('ajaxIntervalActive')) {
+        startInterval();
+    }
+
+    $(document).on('click', '#startButton', function() {
+        sessionStorage.setItem('ajaxIntervalActive', 'true');
+    });
+});
+
+// Optionally, stop the interval when leaving the session
+$(window).on('beforeunload', function() {
+    clearInterval(ajaxInterval);
+    sessionStorage.removeItem('ajaxIntervalActive');
+});

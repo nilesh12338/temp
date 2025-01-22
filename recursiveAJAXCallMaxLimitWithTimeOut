@@ -1,0 +1,37 @@
+Here’s the updated example where the recursive AJAX calls stop after a maximum of 5 attempts:
+
+let maxAttempts = 5; // Maximum number of attempts
+let attemptCount = 0; // Track the number of attempts
+
+function recursiveAjaxCall() {
+  if (attemptCount >= maxAttempts) {
+    console.log("Maximum attempts reached. Stopping further calls.");
+    return; // Exit the recursion
+  }
+
+  attemptCount++; // Increment the attempt count
+
+  $.ajax({
+    url: "your-server-endpoint", // Replace with your server URL
+    method: "GET", // Replace with your desired HTTP method
+    data: { /* your data */ }, // Optional: Data to send to the server
+    success: function(response) {
+      if (response.flag === "done") {
+        console.log("Process completed:", response);
+        // Handle the success response when the flag is "done"
+      } else {
+        console.log(`Attempt ${attemptCount}: Response not done yet, retrying in 1 second...`);
+        // Retry the request after 1 second
+        setTimeout(recursiveAjaxCall, 1000);
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error(`Attempt ${attemptCount}: An error occurred:`, error);
+      console.log("Retrying in 1 second...");
+      setTimeout(recursiveAjaxCall, 1000);
+    }
+  });
+}
+
+// Start the recursive AJAX calls
+recursiveAjaxCall();

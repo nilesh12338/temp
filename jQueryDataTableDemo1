@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jQuery DataTable Example</title>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <table id="example" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Office</th>
+                <th>Salary</th>
+            </tr>
+        </thead>
+    </table>
+
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable({
+                processing: true,                // Show processing indicator
+                serverSide: true,                // Enable server-side processing
+                ajax: {
+                    url: '/api/employees',       // Your backend API endpoint
+                    type: 'POST',               // HTTP method for the request
+                    data: function (d) {        // Add custom parameters if needed
+                        d.department = 'IT';    // Example: Filter by department
+                    }
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'name' },
+                    { data: 'position' },
+                    { data: 'office' },
+                    { data: 'salary', render: $.fn.dataTable.render.number(',', '.', 2, '$') }
+                ],
+                pageLength: 50,                 // Rows per page
+                lengthMenu: [10, 25, 50, 100], // Rows per page options
+                order: [[0, 'asc']],           // Default sorting (by ID)
+                deferRender: true,             // Defer rendering for performance
+                scrollY: "500px",              // Vertical scrolling
+                scrollCollapse: true,          // Collapse table height when data is reduced
+                stateSave: true                // Save table state (pagination, filters, etc.)
+            });
+        });
+    </script>
+</body>
+</html>

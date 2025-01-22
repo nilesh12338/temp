@@ -1,0 +1,54 @@
+$('#example').DataTable({
+    processing: true,          // Display a processing indicator
+    serverSide: true,          // Enable server-side processing
+    ajax: {
+        url: '/your-server-endpoint',  // API endpoint to fetch data
+        type: 'POST',                 // Use POST for data requests
+        data: function (d) {          // Add custom parameters if needed
+            d.extraParam = 'value';   // Example: Add extra parameters to the request
+        }
+    },
+    pageLength: 50,            // Number of rows per page
+    lengthMenu: [10, 25, 50, 100], // Options for rows per page
+    order: [[0, 'asc']],       // Default column sorting (e.g., by first column)
+    columnDefs: [
+        { targets: [0], orderable: false }  // Disable sorting on specific columns
+    ],
+    deferRender: true,         // Defer rendering for faster loading
+    scrollY: "500px",          // Vertical scrolling for a fixed-height table
+    scrollCollapse: true,      // Allow the table to collapse when data is reduced
+});
+
+Example DataTable Request Parameters:
+{
+  "draw": 1,
+  "start": 0,
+  "length": 50,
+  "search": {"value": "example", "regex": false},
+  "order": [{"column": 0, "dir": "asc"}]
+}
+
+
+Your backend should respond with a JSON object:
+{
+  "draw": 1,
+  "recordsTotal": 10000000,
+  "recordsFiltered": 500000,
+  "data": [
+    ["Row 1, Col 1", "Row 1, Col 2", "Row 1, Col 3"],
+    ["Row 2, Col 1", "Row 2, Col 2", "Row 2, Col 3"]
+  ]
+}
+
+
+Plugins and Extensions
+1) Scroller Extension: Helps with infinite scrolling for large datasets.
+scroller: true
+
+2) SearchPanes or Column Search: For advanced filtering.
+dom: 'Plfrtip',  // Add search panes to the UI
+searchPanes: { cascadePanes: true }
+
+3) State Saving: Save the table state (pagination, sorting) for user sessions.
+stateSave: true
+

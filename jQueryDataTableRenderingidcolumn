@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jQuery DataTable Example</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <table id="example" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+    </table>
+
+    <script>
+        $(document).ready(function() {
+            $('#example').DataTable({
+                ajax: {
+                    url: 'your-api-endpoint-or-json-data-source', // Replace with your data source
+                    dataSrc: ''
+                },
+                columns: [
+                    {
+                        data: 'id',
+                        render: function(data, type, row) {
+                            return `<a href="/view/${data}" target="_blank">View/Edit</a>`;
+                        }
+                    },
+                    { data: 'name' },
+                    { data: 'email' }
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

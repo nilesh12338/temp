@@ -208,3 +208,88 @@ $(document).on("click", ".cropBtn", function () {
         alert("Please select a cropping area first!");
     }
 });
+
+
+
+$(document).on("click", ".cropBtn", function () {
+    const $row = $(this).closest(".image-row");
+    const $target = $row.find(".target")[0]; // The preview image
+    const $cropBtn = $(this); // The crop button
+    const instanceKey = $row.index(); // Key to identify the JCrop instance
+    const cropData = {
+        x: parseInt($row.find(".x").val(), 10),
+        y: parseInt($row.find(".y").val(), 10),
+        width: parseInt($row.find(".w").val(), 10),
+        height: parseInt($row.find(".h").val(), 10)
+    };
+
+    if ($target && cropData.width && cropData.height) {
+        // Disable the crop button temporarily
+        $cropBtn.prop("disabled", true);
+
+        // Create a canvas to crop the image
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        canvas.width = cropData.width;
+        canvas.height = cropData.height;
+
+        const img = new Image();
+        img.src = $target.src;
+        img.onload = function () {
+            const naturalWidth = img.naturalWidth;
+            const naturalHeight = img.naturalHeight;
+            const displayedWidth = $target.width;
+            const displayedHeight = $target.height;
+
+            // Adjust crop coordinates based on image scaling
+            const scaleX = naturalWidth / displayedWidth;
+            const scaleY = naturalHeight / displayedHeight;
+
+            context.drawImage(
+                img,
+                cropData.x * scaleX,
+                cropData.y * scaleY,
+                cropData.width * scaleX,
+                cropData.height * scaleY,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            // Replace the preview image with the cropped image
+            const croppedImageUrl = canvas.toDataURL("image/png");
+            $target.src = croppedImageUrl;
+
+            // Destroy the JCrop instance to remove the selection
+            if (jcropInstances[instanceKey]) {
+                jcropInstances[instanceKey].destroy();
+                delete jcropInstances[instanceKey]; // Remove the reference
+            }
+
+            // Reinitialize JCrop for the new cropped image
+            $($target).Jcrop({
+                aspectRatio: 1,
+                onSelect: function (c) {
+                    updateCropDetails($row, c);
+                    $cropBtn.prop("disabled", false); // Enable the crop button on selection
+                }
+            }, function () {
+                jcropInstances[instanceKey] = this; // Store the new instance
+            });
+
+            // Hide the cropping form after cropping
+            $row.find(".cropForm").hide();
+        };
+    } else {
+        alert("Please select a cropping area first!");
+    }
+});
+
+// Function to update crop details
+function updateCropDetails($row, c) {
+    $row.find(".x").val(c.x);
+    $row.find(".y").val(c.y);
+    $row.find(".w").val(c.w);
+    $row.find(".h").val(c.h);
+}

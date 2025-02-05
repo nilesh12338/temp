@@ -9,36 +9,60 @@
     <style>
         .tooltip-inner {
             text-align: left;
-            max-width: 400px;
+            max-width: 500px;
             white-space: pre-wrap;
+            background-color: #ffffff; /* White background */
+            color: black;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .tooltip.bs-tooltip-auto[data-popper-placement^=top] .tooltip-arrow::before {
+            border-top-color: #ccc;
+        }
+        .tooltip-content b {
+            color: #5c4400; /* Dark gold color for bold text */
+        }
+        .tooltip-content i {
+            color: #0046ad; /* Blue italic text */
+            font-style: italic;
+        }
+        .tooltip-content .red {
+            color: #a52a2a; /* Brownish red for warnings */
+            font-weight: bold;
+        }
+        .tooltip-content .purple {
+            color: #6a0dad; /* Purple for formula text */
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
 <div class="container mt-5">
-    <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-html="true" title="
-    <b>Sum of:</b> <i>Net Profit / Loss, Depreciation & Amortization, Goodwill & Other Intangible Assets Written off, Preliminary Expenses Written off, Miscellaneous Expenses Written off</i> for a year in <b>Op Stmt</b>.<br><br>
-    
-    <b>Display value if result is greater than 0 else display empty</b><br><br>
+    <button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-html="true" title='
+    <div class="tooltip-content">
+        <b>Sum of:</b> <i>Net Profit / Loss, Depreciation & Amortization, Goodwill & Other Intangible Assets Written off, Preliminary Expenses Written off, Miscellaneous Expenses Written off</i> for a year in <b>Op Stmt</b>.<br><br>
+        
+        <span class="red">Display value if result is greater than 0 else display empty</span><br><br>
 
-    <b>Formula:</b><br>
-    IF ((Net Profit/Loss)[OP-CY] + [Depreciation & Amortisation][OP-CY] +<br>
-    [Goodwill & Other Intangible Assets Written off][OP-CY] +<br>
-    [Preliminary Expenses Written off][OP-CY] + [Other Miscellaneous Expenses Written off][OP-CY]) < 0 THEN EMPTY<br>
-    ELSE RESULT_VALUE<br><br>
+        <b>Formula:</b><br>
+        <span class="purple">IF</span> ((<i>Net Profit/Loss</i>)[OP-CY] + <i>Depreciation & Amortisation</i>[OP-CY] +<br>
+        <i>Goodwill & Other Intangible Assets Written off</i>[OP-CY] +<br>
+        <i>Preliminary Expenses Written off</i>[OP-CY] + <i>Other Miscellaneous Expenses Written off</i>[OP-CY]) < 0 <span class="purple">THEN</span> EMPTY<br>
+        <span class="purple">ELSE</span> RESULT_VALUE<br><br>
 
-    <b>NOTE:</b><br>
-    BS - Balance Sheet<br>
-    PFI - Performance & Financial Indicators<br>
-    AWC - Assessment of working capital<br>
-    CY - Current year<br>
-    EST - Estimated<br>
-    OP - Operating Statement<br>
-    FF - Funds Flow<br>
-    CCT - Cross checks and Trends<br>
-    PY - Previous Year
-    ">
+        <b>NOTE:</b><br>
+        <b>BS</b> - Balance Sheet<br>
+        <b>PFI</b> - Performance & Financial Indicators<br>
+        <b>AWC</b> - Assessment of working capital<br>
+        <b>CY</b> - Current year<br>
+        <b>EST</b> - Estimated<br>
+        <b>OP</b> - Operating Statement<br>
+        <b>FF</b> - Funds Flow<br>
+        <b>CCT</b> - Cross checks and Trends<br>
+        <b>PY</b> - Previous Year
+    </div>
+    '>
         Hover for Tooltip
     </button>
 </div>
@@ -54,4 +78,3 @@
 
 </body>
 </html>
-

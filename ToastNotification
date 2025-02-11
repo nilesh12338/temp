@@ -168,3 +168,50 @@ function htmlToElement(html) {
     template.innerHTML = html;
     return template.content.firstChild;
 }      
+==============
+toast without dom element 
+
+function showToast(title, message, type = 'info', delay = 5000) {
+    // Create toast container if not exists
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    let toast = document.createElement('div');
+    toast.className = `toast align-items-center text-bg-${type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.setAttribute('data-bs-delay', delay);
+
+    // Toast content
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <strong>${title}</strong><br>${message}
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+
+    // Append to container
+    toastContainer.appendChild(toast);
+
+    // Initialize and show toast
+    let toastInstance = new bootstrap.Toast(toast);
+    toastInstance.show();
+
+    // Remove toast after it's hidden
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
+
+// Example Usage
+showToast('Success', 'Data saved successfully!', 'success');
+showToast('Error', 'Something went wrong!', 'danger');

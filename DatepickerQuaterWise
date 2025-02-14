@@ -120,3 +120,44 @@ $(document).ready(function () {
         });
     });
 });
+_------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Year Date Calculation</title>
+</head>
+<body>
+
+    <label for="dateInput">Select Date:</label>
+    <input type="date" id="dateInput">
+    <button onclick="calculateNextYearDate()">Get Next Year Date</button>
+
+    <script>
+        function calculateNextYearDate() {
+            let dateInput = document.getElementById("dateInput");
+            let selectedDate = new Date(dateInput.value);
+
+            if (isNaN(selectedDate.getTime())) {
+                alert("Please select a valid date.");
+                return;
+            }
+
+            let nextYear = selectedDate.getFullYear() + 1;
+            let nextYearDate = new Date(nextYear, selectedDate.getMonth(), selectedDate.getDate());
+
+            // Check if the calculated date is valid
+            if (nextYearDate.getMonth() !== selectedDate.getMonth()) {
+                // If it's invalid (e.g., Feb 29 → Mar 1), use the previous day
+                nextYearDate = new Date(nextYear, selectedDate.getMonth() + 1, 0); // Last day of the month
+            }
+
+            // Format to YYYY-MM-DD for input field
+            let formattedDate = nextYearDate.toISOString().split("T")[0];
+            dateInput.value = formattedDate;
+        }
+    </script>
+
+</body>
+</html>

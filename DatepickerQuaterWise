@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarter-based Date Picker</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<body>
+
+    <label for="quarter">Select Quarter:</label>
+    <select id="quarter">
+        <option value="">--Select Quarter--</option>
+        <option value="Q1">Q1 (Jan-Mar)</option>
+        <option value="Q2">Q2 (Apr-Jun)</option>
+        <option value="Q3">Q3 (Jul-Sep)</option>
+        <option value="Q4">Q4 (Oct-Dec)</option>
+    </select>
+
+    <label for="datepicker">Select Date:</label>
+    <input type="text" id="datepicker" disabled>
+
+    <script>
+        $(document).ready(function() {
+            $('#quarter').change(function() {
+                let selectedQuarter = $(this).val();
+                let today = new Date();
+                let year = today.getFullYear();
+                let startDate, endDate;
+
+                if (selectedQuarter === "Q1") {
+                    startDate = new Date(year, 0, 1);  // Jan 1
+                    endDate = new Date(year, 2, 31);  // Mar 31
+                } else if (selectedQuarter === "Q2") {
+                    startDate = new Date(year, 3, 1);  // Apr 1
+                    endDate = new Date(year, 5, 30);  // Jun 30
+                } else if (selectedQuarter === "Q3") {
+                    startDate = new Date(year, 6, 1);  // Jul 1
+                    endDate = new Date(year, 8, 30);  // Sep 30
+                } else if (selectedQuarter === "Q4") {
+                    startDate = new Date(year, 9, 1);  // Oct 1
+                    endDate = new Date(year, 11, 31); // Dec 31
+                } else {
+                    $('#datepicker').prop('disabled', true);
+                    return;
+                }
+
+                $('#datepicker').prop('disabled', false).val('');
+
+                // If the selected quarter is the current quarter, limit to past dates
+                let quarterStartMonth = startDate.getMonth();
+                let quarterEndMonth = endDate.getMonth();
+                if (today.getMonth() >= quarterStartMonth && today.getMonth() <= quarterEndMonth) {
+                    endDate = today; // Restrict selection to past dates
+                }
+
+                // Initialize or update Datepicker
+                $('#datepicker').datepicker("destroy").datepicker({
+                    dateFormat: "yy-mm-dd",
+                    minDate: startDate,
+                    maxDate: endDate
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
+==========
+$(document).ready(function () {
+    $("#quarter-select").change(function () {
+        const selectedQuarter = $(this).val();
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const lastYear = currentYear - 1;
+        
+        let startDate, endDate;
+        
+        switch (selectedQuarter) {
+            case "Q1":
+                startDate = new Date(lastYear, 0, 1);
+                endDate = new Date(lastYear, 2, 31);
+                break;
+            case "Q2":
+                startDate = new Date(lastYear, 3, 1);
+                endDate = new Date(lastYear, 5, 30);
+                break;
+            case "Q3":
+                startDate = new Date(lastYear, 6, 1);
+                endDate = new Date(lastYear, 8, 30);
+                break;
+            case "Q4":
+                startDate = new Date(lastYear, 9, 1);
+                endDate = new Date(lastYear, 11, 31);
+                break;
+            case "currentQ":
+                // Determine current quarter
+                const month = currentDate.getMonth();
+                if (month < 3) { // Q1
+                    startDate = new Date(currentYear, 0, 1);
+                } else if (month < 6) { // Q2
+                    startDate = new Date(currentYear, 3, 1);
+                } else if (month < 9) { // Q3
+                    startDate = new Date(currentYear, 6, 1);
+                } else { // Q4
+                    startDate = new Date(currentYear, 9, 1);
+                }
+                endDate = new Date(); // Restrict selection to past dates
+                break;
+            default:
+                return;
+        }
+
+        $("#datepicker").datepicker("destroy").datepicker({
+            minDate: startDate,
+            maxDate: endDate,
+            dateFormat: "yy-mm-dd"
+        });
+    });
+});

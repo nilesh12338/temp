@@ -20,3 +20,22 @@ const str = "Hello123!@#";
 const nonMatching = findNonMatchingChars(str, regex);
 
 console.log(nonMatching); // Output: ["!", "@", "#"]
+
+===================
+function findNonMatchingChars(str, regex) {
+    const uniqueChars = new Set(); // To store unique non-matching characters
+
+    str.split("").forEach(char => {
+        if (!regex.test(char)) {
+            uniqueChars.add(char === "\n" ? "\\n" : char); // Replace \n with "\\n"
+        }
+    });
+
+    return [...uniqueChars]; // Convert Set to an array
+}
+
+const regex = /[a-zA-Z0-9]/;  // Matches allowed characters
+const str = "Hello123!@#\nHello!"; 
+const nonMatching = findNonMatchingChars(str, regex);
+
+console.log(nonMatching); // Output: ["!", "@", "#", "\\n"]

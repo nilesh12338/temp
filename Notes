@@ -9,3 +9,14 @@ Please coordinate accordingly. Let us know if you have any questions.
 Best regards,
 [Your Name]
 [Your Designation]
+
+
+function findNonMatchingChars(str, regex) {
+    return str.split("").filter(char => !regex.test(char));
+}
+
+const regex = /[a-zA-Z0-9]/;  // Matches allowed characters
+const str = "Hello123!@#";
+const nonMatching = findNonMatchingChars(str, regex);
+
+console.log(nonMatching); // Output: ["!", "@", "#"]

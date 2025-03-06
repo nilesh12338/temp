@@ -1,0 +1,21 @@
+(function() {
+    const originalLocation = window.location;
+
+    Object.defineProperty(window, 'location', {
+        configurable: false,
+        enumerable: true,
+        get: function() {
+            return originalLocation;
+        },
+        set: function(url) {
+            const allowedOrigin = window.location.origin; // Current domain
+            const newURL = new URL(url, allowedOrigin); // Resolve relative URLs
+
+            if (newURL.origin === allowedOrigin) {
+                originalLocation.href = url; // Allow same-origin navigation
+            } else {
+                console.warn('Cross-origin redirects are blocked:', url);
+            }
+        }
+    });
+})();

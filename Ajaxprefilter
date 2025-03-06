@@ -1,0 +1,44 @@
+$.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+    let originalSuccess = options.success;
+
+    options.success = function (responseData, textStatus, jqXHR) {
+        // Check if response content type is JSON before validation
+        let contentType = jqXHR.getResponseHeader("Content-Type");
+        if (contentType && contentType.includes("application/json")) {
+            if (isValidResponse(responseData)) {
+                // Call the original success function if valid
+                if (typeof originalSuccess === "function") {
+                    originalSuccess(responseData, textStatus, jqXHR);
+                }
+            } else {
+                console.error("Invalid JSON response detected", responseData);
+            }
+        } else {
+            console.warn("Skipping validation - Response is not JSON", contentType);
+            if (typeof originalSuccess === "function") {
+                originalSuccess(responseData, textStatus, jqXHR);
+            }
+        }
+    };
+});
+
+/**
+ * Function to validate response data
+ */
+function isValidResponse(data) {
+    return typeof data === "object" && data !== null && data.hasOwnProperty("stsFlag") && typeof data.stsFlag === "boolean";
+}
+
+// Example AJAX request (passes through prefilter)
+$.ajax({
+    url: "your-api-endpoint",
+    method: "GET",
+    dataType: "json",
+    contentType: "application/json",
+    success: function (responseData) {
+        console.log("Success:", responseData);
+    },
+    error: function (error) {
+        console.error("Error:", error);
+    }
+});

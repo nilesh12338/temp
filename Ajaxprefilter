@@ -2,6 +2,80 @@ $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
     let originalSuccess = options.success;
 
     options.success = function (responseData, textStatus, jqXHR) {
+        let contentType = jqXHR.getResponseHeader("Content-Type");
+
+        if (options.dataType === "json" && contentType && contentType.includes("application/json")) {
+            // Validate JSON response
+            if (isValidJsonResponse(responseData)) {
+                if (typeof originalSuccess === "function") {
+                    originalSuccess(responseData, textStatus, jqXHR);
+                }
+            } else {
+                console.error("Invalid JSON response detected", responseData);
+            }
+        } else if (options.dataType === "html" && contentType && contentType.includes("text/html")) {
+            // Sanitize HTML response (check for <script> tags)
+            if (containsScriptTag(responseData)) {
+                console.error("Potential XSS detected in HTML response", responseData);
+            } else {
+                if (typeof originalSuccess === "function") {
+                    originalSuccess(responseData, textStatus, jqXHR);
+                }
+            }
+        } else {
+            // For other content types, proceed without validation
+            if (typeof originalSuccess === "function") {
+                originalSuccess(responseData, textStatus, jqXHR);
+            }
+        }
+    };
+});
+
+/**
+ * Function to validate JSON response
+ */
+function isValidJsonResponse(data) {
+    return typeof data === "object" && data !== null && data.hasOwnProperty("stsFlag") && typeof data.stsFlag === "boolean";
+}
+
+/**
+ * Function to check for <script> tags in HTML response
+ */
+function containsScriptTag(response) {
+    return typeof response === "string" && /<script[\s\S]*?>[\s\S]*?<\/script>/gi.test(response);
+}
+
+// Example AJAX requests (pass through prefilter)
+$.ajax({
+    url: "your-json-endpoint",
+    method: "GET",
+    dataType: "json",
+    contentType: "application/json",
+    success: function (responseData) {
+        console.log("JSON Response Processed:", responseData);
+    },
+    error: function (error) {
+        console.error("Error:", error);
+    }
+});
+
+$.ajax({
+    url: "your-html-endpoint",
+    method: "GET",
+    dataType: "html",
+    contentType: "text/html",
+    success: function (responseData) {
+        console.log("HTML Response Processed:", responseData);
+    },
+    error: function (error) {
+        console.error("Error:", error);
+    }
+});
+========================
+$.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+    let originalSuccess = options.success;
+
+    options.success = function (responseData, textStatus, jqXHR) {
         // Check if response content type is JSON before validation
         let contentType = jqXHR.getResponseHeader("Content-Type");
         if (contentType && contentType.includes("application/json")) {

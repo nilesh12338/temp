@@ -42,3 +42,36 @@ $.ajax({
         console.error("Error:", error);
     }
 });
+=================
+$.ajax({
+    url: "your-api-endpoint",
+    method: "GET",
+    dataType: "json",
+    contentType: "application/json",
+    success: function (responseData) {
+        if (isValidResponse(responseData)) { // Validate response before using it
+            if (responseData.stsFlag === true) { 
+                console.log("Valid response received", responseData);
+                // Proceed with business logic
+            }
+        } else {
+            console.error("Invalid response format", responseData);
+        }
+    },
+    error: function (error) {
+        console.error("Error:", error);
+    }
+});
+
+/**
+ * Function to validate and sanitize response data
+ */
+function isValidResponse(data) {
+    if (typeof data !== "object" || data === null) {
+        return false;
+    }
+    if (!data.hasOwnProperty("stsFlag") || typeof data.stsFlag !== "boolean") {
+        return false;
+    }
+    return true; // Passes validation
+}

@@ -166,3 +166,44 @@ window.addEventListener('message', (event) => {
         console.log('Child window URL changed:', event.data.url);
     }
 });
+*****************
+var childWindow;
+
+function openNewWin(url, btn) {
+    var _h = screen.availHeight - 30;
+    var _w = screen.availWidth - 11;
+    var left = 0;
+    var top = 0;
+
+    if (!childWindow || childWindow.closed) {
+        childWindow = window.open(url, 'SBI_LMS', 'directories=0,titlebar=0,width=' + _w + ',height=' + _h + ',top=' + top + ',left=' + left);
+        
+        // Remove parent div of the button
+        $(btn).parent().find('div').remove();
+
+        // Start monitoring the child window
+        monitorChildURL();
+    } else {
+        childWindow.focus();
+    }
+}
+
+function monitorChildURL() {
+    const allowedOrigin = window.location.origin; // Parent's domain
+
+    const interval = setInterval(() => {
+        try {
+            if (childWindow && !childWindow.closed) {
+                if (childWindow.location.origin !== allowedOrigin) {
+                    console.warn('Unauthorized navigation detected! Redirecting back...');
+                    childWindow.location.href = allowedOrigin; // Force redirect back
+                }
+            } else {
+                clearInterval(interval); // Stop monitoring if child is closed
+            }
+        } catch (error) {
+            console.warn('Cross-origin navigation detected. Child window may have changed domains.');
+        }
+    }, 500); // Check every 500ms
+}
+

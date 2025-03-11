@@ -95,4 +95,20 @@
     });
 
 })();
+===================
+(function() {
+    function notifyParent() {
+        window.opener.postMessage({ url: window.location.href }, window.origin);
+    }
 
+    // Detect history changes
+    window.addEventListener('popstate', notifyParent);
+    window.addEventListener('pushstate', notifyParent); // Requires manual trigger in app
+    window.addEventListener('replaceState', notifyParent); // Requires manual trigger in app
+
+    // Detect hash changes (`example.com/#new`)
+    window.addEventListener('hashchange', notifyParent);
+
+    // Notify parent on initial load
+    notifyParent();
+})();

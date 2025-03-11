@@ -42,3 +42,57 @@
     });
 
 })();
+============================
+(function() {
+    const originalAssign = window.location.assign;
+    const originalReplace = window.location.replace;
+    const originalOpen = window.open;
+
+    function isSameOrigin(url) {
+        try {
+            const newURL = new URL(url, window.location.origin);
+            return newURL.origin === window.location.origin;
+        } catch (e) {
+            return false; // Invalid URL
+        }
+    }
+
+    // Override assign() method
+    window.location.assign = function(url) {
+        if (isSameOrigin(url)) {
+            originalAssign.call(window.location, url);
+        } else {
+            console.warn('Cross-origin redirects are blocked:', url);
+        }
+    };
+
+    // Override replace() method
+    window.location.replace = function(url) {
+        if (isSameOrigin(url)) {
+            originalReplace.call(window.location, url);
+        } else {
+            console.warn('Cross-origin redirects are blocked:', url);
+        }
+    };
+
+    // Override window.open()
+    window.open = function(url, ...args) {
+        if (isSameOrigin(url)) {
+            return originalOpen.call(window, url, ...args);
+        } else {
+            console.warn('Cross-origin window opening is blocked:', url);
+            return null;
+        }
+    };
+
+    // Prevent anchor tag clicks from redirecting outside the domain
+    document.addEventListener('click', function(event) {
+        let target = event.target.closest('a'); // Get nearest anchor tag
+        if (target && target.href && !isSameOrigin(target.href)) {
+            event.preventDefault();
+            console.warn('Cross-origin navigation is blocked:', target.href);
+        }
+    });
+
+})();
+

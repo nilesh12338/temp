@@ -112,3 +112,57 @@
     // Notify parent on initial load
     notifyParent();
 })();
+===================================%%%%%%%%%
+var childWindow;
+
+function openNewWin(url, btn) {
+    var _h = screen.availHeight - 30;
+    var _w = screen.availWidth - 11;
+    var left = 0;
+    var top = 0;
+
+    if (typeof childWindow === 'undefined' || childWindow.closed) {
+        childWindow = window.open(url, 'SBI_LMS', 'directories=0,titlebar=0,width=' + _w + ',height=' + _h + ',top=' + top + ',left=' + left);
+
+        // Remove parent div of the button (Existing functionality)
+        $(btn).parent().find('div').remove();
+
+        // Attach event listener for URL change detection
+        if (childWindow) {
+            childWindow.addEventListener('DOMContentLoaded', notifyParent);
+            childWindow.addEventListener('popstate', notifyParent);
+            childWindow.addEventListener('hashchange', notifyParent);
+
+            // Override pushState & replaceState
+            const originalPushState = childWindow.history.pushState;
+            childWindow.history.pushState = function(...args) {
+                originalPushState.apply(childWindow.history, args);
+                notifyParent();
+            };
+
+            const originalReplaceState = childWindow.history.replaceState;
+            childWindow.history.replaceState = function(...args) {
+                originalReplaceState.apply(childWindow.history, args);
+                notifyParent();
+            };
+        }
+    } else {
+        childWindow.focus();
+    }
+}
+
+// Function to notify parent when child URL changes
+function notifyParent() {
+    try {
+        window.postMessage({ url: childWindow.location.href }, window.origin);
+    } catch (error) {
+        console.warn('Error accessing child window URL:', error);
+    }
+}
+
+// Listen for messages from the child window
+window.addEventListener('message', (event) => {
+    if (event.source === childWindow) {
+        console.log('Child window URL changed:', event.data.url);
+    }
+});

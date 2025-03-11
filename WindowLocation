@@ -1,21 +1,44 @@
 (function() {
-    const originalLocation = window.location;
+    const originalAssign = window.location.assign;
+    const originalReplace = window.location.replace;
 
-    Object.defineProperty(window, 'location', {
-        configurable: false,
-        enumerable: true,
-        get: function() {
-            return originalLocation;
-        },
+    function isSameOrigin(url) {
+        try {
+            const newURL = new URL(url, window.location.origin);
+            return newURL.origin === window.location.origin;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    window.location.assign = function(url) {
+        if (isSameOrigin(url)) {
+            originalAssign.call(window.location, url);
+        } else {
+            console.warn('Cross-origin redirects are blocked:', url);
+        }
+    };
+
+    window.location.replace = function(url) {
+        if (isSameOrigin(url)) {
+            originalReplace.call(window.location, url);
+        } else {
+            console.warn('Cross-origin redirects are blocked:', url);
+        }
+    };
+
+    // Intercept direct href assignments
+    Object.defineProperty(window.location, 'href', {
         set: function(url) {
-            const allowedOrigin = window.location.origin; // Current domain
-            const newURL = new URL(url, allowedOrigin); // Resolve relative URLs
-
-            if (newURL.origin === allowedOrigin) {
-                originalLocation.href = url; // Allow same-origin navigation
+            if (isSameOrigin(url)) {
+                originalAssign.call(window.location, url);
             } else {
                 console.warn('Cross-origin redirects are blocked:', url);
             }
+        },
+        get: function() {
+            return window.location.toString();
         }
     });
+
 })();

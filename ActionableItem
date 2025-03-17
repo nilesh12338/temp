@@ -1,0 +1,59 @@
+I will analyze the images and extract actionable items for you. Let me process them now.
+
+I'll first extract any text or key details from the images and then summarize them into actionable bullet points. Let me process them now.
+
+Here are the key actionable items based on the extracted text from the images:
+
+### **1. General UI and Component Standards**
+- **Mandatory Fields:** Mark mandatory fields with an asterisk (*) and apply `mandatory-class`.
+- **Large Input Handling:** Use `dynamicWidth` for large input values.
+- **Field Wrapping:** Use `inputWrapper` class to wrap input fields.
+- **Button Naming Convention:** 
+  - `send-back-*-btn-class` for send-back actions.
+  - `approved-btn-class` for approval.
+  - `delete-btn-class` for delete actions.
+  - `generate-btn-class` for generating actions.
+  - `print-page-btn-class` for print page.
+- **Dropdowns with Large Data:** Use a specific class to optimize dropdowns when the data size is large.
+
+### **2. Form and Input Field Guidelines**
+- **Form Structure:** Add `formNewDesign` class.
+- **Field Alignment:** Use `col-4`, `col-auto`, and `form-floating-class` for proper alignment.
+- **Label Wrapping:** Labels should be wrapped in `label` tags with `form-label-class`.
+- **Number Fields Handling:**
+  - Only allow 2 decimal places for number fields.
+  - Ensure max-length attribute is applied.
+- **Input Validations:**
+  - Max-length attribute is required for all input fields.
+  - `form-select form-select-class form-control-class` should be used for dropdown elements.
+  - `form-check-input form-check-input-class` should be used for checkboxes.
+  
+### **3. Field-Specific Formatting**
+- **Identification Numbers:** Use designated classes:
+  - `tanNumberClass` for TAN.
+  - `cinNumber-class` for CIN.
+  - `cifNumber-class` for CIF.
+  - `panNumber-class` for PAN.
+- **Autofetch Elements:** Use:
+  - `input-fetch-class` for input fields.
+  - `textarea-fetch-class` for text areas.
+- **Amount Formatting:** Use `amount-input-mask` for proper currency formatting.
+- **Special Character Restrictions:** Use `blockSpecialChars_comm` for restricting special characters.
+
+### **4. Button and Action Elements**
+- **Common Button Classes:**
+  - `add-btn-class` for adding new entries.
+  - `edit-btn-class` for editing.
+  - `delete-btn-class` for deleting.
+  - `view-btn-class` for viewing.
+  - `cancel-btn-class` for canceling actions.
+  - `upload-btn-class` for file uploads.
+  - `regenerate-btn-class` for regenerating.
+- **Previous/Next Page Handling:** Use `prev-page-btn-class` for back navigation.
+
+### **5. Layout and Structural Guidelines**
+- **Div-Based Table Structure:** Instead of using `<table>`, use `<div>` with class `formNewDesign`.
+- **Expand/Collapse Feature:** Implement `expandAll` and `collapsedAll` classes.
+- **Section Wrapping:** Use `section A` and `section B` class structures for form segmentation.
+
+These items provide a structured approach to improving and maintaining UI/UX consistency in the web application. Would you like me to format this into a document or provide further clarifications?

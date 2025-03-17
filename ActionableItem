@@ -57,3 +57,54 @@ Here are the key actionable items based on the extracted text from the images:
 - **Section Wrapping:** Use `section A` and `section B` class structures for form segmentation.
 
 These items provide a structured approach to improving and maintaining UI/UX consistency in the web application. Would you like me to format this into a document or provide further clarifications?
+
+======================
+Here are the key actionable points extracted from the provided Excel sheets:  
+
+### **Button Classes:**
+- **Save Button:** `save-btn-class`
+- **Send Back Button:** `send-back-*.btn-class` (e.g., `send-back-rm-btn-class`)
+- **Reject Button:** `reject-btn-class`
+- **Approved Button:** `approved-btn-class`
+- **Text Area:** `textarea-class, blockSpecialChars_comm`
+- **Label:** `form-label, form-label-class`
+- **Input Text:** `form-control, form-control-class`
+- **Select Field:** `form-select, form-select-class, form-control-class`
+- **Add Button (Popup):** `add-btn-class`
+- **Edit Button:** `edit-btn-class`
+- **Delete Button:** `delete-btn-class`
+- **View Button:** `view-btn-class`
+- **Previous Page Button:** `prev-page-btn-class`
+- **Cancel Button:** `cancel-btn-class`
+- **Generate Button:** `generate-btn-class`
+- **Print Page Button:** `print-page-btn-class`
+- **Regenerate Button:** `regenerate-btn-class`
+- **Upload Button:** `upload-btn-class`
+- **Regret Button:** `regret-btn-class`
+
+### **Form Field Classes:**
+- **Mandatory Field (Asterisk `*`):** `mandatory-class`
+- **Large Input Field Required:** `dynamicWidth`
+- **Right Column `<div class="rightCol">` Append Class:** `formNewDesign`
+- **Input Field Wrapper:** `inputWrapper`
+- **Radio Button Wrapper:** `cust-switch-rdo-field`
+- **TAN Number Field:** `tanNumber-class`
+- **CIN Number Field:** `cinNumber-class`
+- **CIF Number Field:** `cifNumber-class`
+- **LEI Number Field:** `leiNumber-class`
+- **GST Field:** `gstNumber-class`
+- **DIN Field:** `dinNumber-class`
+- **PAN Field:** `panNumber-class`
+- **Amount/Value Field:** `amount-input-mask`
+- **Serial Number Field:** `srNumber-class`
+- **Number of Days Field:** `number-day-class`
+- **Percentage (%) in One Line:** `d-inline-block`
+- **Crore (Cr) in One Line:** `d-inline-block`
+- **Autofetch Input Field:** `input-fetch-class`
+- **Autofetch Textarea Field:** `textarea-fetch-class`
+- **File Upload Common Message Field:** `file-upload-msg-class`
+
+### **Dropdown Classes:**
+- **For Large Dropdown Option Data:** `select2-class`
+
+These classifications will help implement UI components efficiently while maintaining consistency across the project. Let me know if you need further refinements!

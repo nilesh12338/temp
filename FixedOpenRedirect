@@ -1,1 +1,14 @@
+function safeRedirect(url) {
+    const allowedHosts = ['yourdomain.com']; // Replace with allowed domains
+    try {
+        let newURL = new URL(url, window.location.origin);
+        if (allowedHosts.includes(newURL.hostname)) {
+            window.location.href = newURL.href;
+        } else {
+            console.warn("Blocked potentially unsafe redirect:", newURL.href);
+        }
+    } catch (e) {
+        console.error("Invalid URL detected:", url);
+    }
+}
 

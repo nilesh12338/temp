@@ -15,4 +15,7 @@ function safeRedirect(url) {
 }
 
 safeRedirect(response);
+let safeParam = encodeURIComponent(response);
+window.location.href = `./error.do?errorMsg=${safeParam}`;
+
 

@@ -1,0 +1,19 @@
+$(document).ready(function () {
+    // Initialize tooltip on hover
+    $('.form-select-class').on('mouseenter', function () {
+        let selectedText = $(this).find('option:selected').text();
+
+        if (selectedText !== '--Select--') {
+            $(this).tooltip({
+                title: selectedText,
+                placement: 'top',
+                trigger: 'manual'
+            }).tooltip('show');
+        }
+    });
+
+    // Remove tooltip on mouse leave
+    $('.form-select-class').on('mouseleave', function () {
+        $(this).tooltip('hide');
+    });
+});

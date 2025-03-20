@@ -1,19 +1,55 @@
-$(document).ready(function () {
-    // Initialize tooltip on hover
-    $('.form-select-class').on('mouseenter', function () {
-        let selectedText = $(this).find('option:selected').text();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap 5.3 Tooltip on Select Hover</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        if (selectedText !== '--Select--') {
-            $(this).tooltip({
-                title: selectedText,
-                placement: 'top',
-                trigger: 'manual'
-            }).tooltip('show');
-        }
-    });
+    <script>
+        $(document).ready(function () {
+            $('.form-select').each(function () {
+                $(this).attr('data-bs-toggle', 'tooltip'); // Add tooltip attribute
+            });
 
-    // Remove tooltip on mouse leave
-    $('.form-select-class').on('mouseleave', function () {
-        $(this).tooltip('hide');
-    });
-});
+            $('.form-select').on('mouseenter', function () {
+                let selectedText = $(this).find('option:selected').text();
+
+                if (selectedText !== '--Select--') {
+                    $(this).attr('title', selectedText)  // Set title for tooltip
+                           .tooltip('dispose')         // Dispose existing tooltip
+                           .tooltip({ placement: 'top', trigger: 'manual' }) // Initialize
+                           .tooltip('show');          // Show tooltip
+                }
+            });
+
+            $('.form-select').on('mouseleave', function () {
+                $(this).tooltip('hide');  // Hide tooltip on mouse leave
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h3 class="mb-3">Bootstrap 5.3 Tooltip Demo</h3>
+    
+    <label for="dropdown" class="form-label">Hover over the select box:</label>
+    <select id="dropdown" class="form-select">
+        <option>--Select--</option>
+        <option value="1">Option 1</option>
+        <option value="2">Option 2</option>
+        <option value="3">Option 3</option>
+    </select>
+</div>
+
+</body>
+</html>

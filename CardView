@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bank Details - Bootstrap 3.3</title>
+    
+    <!-- Bootstrap 3.3 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <style>
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #fff;
+        }
+        .card label {
+            font-weight: bold;
+        }
+        .form-control[readonly] {
+            background-color: #f9f9f9;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3 class="text-center">Bank Details</h3>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="checkbox">
+                    <label><input type="checkbox" checked> Select</label>
+                </div>
+                <div class="form-group">
+                    <label>Bank Name:</label>
+                    <input type="text" class="form-control" value="Indian Bank" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Branch Name:</label>
+                    <input type="text" class="form-control" value="Guntur Main" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Address:</label>
+                    <textarea class="form-control" readonly>Indian Bank Dno10-1-1, 1st Line Sambasivapet, Naaz Center, Guntur, Andhra Pradesh, India, 522001</textarea>
+                </div>
+                <p class="text-danger">Characters left: 1892</p>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="checkbox">
+                    <label><input type="checkbox" checked> Select</label>
+                </div>
+                <div class="form-group">
+                    <label>Bank Name:</label>
+                    <input type="text" class="form-control" value="Union Bank of India" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Branch Name:</label>
+                    <input type="text" class="form-control" value="Guntur Main (e-AB)" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Address:</label>
+                    <textarea class="form-control" readonly>Andhra Bank, Main Branch, Near Gowri Shankar Theater</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="checkbox">
+                    <label><input type="checkbox" checked> Select</label>
+                </div>
+                <div class="form-group">
+                    <label>Bank Name:</label>
+                    <input type="text" class="form-control" value="HDFC Bank" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Branch Name:</label>
+                    <input type="text" class="form-control" value="Vijayawada" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Address:</label>
+                    <textarea class="form-control" readonly>Vijayawada, Krishna, Andhra Pradesh</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="checkbox">
+                    <label><input type="checkbox" checked> Select</label>
+                </div>
+                <div class="form-group">
+                    <label>Bank Name:</label>
+                    <input type="text" class="form-control" value="SBI" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Branch Name:</label>
+                    <input type="text" class="form-control" value="SCB, Guntur" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Address:</label>
+                    <textarea class="form-control" readonly>Andhra Pradesh, India, 522002</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

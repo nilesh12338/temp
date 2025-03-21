@@ -16,23 +16,33 @@
 
     <script>
         $(document).ready(function () {
+            function updateTooltip(element) {
+                let selectedText = $(element).find('option:selected').text();
+                
+                if (selectedText !== '--Select--') {
+                    $(element).attr('title', selectedText) // Update tooltip text
+                              .tooltip('dispose')         // Remove previous tooltip
+                              .tooltip({ placement: 'top', trigger: 'manual' }); // Reinitialize
+                } else {
+                    $(element).tooltip('dispose'); // Remove tooltip if no valid selection
+                }
+            }
+
             $('.form-select').each(function () {
-                $(this).attr('data-bs-toggle', 'tooltip'); // Add tooltip attribute
+                updateTooltip(this); // Initialize tooltip on page load
             });
 
             $('.form-select').on('mouseenter', function () {
-                let selectedText = $(this).find('option:selected').text();
-
-                if (selectedText !== '--Select--') {
-                    $(this).attr('title', selectedText)  // Set title for tooltip
-                           .tooltip('dispose')         // Dispose existing tooltip
-                           .tooltip({ placement: 'top', trigger: 'manual' }) // Initialize
-                           .tooltip('show');          // Show tooltip
-                }
+                updateTooltip(this);
+                $(this).tooltip('show');
             });
 
             $('.form-select').on('mouseleave', function () {
-                $(this).tooltip('hide');  // Hide tooltip on mouse leave
+                $(this).tooltip('hide');
+            });
+
+            $('.form-select').on('change', function () {
+                updateTooltip(this); // Update tooltip on change
             });
         });
     </script>
@@ -40,7 +50,7 @@
 <body>
 
 <div class="container mt-5">
-    <h3 class="mb-3">Bootstrap 5.3 Tooltip Demo</h3>
+    <h3 class="mb-3">Bootstrap 5.3 Tooltip Demo (Dynamic)</h3>
     
     <label for="dropdown" class="form-label">Hover over the select box:</label>
     <select id="dropdown" class="form-select">

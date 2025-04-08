@@ -1,132 +1,109 @@
-// 1. For encryption
-const rsaEncKeyPair = await window.crypto.subtle.generateKey(
-  {
-    name: "RSA-OAEP",
-    modulusLength: 2048,
-    publicExponent: new Uint8Array([1, 0, 1]),
-    hash: "SHA-256"
-  },
-  true,
-  ["encrypt", "decrypt"]
-);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Secure Login Demo</title>
+</head>
+<body>
+  <h2>Secure Login</h2>
+  <input type="text" id="userId" placeholder="Enter User ID" />
+  <button onclick="handleLogin()">Login</button>
 
-// 2. For digital signing
-const rsaSignKeyPair = await window.crypto.subtle.generateKey(
-  {
-    name: "RSASSA-PKCS1-v1_5",
-    modulusLength: 2048,
-    publicExponent: new Uint8Array([1, 0, 1]),
-    hash: "SHA-256"
-  },
-  true,
-  ["sign", "verify"]
-);
+  <script>
+    async function handleLogin() {
+      const userId = document.getElementById("userId").value;
+      if (!userId) return alert("Enter User ID");
 
-// ... later when signing
-const signature = await window.crypto.subtle.sign(
-  { name: "RSASSA-PKCS1-v1_5" },
-  rsaSignKeyPair.privateKey,
-  aesKeyRaw
-);
+      // Step 1: Generate AES-256 Key
+      const aesKey = await crypto.subtle.generateKey(
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+      );
 
-// Export signing public key too
-const signPubKey = await window.crypto.subtle.exportKey("spki", rsaSignKeyPair.publicKey);
-const signPubKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(signPubKey)));
+      // Export and store AES key in sessionStorage
+      const aesKeyRaw = await crypto.subtle.exportKey("raw", aesKey);
+      const aesKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(aesKeyRaw)));
+      sessionStorage.setItem("aesKey", aesKeyBase64);
 
-========================
-const payload = {
-  userId,
-  encryptedAES: encryptedAESBase64,
-  signature: signatureBase64,
-  uiEncPublicKey: /* export and send rsaEncKeyPair.publicKey */,
-  uiSignPublicKey: signPubKeyBase64
-};
+      // Step 2: Generate RSA key pair for encryption (RSA-OAEP)
+      const rsaEncKeyPair = await crypto.subtle.generateKey(
+        {
+          name: "RSA-OAEP",
+          modulusLength: 2048,
+          publicExponent: new Uint8Array([1, 0, 1]),
+          hash: "SHA-256"
+        },
+        true,
+        ["encrypt", "decrypt"]
+      );
 
-%%%%%%%%%%%%%%%%%%
-// Export AES key as raw data
-const aesKeyRaw = await window.crypto.subtle.exportKey("raw", aesKey);
-const aesKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(aesKeyRaw)));
+      // Step 3: Generate RSA key pair for signing (RSASSA-PKCS1-v1_5)
+      const rsaSignKeyPair = await crypto.subtle.generateKey(
+        {
+          name: "RSASSA-PKCS1-v1_5",
+          modulusLength: 2048,
+          publicExponent: new Uint8Array([1, 0, 1]),
+          hash: "SHA-256"
+        },
+        true,
+        ["sign", "verify"]
+      );
 
-// Step 1.1: Store AES key in session storage
-sessionStorage.setItem("aesKey", aesKeyBase64);
-================================
+      // Export UI RSA public keys
+      const encPublicKey = await crypto.subtle.exportKey("spki", rsaEncKeyPair.publicKey);
+      const encPublicKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(encPublicKey)));
 
-async function handleLogin() {
-  const userId = document.getElementById("userId").value;
-  if (!userId) return alert("Enter User ID");
+      const signPublicKey = await crypto.subtle.exportKey("spki", rsaSignKeyPair.publicKey);
+      const signPublicKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(signPublicKey)));
 
-  // Step 1: Generate AES-256 Key
-  const aesKey = await window.crypto.subtle.generateKey(
-    { name: "AES-GCM", length: 256 },
-    true,
-    ["encrypt", "decrypt"]
-  );
+      // Simulate server RSA public key for encryption (in real scenario, fetch from server)
+      const serverRsaKeyPair = await crypto.subtle.generateKey(
+        {
+          name: "RSA-OAEP",
+          modulusLength: 2048,
+          publicExponent: new Uint8Array([1, 0, 1]),
+          hash: "SHA-256"
+        },
+        true,
+        ["encrypt", "decrypt"]
+      );
 
-  // Step 1.1: Store AES key in sessionStorage
-  const aesKeyRaw = await window.crypto.subtle.exportKey("raw", aesKey);
-  const aesKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(aesKeyRaw)));
-  sessionStorage.setItem("aesKey", aesKeyBase64);
+      // Step 4: Encrypt AES key using server public key
+      const encryptedAES = await crypto.subtle.encrypt(
+        { name: "RSA-OAEP" },
+        serverRsaKeyPair.publicKey,
+        aesKeyRaw
+      );
+      const encryptedAESBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedAES)));
 
-  // Step 2: Generate RSA key pair for UI
-  const rsaKeyPair = await window.crypto.subtle.generateKey(
-    {
-      name: "RSA-OAEP",
-      modulusLength: 2048,
-      publicExponent: new Uint8Array([1, 0, 1]),
-      hash: "SHA-256"
-    },
-    true,
-    ["encrypt", "decrypt"]
-  );
+      // Step 5: Sign AES key using UI signing private key
+      const signature = await crypto.subtle.sign(
+        { name: "RSASSA-PKCS1-v1_5" },
+        rsaSignKeyPair.privateKey,
+        aesKeyRaw
+      );
+      const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
 
-  // Export UI public key
-  const publicKey = await window.crypto.subtle.exportKey("spki", rsaKeyPair.publicKey);
-  const publicKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(publicKey)));
+      // Step 6: Send data to server
+      const payload = {
+        userId,
+        encryptedAES: encryptedAESBase64,
+        signature: signatureBase64,
+        uiEncPublicKey: encPublicKeyBase64,
+        uiSignPublicKey: signPublicKeyBase64
+      };
 
-  // Simulate server public key
-  const serverRsaKeyPair = await window.crypto.subtle.generateKey(
-    {
-      name: "RSA-OAEP",
-      modulusLength: 2048,
-      publicExponent: new Uint8Array([1, 0, 1]),
-      hash: "SHA-256"
-    },
-    true,
-    ["encrypt", "decrypt"]
-  );
+      console.log("Sending to server:", payload);
 
-  // Step 3: Encrypt AES key using server public key
-  const encryptedAES = await window.crypto.subtle.encrypt(
-    { name: "RSA-OAEP" },
-    serverRsaKeyPair.publicKey,
-    aesKeyRaw
-  );
-  const encryptedAESBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedAES)));
-
-  // Step 4: Generate digital signature using UI private key
-  const signature = await window.crypto.subtle.sign(
-    { name: "RSASSA-PKCS1-v1_5" },
-    rsaKeyPair.privateKey,
-    aesKeyRaw
-  );
-  const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
-
-  // Step 5: Send to server
-  const payload = {
-    userId,
-    encryptedAES: encryptedAESBase64,
-    signature: signatureBase64,
-    uiPublicKey: publicKeyBase64
-  };
-
-  console.log("Payload to send:", payload);
-
-  fetch("/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  }).then(res => res.json())
-    .then(data => console.log("Server response:", data))
-    .catch(err => console.error("Error:", err));
-}
-
+      fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(res => res.json())
+        .then(data => console.log("Server response:", data))
+        .catch(err => console.error("Error:", err));
+    }
+  </script>
+</body>
+</html>

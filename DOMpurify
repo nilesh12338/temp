@@ -1,0 +1,27 @@
+import DOMPurify from 'dompurify';
+
+const sanitizeInputs = (...inputs) => {
+  const sanitizedResults = [];
+
+  // Hook to log script tags or any other disallowed tag
+  DOMPurify.addHook('uponSanitizeElement', function(node, data) {
+    if (data.tagName && data.tagName.toLowerCase() === 'script') {
+      console.error('Sanitization blocked a <script> tag:', node);
+    }
+  });
+
+  for (const input of inputs) {
+    const sanitized = DOMPurify.sanitize(input);
+    sanitizedResults.push(sanitized);
+  }
+
+  return inputs.length === 1 ? sanitizedResults[0] : sanitizedResults;
+};
+
+
+
+
+
+const cleanText = sanitizeInputs('<div>Hello</div><script>alert(1)</script>');
+// OR multiple
+const [clean1, clean2] = sanitizeInputs('<p>Hi</p>', '<script>malicious()</script>');

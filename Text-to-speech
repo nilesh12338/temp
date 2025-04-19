@@ -1,0 +1,28 @@
+document.addEventListener('mouseup', () => {
+  const readableHTML = getReadableSelectedHTML();
+  if (readableHTML) {
+    console.log('Readable selection:', readableHTML);
+    speechSynthesis.speak(new SpeechSynthesisUtterance(readableHTML));
+  }
+});
+
+function getReadableSelectedHTML() {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return '';
+
+  const range = selection.getRangeAt(0);
+  const clonedContent = range.cloneContents();
+  const container = document.createElement('div');
+  container.appendChild(clonedContent);
+
+  // Replace input elements with their values
+  const inputs = container.querySelectorAll('input, textarea, select');
+  inputs.forEach(input => {
+    const value = input.value || input.textContent || '';
+    const span = document.createElement('span');
+    span.textContent = value;
+    input.replaceWith(span);
+  });
+
+  return container.innerHTML;
+}

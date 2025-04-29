@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Row-Based Chart Module (Class Selector)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="p-4">
+
+  <div class="chart-module">
+    <h5 class="chart-title">Financial Report</h5>
+    <div class="d-flex gap-3 mb-3">
+      <select class="form-select chart-type-selector" style="width: 150px;">
+        <option value="bar">Bar</option>
+        <option value="line">Line</option>
+        <option value="pie">Pie</option>
+      </select>
+      <select class="form-select row-selector" multiple style="width: 300px;"></select>
+      <button class="btn btn-primary show-chart">Show Chart</button>
+    </div>
+
+    <table class="table table-bordered data-table">
+      <thead>
+        <tr>
+          <th>Label</th>
+          <th class="col-label">Q1</th>
+          <th class="col-label">Q2</th>
+          <th class="col-label">Q3</th>
+          <th class="col-label">Q4</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Total Revenue</td>
+          <td class="col-value">500</td>
+          <td class="col-value">600</td>
+          <td class="col-value">550</td>
+          <td class="col-value">700</td>
+        </tr>
+        <tr>
+          <td>Total current Liabilities</td>
+          <td class="col-value">200</td>
+          <td class="col-value">250</td>
+          <td class="col-value">300</td>
+          <td class="col-value">280</td>
+        </tr>
+        <tr>
+          <td>Operating Costs</td>
+          <td class="col-value">150</td>
+          <td class="col-value">180</td>
+          <td class="col-value">170</td>
+          <td class="col-value">160</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Shared Chart Modal -->
+  <div class="modal fade" id="sharedChartModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title chart-modal-title">Chart Preview</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="sharedChartCanvas" height="100"></canvas>
+          <button class="btn btn-success mt-3" id="downloadChart">Download Chart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let sharedChart;
+    let modal = new bootstrap.Modal(document.getElementById('sharedChartModal'));
+    let currentModule = null;
+
+    function getRandomColor(alpha = 0.6) {
+      const r = Math.floor(Math.random() * 200);
+      const g = Math.floor(Math.random() * 200);
+      const b = Math.floor(Math.random() * 200);
+      return [`rgba(${r},${g},${b},${alpha})`, `rgba(${r},${g},${b},1)`];
+    }
+
+    function updateChartFromRows(moduleEl) {
+      const chartType = moduleEl.querySelector('.chart-type-selector').value;
+      const rowSelector = moduleEl.querySelector('.row-selector');
+      const selectedIndices = Array.from(rowSelector.selectedOptions).map(opt => parseInt(opt.value));
+
+      const table = moduleEl.querySelector('.data-table');
+      const headers = Array.from(table.querySelectorAll('thead th.col-label')).map(h => h.textContent.trim());
+      const rowElements = Array.from(table.querySelectorAll('tbody tr'));
+
+      const datasets = selectedIndices.map(rowIndex => {
+        const row = rowElements[rowIndex];
+        const label = row.querySelector('td').textContent.trim();
+        const valueCells = row.querySelectorAll('.col-value');
+        const data = Array.from(valueCells).map(cell => parseFloat(cell.textContent.trim()));
+        const [bg, border] = getRandomColor();
+        return {
+          label,
+          data,
+          backgroundColor: chartType === 'pie' ? data.map(() => getRandomColor()[0]) : bg,
+          borderColor: border,
+          borderWidth: 1
+        };
+      });
+
+      const ctx = document.getElementById('sharedChartCanvas').getContext('2d');
+      if (sharedChart) sharedChart.destroy();
+
+      sharedChart = new Chart(ctx, {
+        type: chartType,
+        data: {
+          labels: headers,
+          datasets: chartType === 'pie' ? [datasets[0]] : datasets
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true },
+            title: {
+              display: true,
+              text: moduleEl.querySelector('.chart-title').textContent
+            }
+          },
+          scales: chartType === 'pie' ? {} : {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+
+      document.querySelector('.chart-modal-title').textContent = moduleEl.querySelector('.chart-title').textContent;
+    }
+
+    // Init module dropdowns
+    function initModuleDropdown(moduleEl) {
+      const table = moduleEl.querySelector('.data-table');
+      const rows = table.querySelectorAll('tbody tr');
+      const rowSelector = moduleEl.querySelector('.row-selector');
+
+      rowSelector.innerHTML = '';
+      rows.forEach((row, i) => {
+        const label = row.querySelector('td').textContent.trim();
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = label;
+        rowSelector.appendChild(opt);
+      });
+    }
+
+    document.querySelectorAll('.chart-module').forEach(module => {
+      initModuleDropdown(module);
+      module.querySelector('.show-chart').addEventListener('click', () => {
+        currentModule = module;
+        updateChartFromRows(module);
+        modal.show();
+      });
+    });
+
+    document.getElementById('downloadChart').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.href = sharedChart.toBase64Image();
+      link.download = 'chart.png';
+      link.click();
+    });
+
+    document.getElementById('sharedChartModal').addEventListener('show.bs.modal', () => {
+      if (currentModule) updateChartFromRows(currentModule);
+    });
+  </script>
+</body>
+</html>

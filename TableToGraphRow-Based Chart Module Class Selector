@@ -10,7 +10,7 @@
 <body class="p-4">
 
   <div class="chart-module">
-    <h5 class="chart-title">Financial Report</h5>
+    <h5 class="chart-title" data-original-title="Financial Report">Financial Report</h5>
     <div class="d-flex gap-3 mb-3">
       <select class="form-select chart-type-selector" style="width: 150px;">
         <option value="bar">Bar</option>
@@ -90,7 +90,9 @@
     function updateChartFromRows(moduleEl) {
       const chartType = moduleEl.querySelector('.chart-type-selector').value;
       const rowSelector = moduleEl.querySelector('.row-selector');
-      const selectedIndices = Array.from(rowSelector.selectedOptions).map(opt => parseInt(opt.value));
+      const selectedOptions = Array.from(rowSelector.selectedOptions);
+      const selectedIndices = selectedOptions.map(opt => parseInt(opt.value));
+      const selectedLabels = selectedOptions.map(opt => opt.textContent.trim());
 
       const table = moduleEl.querySelector('.data-table');
       const headers = Array.from(table.querySelectorAll('thead th.col-label')).map(h => h.textContent.trim());
@@ -126,7 +128,7 @@
             legend: { display: true },
             title: {
               display: true,
-              text: moduleEl.querySelector('.chart-title').textContent
+              text: `${moduleEl.querySelector('.chart-title').dataset.originalTitle} – ${selectedLabels.join(', ')}`
             }
           },
           scales: chartType === 'pie' ? {} : {
@@ -135,15 +137,17 @@
         }
       });
 
-      document.querySelector('.chart-modal-title').textContent = moduleEl.querySelector('.chart-title').textContent;
+      // Update visible and modal titles
+      const originalTitle = moduleEl.querySelector('.chart-title').dataset.originalTitle;
+      const newTitle = `${originalTitle} – ${selectedLabels.join(', ')}`;
+      moduleEl.querySelector('.chart-title').textContent = newTitle;
+      document.querySelector('.chart-modal-title').textContent = newTitle;
     }
 
-    // Init module dropdowns
     function initModuleDropdown(moduleEl) {
       const table = moduleEl.querySelector('.data-table');
       const rows = table.querySelectorAll('tbody tr');
       const rowSelector = moduleEl.querySelector('.row-selector');
-
       rowSelector.innerHTML = '';
       rows.forEach((row, i) => {
         const label = row.querySelector('td').textContent.trim();

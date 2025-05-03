@@ -91,3 +91,19 @@ console.log(nonMatching); // Output: ["!", "@", "#", "\\n"]
 
 </body>
 </html>
+=========°°
+<script>
+  document.querySelectorAll('[data-tooltip]').forEach(el => {
+    const title = el.getAttribute('data-tooltip');
+    const placement = el.getAttribute('data-placement') || 'top';
+
+    // Check if tooltip already exists
+    if (!bootstrap.Tooltip.getInstance(el)) {
+      new bootstrap.Tooltip(el, {
+        title: title,
+        placement: placement,
+        trigger: 'hover focus'
+      });
+    }
+  });
+</script>

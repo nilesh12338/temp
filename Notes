@@ -48,3 +48,46 @@ console.log(nonMatching); // Output: ["!", "@", "#", "\\n"]
     <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
   </circle>
 </svg>
+
+
+=========
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bootstrap 5.3 Dropdown with Tooltip</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-5">
+
+  <div class="dropdown">
+    <div 
+      class="btn btn-secondary dropdown-toggle" 
+      data-bs-toggle="dropdown" 
+      title="Click to open dropdown"
+      role="button" 
+      aria-expanded="false"
+      id="dropdownTooltip"
+    >
+      Dropdown
+    </div>
+    <ul class="dropdown-menu" aria-labelledby="dropdownTooltip">
+      <li><a class="dropdown-item" href="#">Action</a></li>
+      <li><a class="dropdown-item" href="#">Another action</a></li>
+      <li><a class="dropdown-item" href="#">Something else</a></li>
+    </ul>
+  </div>
+
+  <!-- Bootstrap JS with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Initialize tooltip manually
+    const tooltipTrigger = document.getElementById('dropdownTooltip');
+    new bootstrap.Tooltip(tooltipTrigger);
+  </script>
+
+</body>
+</html>

@@ -107,3 +107,35 @@ console.log(nonMatching); // Output: ["!", "@", "#", "\\n"]
     }
   });
 </script>
+
+<style>
+  .select2-selection__choice {
+    background-color: #007bff !important;  /* Default blue */
+    border: none !important;
+    color: white !important;
+    padding: 0.25em 0.5em !important;
+    font-size: 0.875rem;
+  }
+
+  /* Example tag-based coloring */
+  .select2-selection__choice[data-tag-color="urgent"] {
+    background-color: #dc3545 !important; /* red */
+  }
+
+  .select2-selection__choice[data-tag-color="review"] {
+    background-color: #ffc107 !important; /* yellow */
+    color: black !important;
+  }
+
+  .select2-selection__choice[data-tag-color="completed"] {
+    background-color: #198754 !important; /* green */
+  }
+</style>
+
+templateSelection: function (data, container) {
+        const tagClass = tagColors[data.id?.toLowerCase()];
+        if (tagClass) {
+          $(container).attr('data-tag-color', tagClass);
+        }
+        return data.text;
+      }

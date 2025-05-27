@@ -191,4 +191,154 @@ const fixedColors = [
 
 function getColorByIndex(i) {
   return fixedColors[i % fixedColors.length];
-}
+#############₹
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  Chart.register(ChartDataLabels);
+  let sharedChart;
+  let modal = new bootstrap.Modal(document.getElementById('sharedChartModal'));
+  let currentModule = null;
+
+  function getRandomColor(alpha = 0.6) {
+    const r = Math.floor(Math.random() * 200);
+    const g = Math.floor(Math.random() * 200);
+    const b = Math.floor(Math.random() * 200);
+    return [`rgba(${r},${g},${b},${alpha})`, `rgba(${r},${g},${b},1)`];
+  }
+
+  function updateChartFromRows(moduleEl) {
+    const chartType = moduleEl.querySelector('.chart-type-selector').value;
+    const rowSelector = moduleEl.querySelector('.row-selector');
+    const selectedOptions = Array.from(rowSelector.selectedOptions);
+    const selectedIndices = selectedOptions.map(opt => parseInt(opt.value));
+    const selectedLabels = selectedOptions.map(opt => opt.textContent.trim());
+
+    const table = moduleEl.querySelector('.data-table');
+    const headers = Array.from(table.querySelectorAll('thead th.col-label')).map(h => h.textContent.trim());
+    const rowElements = Array.from(table.querySelectorAll('tbody tr'));
+
+    const datasets = selectedIndices.map(rowIndex => {
+      const row = rowElements[rowIndex];
+      const label = row.querySelector('td').textContent.trim();
+      const valueCells = row.querySelectorAll('.col-value');
+      const data = Array.from(valueCells).map(cell => parseFloat(cell.textContent.trim()));
+      const [bg, border] = getRandomColor();
+      return {
+        label,
+        data,
+        backgroundColor: chartType === 'pie' ? data.map(() => getRandomColor()[0]) : bg,
+        borderColor: border,
+        borderWidth: 1
+      };
+    });
+
+    const ctx = document.getElementById('sharedChartCanvas').getContext('2d');
+    if (sharedChart) sharedChart.destroy();
+
+    const data = {
+      labels: headers,
+      datasets: chartType === 'pie' ? [datasets[0]] : datasets
+    };
+
+    sharedChart = new Chart(ctx, {
+      type: chartType,
+      data,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              generateLabels: chart => {
+                if (chart.config.type !== 'pie') {
+                  return Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                }
+                const ds = chart.data.datasets[0];
+                const total = ds.data.reduce((sum, val) => sum + val, 0);
+                return chart.data.labels.map((label, i) => {
+                  const value = ds.data[i];
+                  const percent = ((value / total) * 100).toFixed(1);
+                  return {
+                    text: `${label}: ${value} (${percent}%)`,
+                    fillStyle: ds.backgroundColor[i],
+                    strokeStyle: ds.backgroundColor[i],
+                    index: i
+                  };
+                });
+              }
+            }
+          },
+          title: {
+            display: true,
+            text: `${moduleEl.querySelector('.chart-title').dataset.originalTitle} – ${selectedLabels.join(', ')}`
+          },
+          datalabels: {
+            display: ctx => ctx.chart.config.type === 'pie',
+            color: '#fff',
+            font: { weight: 'bold' },
+            formatter: (value, ctx) => {
+              const label = ctx.chart.data.labels[ctx.dataIndex];
+              const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+              const percent = ((value / total) * 100).toFixed(1);
+              return `${label}: ${value} (${percent}%)`;
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const label = ctx.label;
+                const value = ctx.parsed;
+                const total = ctx.chart.data.datasets[ctx.datasetIndex].data.reduce((a, b) => a + b, 0);
+                const percent = ((value / total) * 100).toFixed(1);
+                return `${label}: ${value} (${percent}%)`;
+              }
+            }
+          }
+        },
+        scales: chartType === 'pie' ? {} : {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    const originalTitle = moduleEl.querySelector('.chart-title').dataset.originalTitle;
+    const newTitle = `${originalTitle} – ${selectedLabels.join(', ')}`;
+    moduleEl.querySelector('.chart-title').textContent = newTitle;
+    document.querySelector('.chart-modal-title').textContent = newTitle;
+  }
+
+  function initModuleDropdown(moduleEl) {
+    const table = moduleEl.querySelector('.data-table');
+    const rows = table.querySelectorAll('tbody tr');
+    const rowSelector = moduleEl.querySelector('.row-selector');
+    rowSelector.innerHTML = '';
+    rows.forEach((row, i) => {
+      const label = row.querySelector('td').textContent.trim();
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = label;
+      rowSelector.appendChild(opt);
+    });
+  }
+
+  document.querySelectorAll('.chart-module').forEach(module => {
+    initModuleDropdown(module);
+    module.querySelector('.show-chart').addEventListener('click', () => {
+      currentModule = module;
+      updateChartFromRows(module);
+      modal.show();
+    });
+  });
+
+  document.getElementById('downloadChart').addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.href = sharedChart.toBase64Image();
+    link.download = 'chart.png';
+    link.click();
+  });
+
+  document.getElementById('sharedChartModal').addEventListener('show.bs.modal', () => {
+    if (currentModule) updateChartFromRows(currentModule);
+  });
+</script>
+

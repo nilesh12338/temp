@@ -139,3 +139,43 @@ templateSelection: function (data, container) {
         }
         return data.text;
       }
+==============
+plugins: {
+  legend: {
+    display: true,
+    labels: {
+      generateLabels: (chart) => {
+        if (chart.config.type !== 'pie') {
+          return Chart.defaults.plugins.legend.labels.generateLabels(chart);
+        }
+
+        const data = chart.data;
+        const dataset = data.datasets[0];
+        return data.labels.map((label, i) => {
+          const value = dataset.data[i];
+          const backgroundColor = dataset.backgroundColor[i];
+          return {
+            text: `${label}: ${value}`,
+            fillStyle: backgroundColor,
+            strokeStyle: backgroundColor,
+            index: i
+          };
+        });
+      }
+    }
+  },
+  title: {
+    display: true,
+    text: `${moduleEl.querySelector('.chart-title').dataset.originalTitle} – ${selectedLabels.join(', ')}`
+  },
+  datalabels: {
+    display: chartType === 'pie',
+    color: '#fff',
+    font: {
+      weight: 'bold'
+    },
+    formatter: (value, ctx) => {
+      return `${ctx.chart.data.labels[ctx.dataIndex]}: ${value}`;
+    }
+  }
+}

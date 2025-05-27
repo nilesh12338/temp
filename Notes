@@ -341,4 +341,50 @@ function getColorByIndex(i) {
     if (currentModule) updateChartFromRows(currentModule);
   });
 </script>
+&&&&&&&&&&&&&
+options: {
+  responsive: true,
+  plugins: {
+    legend: {
+      display: true,
+      labels: {
+        generateLabels: (chart) => {
+          if (chart.config.type !== 'pie') {
+            return Chart.defaults.plugins.legend.labels.generateLabels(chart);
+          }
+
+          const data = chart.data;
+          return data.labels.map((label, i) => {
+            const value = data.datasets[0].data[i];
+            const bgColor = data.datasets[0].backgroundColor[i];
+            return {
+              text: `${label}: ${value}`,
+              fillStyle: bgColor,
+              strokeStyle: bgColor,
+              index: i
+            };
+          });
+        }
+      }
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          const label = context.label || '';
+          const value = context.parsed;
+          let total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+          let percent = ((value / total) * 100).toFixed(1);
+          return `${label}: ${value} (${percent}%)`;
+        }
+      }
+    },
+    title: {
+      display: true,
+      text: `${moduleEl.querySelector('.chart-title').dataset.originalTitle} – ${selectedLabels.join(', ')}`
+    }
+  },
+  scales: chartType === 'pie' ? {} : {
+    y: { beginAtZero: true }
+  }
+}
 

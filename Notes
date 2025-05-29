@@ -388,3 +388,93 @@ options: {
   }
 }
 
+₹₹₹₹₹₹₹₹₹₹₹₹₹₹
+function updateChartFromRows(moduleEl) {
+  const chartType = moduleEl.querySelector('.chart-type-selector').value;
+  const rowSelector = moduleEl.querySelector('.row-selector');
+  const selectedOptions = Array.from(rowSelector.selectedOptions);
+  const selectedIndices = selectedOptions.map(opt => parseInt(opt.value));
+  const selectedLabels = selectedOptions.map(opt => opt.textContent.trim());
+
+  const table = moduleEl.querySelector('.data-table');
+  const headers = Array.from(table.querySelectorAll('thead th.col-label')).map(h => h.textContent.trim());
+  const rowElements = Array.from(table.querySelectorAll('tbody tr'));
+
+  const ctxContainer = document.querySelector('#sharedChartCanvas').parentNode;
+  ctxContainer.innerHTML = ''; // Clear previous charts
+
+  selectedIndices.slice(0, 3).forEach((rowIndex, i) => {
+    const canvas = document.createElement('canvas');
+    canvas.height = 300;
+    canvas.classList.add('mb-4');
+    ctxContainer.appendChild(canvas);
+
+    const row = rowElements[rowIndex];
+    const label = row.querySelector('td').textContent.trim();
+    const valueCells = row.querySelectorAll('.col-value');
+    const data = Array.from(valueCells).map(cell => parseFloat(cell.textContent.trim()));
+
+    const backgroundColors = data.map((_, idx) => getColorByIndex(idx)[0]);
+    const borderColors = data.map((_, idx) => getColorByIndex(idx)[1]);
+
+    const chart = new Chart(canvas.getContext('2d'), {
+      type: chartType,
+      data: {
+        labels: headers,
+        datasets: [{
+          label: label,
+          data,
+          backgroundColor: chartType === 'pie' ? backgroundColors : backgroundColors[0],
+          borderColor: chartType === 'pie' ? borderColors : borderColors[0],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              generateLabels: (chart) => {
+                if (chartType !== 'pie') {
+                  return Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                }
+                return chart.data.labels.map((label, j) => {
+                  const value = chart.data.datasets[0].data[j];
+                  return {
+                    text: `${label}: ${value}`,
+                    fillStyle: chart.data.datasets[0].backgroundColor[j],
+                    strokeStyle: chart.data.datasets[0].backgroundColor[j],
+                    index: j
+                  };
+                });
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const label = context.label || '';
+                const value = context.parsed;
+                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                let percent = ((value / total) * 100).toFixed(1);
+                return `${label}: ${value} (${percent}%)`;
+              }
+            }
+          },
+          title: {
+            display: true,
+            text: `${moduleEl.querySelector('.chart-title').dataset.originalTitle} – ${label}`
+          }
+        },
+        scales: chartType === 'pie' ? {} : {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  });
+
+  const newTitle = `${moduleEl.querySelector('.chart-title').dataset.originalTitle} – ${selectedLabels.join(', ')}`;
+  moduleEl.querySelector('.chart-title').textContent = newTitle;
+  document.querySelector('.chart-modal-title').textContent = newTitle;
+}

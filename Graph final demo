@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reusable Chart Module</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .modal-body canvas {
+      max-height: 250px !important;
+    }
+  </style>
+</head>
+<body class="p-4">
+
+<div class="chart-module">
+  <h5 class="chart-title" data-original-title="Financial Report">Financial Report</h5>
+  <div class="d-flex gap-3 mb-3">
+    <select class="form-select chart-type-selector" style="width: 150px;">
+      <option value="bar">Bar</option>
+      <option value="line">Line</option>
+      <option value="pie">Pie</option>
+    </select>
+    <select class="form-select row-selector" multiple style="width: 300px;"></select>
+    <button class="btn btn-primary show-chart">Show Chart</button>
+  </div>
+
+  <table class="table table-bordered data-table">
+    <thead>
+    <tr>
+      <th>Label</th>
+      <th class="col-label">Q1</th>
+      <th class="col-label">Q2</th>
+      <th class="col-label">Q3</th>
+      <th class="col-label">Q4</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>Total Revenue</td>
+      <td class="col-value">500</td>
+      <td class="col-value">600</td>
+      <td class="col-value">550</td>
+      <td class="col-value">700</td>
+    </tr>
+    <tr>
+      <td>Total current Liabilities</td>
+      <td class="col-value">200</td>
+      <td class="col-value">250</td>
+      <td class="col-value">300</td>
+      <td class="col-value">280</td>
+    </tr>
+    <tr>
+      <td>Operating Costs</td>
+      <td class="col-value">150</td>
+      <td class="col-value">180</td>
+      <td class="col-value">170</td>
+      <td class="col-value">160</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="sharedChartModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title chart-modal-title">Chart Preview</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="chartContainer">
+        <canvas id="sharedChartCanvas" height="100"></canvas>
+        <button class="btn btn-success mt-3" id="downloadChart">Download Chart</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const staticColors = [
+    ['rgba(255, 99, 132, 0.6)', 'rgba(255, 99, 132, 1)'],
+    ['rgba(54, 162, 235, 0.6)', 'rgba(54, 162, 235, 1)'],
+    ['rgba(255, 206, 86, 0.6)', 'rgba(255, 206, 86, 1)'],
+    ['rgba(75, 192, 192, 0.6)', 'rgba(75, 192, 192, 1)'],
+    ['rgba(153, 102, 255, 0.6)', 'rgba(153, 102, 255, 1)'],
+    ['rgba(255, 159, 64, 0.6)', 'rgba(255, 159, 64, 1)'],
+  ];
+
+  function getColorByIndex(i) {
+    return staticColors[i % staticColors.length];
+  }
+
+  let sharedChart;
+  let modal = new bootstrap.Modal(document.getElementById('sharedChartModal'));
+  let currentModule = null;
+
+  function updateChartFromRows(moduleEl) {
+    const chartType = moduleEl.querySelector('.chart-type-selector').value;
+    const rowSelector = moduleEl.querySelector('.row-selector');
+    const selectedOptions = Array.from(rowSelector.selectedOptions).slice(0, 3);
+    const selectedIndices = selectedOptions.map(opt => parseInt(opt.value));
+    const selectedLabels = selectedOptions.map(opt => opt.textContent.trim());
+
+    const table = moduleEl.querySelector('.data-table');
+    const headers = Array.from(table.querySelectorAll('thead th.col-label')).map(h => h.textContent.trim());
+    const rowElements = Array.from(table.querySelectorAll('tbody tr'));
+    const chartContainer = document.getElementById('chartContainer');
+
+    chartContainer.innerHTML = ''; // Clear previous
+    const originalTitle = moduleEl.querySelector('.chart-title').dataset.originalTitle;
+    const newTitle = `${originalTitle} – ${selectedLabels.join(', ')}`;
+    moduleEl.querySelector('.chart-title').textContent = newTitle;
+    document.querySelector('.chart-modal-title').textContent = newTitle;
+
+    if (chartType === 'pie') {
+      const rowWrapper = document.createElement('div');
+      rowWrapper.classList.add('d-flex', 'flex-wrap', 'gap-4', 'justify-content-start');
+      chartContainer.appendChild(rowWrapper);
+
+      selectedIndices.forEach((rowIndex, idx) => {
+        const row = rowElements[rowIndex];
+        const label = row.querySelector('td').textContent.trim();
+        const valueCells = row.querySelectorAll('.col-value');
+        const data = Array.from(valueCells).map(cell => parseFloat(cell.textContent.trim()));
+        const bgColors = data.map((_, i) => getColorByIndex(i)[0]);
+        const borderColors = data.map((_, i) => getColorByIndex(i)[1]);
+
+        const canvasWrapper = document.createElement('div');
+        canvasWrapper.style.width = '250px';
+        canvasWrapper.innerHTML = `<canvas height="250"></canvas>`;
+        rowWrapper.appendChild(canvasWrapper);
+
+        new Chart(canvasWrapper.querySelector('canvas'), {
+          type: 'pie',
+          data: {
+            labels: headers,
+            datasets: [{
+              data,
+              backgroundColor: bgColors,
+              borderColor: borderColors,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                labels: {
+                  generateLabels: (chart) =>
+                    chart.data.labels.map((l, i) => ({
+                      text: `${l}: ${chart.data.datasets[0].data[i]}`,
+                      fillStyle: chart.data.datasets[0].backgroundColor[i]
+                    }))
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    const label = context.label || '';
+                    const value = context.parsed;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percent = ((value / total) * 100).toFixed(1);
+                    return `${label}: ${value} (${percent}%)`;
+                  }
+                }
+              },
+              title: {
+                display: true,
+                text: label,
+                font: { size: 14 }
+              }
+            }
+          }
+        });
+      });
+    } else {
+      const canvas = document.createElement('canvas');
+      canvas.id = "sharedChartCanvas";
+      chartContainer.appendChild(canvas);
+
+      const datasets = selectedIndices.map((rowIndex, i) => {
+        const row = rowElements[rowIndex];
+        const label = row.querySelector('td').textContent.trim();
+        const data = Array.from(row.querySelectorAll('.col-value')).map(c => parseFloat(c.textContent.trim()));
+        const [bg, border] = getColorByIndex(i);
+        return {
+          label,
+          data,
+          backgroundColor: bg,
+          borderColor: border,
+          borderWidth: 2
+        };
+      });
+
+      if (sharedChart) sharedChart.destroy();
+      sharedChart = new Chart(canvas.getContext('2d'), {
+        type: chartType,
+        data: {
+          labels: headers,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: newTitle
+            }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+  }
+
+  function initModuleDropdown(moduleEl) {
+    const rows = moduleEl.querySelectorAll('tbody tr');
+    const rowSelector = moduleEl.querySelector('.row-selector');
+    rowSelector.innerHTML = '';
+    rows.forEach((row, i) => {
+      const label = row.querySelector('td').textContent.trim();
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = label;
+      rowSelector.appendChild(opt);
+    });
+  }
+
+  document.querySelectorAll('.chart-module').forEach(module => {
+    initModuleDropdown(module);
+    module.querySelector('.show-chart').addEventListener('click', () => {
+      currentModule = module;
+      updateChartFromRows(module);
+      modal.show();
+    });
+  });
+
+  document.getElementById('downloadChart').addEventListener('click', () => {
+    const canvas = document.querySelector('#chartContainer canvas');
+    if (canvas) {
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = 'chart.png';
+      link.click();
+    }
+  });
+
+  document.getElementById('sharedChartModal').addEventListener('show.bs.modal', () => {
+    if (currentModule) updateChartFromRows(currentModule);
+  });
+</script>
+
+</body>
+</html>

@@ -1,3 +1,31 @@
+
+function initModuleDropdown(moduleEl) {
+  const rows = moduleEl.querySelectorAll('tbody tr');
+  const rowSelector = moduleEl.querySelector('.row-selector');
+  rowSelector.innerHTML = '';
+
+  rows.forEach((row, i) => {
+    const labelCell = row.querySelector('.graph-tr-label');
+    let label = '';
+
+    if (labelCell) {
+      if (labelCell.classList.contains('other')) {
+        const input = labelCell.querySelector('.graph-tr-label-other');
+        label = input ? input.value.trim() : '';
+      } else {
+        label = labelCell.textContent.trim();
+      }
+    }
+
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = label;
+    rowSelector.appendChild(opt);
+  });
+}
+########3
+
+
 Subject: Constitution Module UI Inconsistencies Analysis
 
 Dear Team,

@@ -1,4 +1,44 @@
+document.getElementById('downloadChart').addEventListener('click', () => {
+  const chartType = currentModule?.querySelector('.chart-type-selector')?.value;
 
+  if (chartType === 'pie') {
+    // Collect all canvas elements from the modal
+    const canvases = Array.from(document.querySelectorAll('#sharedChartModal canvas'));
+    if (canvases.length === 0) return;
+
+    // Get dimensions
+    const width = canvases.reduce((sum, c) => sum + c.width, 0);
+    const height = Math.max(...canvases.map(c => c.height));
+
+    // Create new canvas
+    const combinedCanvas = document.createElement('canvas');
+    combinedCanvas.width = width;
+    combinedCanvas.height = height;
+    const ctx = combinedCanvas.getContext('2d');
+
+    // Draw each chart onto combined canvas
+    let offsetX = 0;
+    canvases.forEach(canvas => {
+      ctx.drawImage(canvas, offsetX, 0);
+      offsetX += canvas.width;
+    });
+
+    // Trigger download
+    const link = document.createElement('a');
+    link.href = combinedCanvas.toDataURL('image/png');
+    link.download = 'combined_charts.png';
+    link.click();
+  } else {
+    // For single bar/line chart
+    const link = document.createElement('a');
+    link.href = sharedChart.toBase64Image();
+    link.download = 'chart.png';
+    link.click();
+  }
+});
+
+
+=========
 function initModuleDropdown(moduleEl) {
   const rows = moduleEl.querySelectorAll('tbody tr');
   const rowSelector = moduleEl.querySelector('.row-selector');

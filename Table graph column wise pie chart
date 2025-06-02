@@ -163,60 +163,136 @@
     });
   }
 
-  function updateChart(module) {
-    const chartType = module.querySelector('.chart-type-selector').value;
-    const [year, type] = module.querySelector('.year-type-selector').value.split('-');
-    const rowSelector = module.querySelector('.row-selector');
-    const selected = [...rowSelector.selectedOptions].map(o => parseInt(o.value));
-    const rows = module.querySelectorAll('tbody tr');
+  function updateChartFromRows(moduleEl) {
+  const chartType = moduleEl.querySelector('.chart-type-selector').value;
+  const rowSelector = moduleEl.querySelector('.row-selector');
+  const selectedOptions = Array.from(rowSelector.selectedOptions).slice(0, 3);
+  const selectedIndices = selectedOptions.map(opt => parseInt(opt.value));
+  const selectedLabels = selectedOptions.map(opt => opt.textContent.trim());
 
-    const selectedRows = selected.map(i => rows[i]);
-    const container = document.getElementById('chart-container');
+  const table = moduleEl.querySelector('.data-table');
+  const headers = Array.from(table.querySelectorAll('thead th.col-label')).map(h => h.textContent.trim());
+  const rowElements = Array.from(table.querySelectorAll('tbody tr'));
+  const chartContainer = document.getElementById('chartContainer');
 
-    if (chartType === 'pie') {
-      if (selectedRows.length > 3) {
-        alert('Maximum 3 rows allowed for Pie chart');
-        return;
-      }
-      drawPieCharts(selectedRows, year, type, container);
-    } else {
-      container.innerHTML = '<canvas id="sharedChartCanvas" height="100"></canvas>';
-      const newCtx = document.getElementById('sharedChartCanvas').getContext('2d');
+  chartContainer.innerHTML = ''; // Clear previous
+  const originalTitle = moduleEl.querySelector('.chart-title').dataset.originalTitle;
+  const newTitle = `${originalTitle} – ${selectedLabels.join(', ')}`;
+  moduleEl.querySelector('.chart-title').textContent = newTitle;
+  document.querySelector('.chart-modal-title').textContent = newTitle;
 
-      const labels = selectedRows.map(row => row.querySelector('td').textContent.trim());
-      const values = selectedRows.map(row => {
-        const cell = row.querySelector(`.col-year-${year}.col-type-${type}`);
-        return parseFloat(cell?.textContent.trim() || 0);
+  const labels = selectedIndices.map(rowIndex =>
+    rowElements[rowIndex].querySelector('td').textContent.trim()
+  );
+
+  if (chartType === 'pie') {
+    const rowWrapper = document.createElement('div');
+    rowWrapper.classList.add('d-flex', 'flex-wrap', 'gap-4', 'justify-content-start');
+    chartContainer.appendChild(rowWrapper);
+
+    headers.forEach((header, colIndex) => {
+      const data = selectedIndices.map(rowIndex => {
+        const row = rowElements[rowIndex];
+        const cell = row.querySelectorAll('.col-value')[colIndex];
+        return parseFloat(cell.textContent.trim());
       });
 
-      if (sharedChart) sharedChart.destroy();
-      sharedChart = new Chart(newCtx, {
-        type: chartType,
+      const bgColors = data.map((_, i) => getColorByIndex(i)[0]);
+      const borderColors = data.map((_, i) => getColorByIndex(i)[1]);
+
+      const canvasWrapper = document.createElement('div');
+      canvasWrapper.style.width = '250px';
+      canvasWrapper.innerHTML = `<canvas height="250"></canvas>`;
+      rowWrapper.appendChild(canvasWrapper);
+
+      new Chart(canvasWrapper.querySelector('canvas'), {
+        type: 'pie',
         data: {
           labels,
           datasets: [{
-            label: `${year} ${type}`,
-            data: values,
-            backgroundColor: values.map((_, i) => colors[i % colors.length])
+            data,
+            backgroundColor: bgColors,
+            borderColor: borderColors,
+            borderWidth: 1
           }]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: { display: true },
+            legend: {
+              display: true,
+              labels: {
+                generateLabels: (chart) =>
+                  chart.data.labels.map((l, i) => ({
+                    text: `${l}: ${chart.data.datasets[0].data[i]}`,
+                    fillStyle: chart.data.datasets[0].backgroundColor[i]
+                  }))
+              }
+            },
             tooltip: {
               callbacks: {
-                label: (context) => `${context.label}: ${context.parsed}`
+                label: function (context) {
+                  const label = context.label || '';
+                  const value = context.parsed;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percent = ((value / total) * 100).toFixed(1);
+                  return `${label}: ${value} (${percent}%)`;
+                }
               }
+            },
+            title: {
+              display: true,
+              text: header,
+              font: { size: 14 }
             }
-          },
-          scales: {
-            y: { beginAtZero: true }
           }
         }
       });
-    }
+    });
+  } else {
+    const canvas = document.createElement('canvas');
+    canvas.id = "sharedChartCanvas";
+    chartContainer.appendChild(canvas);
+
+    const datasets = headers.map((header, colIndex) => {
+      const data = selectedIndices.map(rowIndex => {
+        const row = rowElements[rowIndex];
+        const cell = row.querySelectorAll('.col-value')[colIndex];
+        return parseFloat(cell.textContent.trim());
+      });
+      const [bg, border] = getColorByIndex(colIndex);
+      return {
+        label: header,
+        data,
+        backgroundColor: bg,
+        borderColor: border,
+        borderWidth: 2
+      };
+    });
+
+    if (sharedChart) sharedChart.destroy();
+    sharedChart = new Chart(canvas.getContext('2d'), {
+      type: chartType,
+      data: {
+        labels,
+        datasets
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: newTitle
+          }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
   }
+}
+
 
   document.querySelectorAll('.chart-module').forEach(module => {
     initRowDropdown(module);

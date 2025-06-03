@@ -1,4 +1,75 @@
-<!DOCTYPE html>
+<
+// Key generation logic
+async function handleLogin() {
+  // 1. Generate AES-256 Key
+  const aesKey = await crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  );
+  const aesKeyRaw = await crypto.subtle.exportKey("raw", aesKey);
+  const aesKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(aesKeyRaw)));
+  sessionStorage.setItem("aesKey", aesKeyBase64);
+
+  // 2. Generate RSA Key Pair for Signing (RSASSA-PKCS1-v1_5)
+  const rsaSignKeyPair = await crypto.subtle.generateKey(
+    {
+      name: "RSASSA-PKCS1-v1_5",
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: "SHA-256"
+    },
+    true,
+    ["sign", "verify"]
+  );
+
+  // 3. Encrypt AES key using Server's Public RSA Key (e.g. with JSEncrypt)
+  const serverPublicKeyPEM = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnUHMqxlLgtJKNtUKNfDmUCy
+...your key...
+-----END PUBLIC KEY-----`;
+
+  const jsEncrypt = new JSEncrypt();
+  jsEncrypt.setPublicKey(serverPublicKeyPEM);
+  const encryptedAesKeyBase64 = jsEncrypt.encrypt(aesKeyBase64);
+
+  // 4. Sign AES key using private RSA signing key
+  const signature = await crypto.subtle.sign(
+    { name: "RSASSA-PKCS1-v1_5" },
+    rsaSignKeyPair.privateKey,
+    aesKeyRaw // must be ArrayBuffer!
+  );
+
+  const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+
+  // 5. Export Public Signing Key (PEM format)
+  const rsaSignPublicKeyPem = await exportCryptoKey(rsaSignKeyPair.publicKey);
+
+  // 6. Store results (send to server or debug)
+  console.log("AES Key (Base64):", aesKeyBase64);
+  console.log("Encrypted AES Key:", encryptedAesKeyBase64);
+  console.log("Signature:", signatureBase64);
+  console.log("RSA Signing Public Key PEM:", rsaSignPublicKeyPem);
+
+  return {
+    aesKeyBase64,
+    encryptedAesKeyBase64,
+    signatureBase64,
+    rsaSignPublicKeyPem
+  };
+}
+
+// Utility: Export RSA public key to PEM format
+async function exportCryptoKey(key) {
+  const exported = await crypto.subtle.exportKey("spki", key);
+  const exportedAsString = String.fromCharCode(...new Uint8Array(exported));
+  const exportedAsBase64 = btoa(exportedAsString);
+  const pem = `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64}\n-----END PUBLIC KEY-----`;
+  return pem;
+}
+
+
+!DOCTYPE html>
 <html>
 <head>
   <title>Crypto Test</title>

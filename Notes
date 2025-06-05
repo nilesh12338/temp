@@ -1,3 +1,63 @@
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const modal = document.getElementById('sharedChartModal');
+  const dialog = modal.querySelector('.modal-dialog');
+  const header = modal.querySelector('.modal-header');
+
+  let isDragging = false;
+  let offsetX, offsetY;
+
+  header.style.cursor = 'move';
+  dialog.style.position = 'fixed'; // so we can move it freely
+  dialog.style.margin = '0'; // remove bootstrap centering
+  dialog.style.top = '50%';
+  dialog.style.left = '50%';
+  dialog.style.transform = 'translate(-50%, -50%)'; // start centered
+
+  header.addEventListener('mousedown', function (e) {
+    isDragging = true;
+
+    const rect = dialog.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    dialog.style.transform = ''; // disable transform for pixel-based move
+  });
+
+  document.addEventListener('mousemove', function (e) {
+    if (!isDragging) return;
+
+    let left = e.clientX - offsetX;
+    let top = e.clientY - offsetY;
+
+    // Constrain within viewport
+    const maxLeft = window.innerWidth - dialog.offsetWidth;
+    const maxTop = window.innerHeight - dialog.offsetHeight;
+
+    left = Math.max(0, Math.min(left, maxLeft));
+    top = Math.max(0, Math.min(top, maxTop));
+
+    dialog.style.left = left + 'px';
+    dialog.style.top = top + 'px';
+  });
+
+  document.addEventListener('mouseup', function () {
+    isDragging = false;
+  });
+
+  // Reset position every time modal is shown
+  modal.addEventListener('shown.bs.modal', function () {
+    dialog.style.left = '50%';
+    dialog.style.top = '50%';
+    dialog.style.transform = 'translate(-50%, -50%)';
+  });
+});
+</script>
+
+
+
+============
 document.getElementById('downloadChart').addEventListener('click', () => {
   const chartType = currentModule?.querySelector('.chart-type-selector')?.value;
 

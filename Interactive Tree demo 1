@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Tree Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .branch {
+      margin-left: 20px;
+      border-left: 1px dashed #ccc;
+      padding-left: 15px;
+      position: relative;
+    }
+    .entry {
+      margin: 5px 0;
+      position: relative;
+    }
+    .entry::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: -16px;
+      width: 16px;
+      height: 1px;
+      background: #ccc;
+    }
+    .toggle-btn {
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 5px;
+      color: #007bff;
+    }
+    .label {
+      display: inline-block;
+    }
+    .meta small {
+      display: block;
+      margin-left: 20px;
+    }
+    input[type="button"] {
+      margin: 5px 5px 5px 0;
+    }
+    .fRight {
+      float: right;
+      font-size: 12px;
+      color: gray;
+    }
+    .root_label {
+      font-size: 18px;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Interactive Tree Structure</h2>
+<div id="wrapperTree">Loading...</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+const treeData = {
+  label: "Mumbai Metro",
+  level: 0,
+  type: "root",
+  children: [
+    {
+      label: "Mumbai Metro",
+      location: "",
+      level: 1,
+      type: "AO",
+      buttons: ["User List", "View AO's"],
+      children: [
+        {
+          label: "AO1",
+          location: "East Mumbai",
+          level: 2,
+          type: "RBO",
+          buttons: ["User List", "View RBO's"],
+          children: [
+            {
+              label: "RBO1",
+              location: "New Mumbai",
+              level: 3,
+              type: "BranchGroup",
+              buttons: ["User List", "View Branch"],
+              children: [
+                {
+                  label: "Konkan Bhawan Branch",
+                  level: 4,
+                  type: "Branch",
+                  meta: {
+                    "Incumbency": "",
+                    "Linked CPC": "",
+                    "No. of A/c": ""
+                  },
+                  buttons: ["User List"]
+                },
+                {
+                  label: "Konkan Bhawan Branch",
+                  level: 4,
+                  type: "Branch",
+                  meta: {
+                    "Incumbency": "",
+                    "Linked CPC": "",
+                    "No. of A/c": ""
+                  },
+                  buttons: ["User List"]
+                }
+              ]
+            },
+            {
+              label: "RBO2",
+              level: 3,
+              type: "BranchGroup",
+              buttons: ["User List", "View Branch"],
+              children: []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+function renderTree(data) {
+  const branch = $('<div class="branch"></div>').addClass('lv' + data.level);
+
+  if (data.type !== 'root') {
+    const entry = $('<div class="entry"></div>');
+    const label = $('<span class="label"></span>').text(data.label);
+    
+    if (data.children && data.children.length > 0) {
+      const toggle = $('<span class="toggle-btn">[+]</span>');
+      toggle.on('click', function () {
+        const childrenContainer = $(this).siblings('.children');
+        childrenContainer.slideToggle();
+        $(this).text($(this).text() === '[+]' ? '[-]' : '[+]');
+      });
+      entry.append(toggle);
+    }
+
+    entry.append(label);
+    if (data.location) entry.append(`<small class="fRight">${data.location}</small>`);
+
+    if (data.buttons) {
+      const buttonDiv = $('<div class="clearfix mTop15"></div>');
+      data.buttons.forEach(btn => {
+        const className = btn.toLowerCase().includes('view') ? 'view-btn view-card' : 'list-btn';
+        buttonDiv.append(`<input type="button" class="${className}" value="${btn}" />`);
+      });
+      entry.append(buttonDiv);
+    }
+
+    if (data.meta) {
+      const meta = $('<div class="meta"></div>');
+      Object.entries(data.meta).forEach(([key, val]) => {
+        meta.append(`<small>${key}: ${val}</small>`);
+      });
+      entry.append(meta);
+    }
+
+    branch.append(entry);
+  } else {
+    const rootLabel = $('<span class="label root_label txt-center view-card"></span>').text(data.label);
+    branch.append(rootLabel);
+  }
+
+  if (data.children && data.children.length > 0) {
+    const childrenContainer = $('<div class="children" style="display:none;"></div>');
+    data.children.forEach(child => {
+      childrenContainer.append(renderTree(child));
+    });
+    branch.append(childrenContainer);
+  }
+
+  return branch;
+}
+
+$(document).ready(function () {
+  $('#wrapperTree').empty().append(renderTree(treeData));
+});
+</script>
+
+</body>
+</html>

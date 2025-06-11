@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic HTML from JSON</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to the top */
+            min-height: 100vh;
+            padding: 20px; /* Add some padding around the content */
+            box-sizing: border-box;
+        }
+        #json-output-container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+            width: 100%;
+            max-width: 960px; /* Equivalent to max-w-4xl */
+            overflow-x: auto; /* Allow horizontal scrolling if content overflows */
+        }
+        /* Custom styles from the original HTML to approximate its look */
+        .horzScrollable {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .root_label {
+            font-size: 1.5rem; /* Larger font for root label */
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .view-card {
+            background-color: #e0f2f7; /* Light blue background */
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .network-card {
+            background-color: #e6ffed; /* Light green background */
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .branch {
+            padding-left: 30px; /* Indent branches */
+            border-left: 2px solid #ccc; /* Visual line for branches */
+            margin-top: 15px;
+            padding-top: 5px;
+        }
+        .entry {
+            margin-bottom: 15px;
+            background-color: #f7faff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .label {
+            display: block;
+            font-weight: 600;
+        }
+        .fRight {
+            float: right;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+        .mTop15 {
+            margin-top: 15px;
+        }
+        .list-btn, .view-btn {
+            background-color: #4299e1; /* Blue */
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 0.5rem; /* rounded-md */
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+        .list-btn:hover, .view-btn:hover {
+            background-color: #3182ce;
+        }
+        .branchDetails {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem; /* column-gap-2 */
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        .branchDetails button {
+            background-color: #63b3ed; /* Lighter blue for inner buttons */
+        }
+        .branchDetails button:hover {
+            background-color: #4299e1;
+        }
+        small {
+            color: #555;
+            font-size: 0.85em;
+        }
+        .hide {
+            display: none; /* Elements marked as 'hide' in original HTML */
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .root_label {
+                font-size: 1.25rem;
+            }
+            .branch {
+                padding-left: 15px;
+            }
+            .list-btn, .view-btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .branchDetails {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .branchDetails button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="json-output-container">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Dynamically Generated HTML</h1>
+        <div id="dynamic-content">
+            <!-- HTML content will be generated here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // The JSON object representing the HTML structure
+        const htmlStructureJson = {
+            "tag": "div",
+            "attributes": { "class": "horzScrollable" },
+            "children": [
+                {
+                    "tag": "div",
+                    "attributes": { "id": "wrapperTree", "style": "padding-bottom: 18px;" },
+                    "children": [
+                        {
+                            "tag": "span",
+                            "attributes": { "class": "label root_label txt-center view-card" },
+                            "content": "Mumbai Metro"
+                        },
+                        {
+                            "tag": "div",
+                            "attributes": { "class": "branch lv1 animate_animated animate_fadeIn hide" },
+                            "children": [
+                                {
+                                    "tag": "div",
+                                    "attributes": { "class": "entry" },
+                                    "children": [
+                                        {
+                                            "tag": "span",
+                                            "attributes": { "class": "label txt-center network-card" },
+                                            "content": "Mumbai Metro"
+                                        },
+                                        {
+                                            "tag": "div",
+                                            "attributes": { "class": "clearfix mTop15" },
+                                            "children": [
+                                                { "tag": "input", "attributes": { "type": "button", "name": "", "class": "list-btn", "id": "", "value": "User List" } },
+                                                { "tag": "input", "attributes": { "type": "button", "name": "", "class": "view-btn view-card", "id": "", "value": "View AO's" } }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "div",
+                            "attributes": { "class": "branch lv2 animate_animated animate_fadeIn hide" },
+                            "children": [
+                                {
+                                    "tag": "div",
+                                    "attributes": { "class": "entry" },
+                                    "children": [
+                                        {
+                                            "tag": "span",
+                                            "attributes": { "class": "label" },
+                                            "children": [
+                                                { "tag": "label", "attributes": { "class": "" }, "content": "AO1" },
+                                                { "tag": "small", "attributes": { "class": "fRight" }, "content": "East Mumbai" }
+                                            ]
+                                        },
+                                        {
+                                            "tag": "div",
+                                            "attributes": { "class": "clearfix mTop15" },
+                                            "children": [
+                                                { "tag": "input", "attributes": { "type": "button", "name": "", "class": "list-btn", "id": "", "value": "User List" } },
+                                                { "tag": "input", "attributes": { "type": "button", "name": "", "class": "view-btn view-card", "id": "", "value": "View RBO's" } }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "div",
+                            "attributes": { "class": "branch lv3 animate_animated animate_fadeIn hide" },
+                            "children": [
+                                {
+                                    "tag": "div",
+                                    "attributes": { "class": "entry" },
+                                    "children": [
+                                        {
+                                            "tag": "span",
+                                            "attributes": { "class": "label" },
+                                            "children": [
+                                                { "tag": "label", "attributes": { "class": "" }, "content": "RBO1" },
+                                                { "tag": "small", "attributes": { "class": "fRight" }, "content": "New Mumbai" }
+                                            ]
+                                        },
+                                        {
+                                            "tag": "div",
+                                            "attributes": { "class": "clearfix mTop15" },
+                                            "children": [
+                                                { "tag": "input", "attributes": { "type": "button", "name": "", "class": "list-btn", "id": "", "value": "User List" } },
+                                                { "tag": "input", "attributes": { "type": "button", "name": "", "class": "view-btn view-card", "id": "", "value": "View Branch" } }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "div",
+                            "attributes": { "class": "branch animate_animated animate_fadeIn lv3 lv4 hide" },
+                            "children": [
+                                {
+                                    "tag": "div",
+                                    "attributes": { "class": "entryWrapperDiv" },
+                                    "children": [
+                                        // Repeated 'entry' blocks
+                                        ...Array(4).fill(null).map(() => ({
+                                            "tag": "div",
+                                            "attributes": { "class": "entry" },
+                                            "children": [
+                                                {
+                                                    "tag": "div",
+                                                    "attributes": { "class": "label" },
+                                                    "children": [
+                                                        {
+                                                            "tag": "div",
+                                                            "attributes": { "class": "branchDetails d-flex justify-content-between column-gap-2" },
+                                                            "children": [
+                                                                { "tag": "label", "attributes": { "class": "" }, "content": "Konkan Bhawan Branch" },
+                                                                { "tag": "button", "attributes": { "class": "" }, "content": "User List" }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                { "tag": "div", "children": [{ "tag": "small", "content": "Incumbency:" }] },
+                                                { "tag": "div", "children": [{ "tag": "small", "content": "Linked CPC:" }] },
+                                                { "tag": "div", "children": [{ "tag": "small", "content": "No. of A/c:-" }] }
+                                            ]
+                                        }))
+                                    ]
+                                }
+                            ]
+                        },
+                        // Repeated RBO1 entries
+                        ...Array(4).fill(null).map(() => ({
+                            "tag": "div",
+                            "attributes": { "class": "entry" },
+                            "children": [
+                                {
+                                    "tag": "span",
+                                    "attributes": { "class": "label" },
+                                    "children": [
+                                        { "tag": "label", "attributes": { "class": "" }, "content": "RBO1" },
+                                        { "tag": "small", "attributes": { "class": "fRight" }, "content": "New Mumbai" }
+                                    ]
+                                },
+                                {
+                                    "tag": "div",
+                                    "attributes": { "class": "clearfix mTop15" },
+                                    "children": [
+                                        { "tag": "input", "attributes": { "type": "button", "name": "", "class": "list-btn", "id": "", "value": "User List" } },
+                                        { "tag": "input", "attributes": { "type": "button", "name": "", "class": "view-btn view-card", "id": "", "value": "View Branch" } }
+                                    ]
+                                }
+                            ]
+                        })),
+                        // Repeated RBO2 entries
+                        ...Array(3).fill(null).map(() => ({
+                            "tag": "div",
+                            "attributes": { "class": "entry" },
+                            "children": [
+                                {
+                                    "tag": "span",
+                                    "attributes": { "class": "label" },
+                                    "children": [
+                                        { "tag": "label", "attributes": { "class": "" }, "content": "RBO2" }
+                                    ]
+                                },
+                                {
+                                    "tag": "div",
+                                    "attributes": { "class": "clearfix mTop15" },
+                                    "children": [
+                                        { "tag": "input", "attributes": { "type": "button", "name": "", "class": "list-btn", "id": "", "value": "User List" } },
+                                        { "tag": "input", "attributes": { "type": "button", "name": "", "class": "view-btn view-card", "id": "", "value": "View Branch" } }
+                                    ]
+                                }
+                            ]
+                        }))
+                    ]
+                }
+            ]
+        };
+
+        /**
+         * Recursively creates HTML elements from a JSON object.
+         * @param {Object} jsonElement - The JSON object representing an HTML element.
+         * @returns {HTMLElement} The created HTML element.
+         */
+        function createHtmlFromJson(jsonElement) {
+            // Create the element based on the tag name
+            const element = document.createElement(jsonElement.tag);
+
+            // Set attributes if they exist
+            if (jsonElement.attributes) {
+                for (const key in jsonElement.attributes) {
+                    if (Object.hasOwnProperty.call(jsonElement.attributes, key)) {
+                        element.setAttribute(key, jsonElement.attributes[key]);
+                    }
+                }
+            }
+
+            // Set text content if it exists
+            if (jsonElement.content) {
+                element.textContent = jsonElement.content;
+            }
+
+            // Recursively append child elements
+            if (jsonElement.children && Array.isArray(jsonElement.children)) {
+                jsonElement.children.forEach(childJson => {
+                    if (typeof childJson === 'string') {
+                        // Handle raw text nodes if any (though not explicitly in this JSON)
+                        element.appendChild(document.createTextNode(childJson));
+                    } else if (typeof childJson === 'object' && childJson !== null) {
+                        element.appendChild(createHtmlFromJson(childJson));
+                    }
+                });
+            }
+
+            return element;
+        }
+
+        // Get the container where dynamic content will be appended
+        const dynamicContentContainer = document.getElementById('dynamic-content');
+
+        // Check if the container exists before attempting to append
+        if (dynamicContentContainer) {
+            // Generate the HTML from the JSON object
+            const generatedHtmlElement = createHtmlFromJson(htmlStructureJson);
+
+            // Append the generated HTML to the container
+            dynamicContentContainer.appendChild(generatedHtmlElement);
+        } else {
+            console.error("Target container 'dynamic-content' not found.");
+        }
+    </script>
+</body>
+</html>

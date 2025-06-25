@@ -1,3 +1,19 @@
+const loginTimestamp = sessionStorage.getItem('login_timestamp');
+
+// Step 1: Set login timestamp if not already set
+if (!loginTimestamp) {
+  const now = new Date().getTime(); // current timestamp in milliseconds
+  sessionStorage.setItem('login_timestamp', now);
+} else {
+  // Step 2: Check time difference on every page load
+  const currentTime = new Date().getTime();
+  const timeDiff = currentTime - parseInt(loginTimestamp, 10);
+
+  // Step 3: If time difference is more than 1 hour
+  if (timeDiff > 3600000) { // 1 hour = 3600000 ms
+    sessionStorage.setItem('session_expired', 'true');
+  }
+}
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {

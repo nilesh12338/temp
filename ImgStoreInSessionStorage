@@ -1,41 +1,68 @@
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const imgElement = document.querySelector("img.for_updateProfile");
-
-    if (!imgElement) return; // Exit if image element not found
-
-    const sessionKey = "userProfileBase64";
-
-    // Check if image base64 already in sessionStorage
-    const cachedBase64 = sessionStorage.getItem(sessionKey);
-
-    if (cachedBase64) {
-        // Use base64 from sessionStorage
-        imgElement.src = cachedBase64;
-    } else {
-        // Convert image to base64 and store
-        const img = new Image();
-        img.crossOrigin = "anonymous"; // Important to avoid CORS issues
-        img.src = imgElement.src;
-
-        img.onload = function () {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-            const base64String = canvas.toDataURL("image/png"); // or "image/jpeg"
-
-            // Store in sessionStorage
-            sessionStorage.setItem(sessionKey, base64String);
-
-            // Set the base64 to actual image
-            imgElement.src = base64String;
-        };
-
-        img.onerror = function () {
-            console.warn("Could not load image to convert to base64.");
-        };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile Image Cache</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
     }
-});
-</script>
+    img.for_updateProfile {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>User Profile Image</h2>
+  <img src="newimg/userIcon.png" alt="User Icon" class="for_updateProfile" />
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const imgElement = document.querySelector("img.for_updateProfile");
+      const sessionKey = "userProfileBase64";
+
+      if (!imgElement) return;
+
+      const cachedBase64 = sessionStorage.getItem(sessionKey);
+
+      if (cachedBase64) {
+        // Use base64 from session storage
+        imgElement.src = cachedBase64;
+      } else {
+        // Load image from server, convert to base64, store in sessionStorage
+        const tempImg = new Image();
+        tempImg.crossOrigin = "anonymous"; // Required for cross-origin images
+        tempImg.src = "newimg/userIcon.png";
+
+        tempImg.onload = function () {
+          const canvas = document.createElement("canvas");
+          canvas.width = tempImg.naturalWidth;
+          canvas.height = tempImg.naturalHeight;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(tempImg, 0, 0);
+
+          try {
+            const base64String = canvas.toDataURL("image/png");
+            sessionStorage.setItem(sessionKey, base64String);
+            imgElement.src = base64String;
+          } catch (e) {
+            console.warn("Base64 conversion failed:", e);
+            imgElement.src = tempImg.src; // fallback
+          }
+        };
+
+        tempImg.onerror = function () {
+          console.warn("Failed to load image from server.");
+          imgElement.src = "newimg/userIcon.png"; // fallback
+        };
+      }
+    });
+  </script>
+
+</body>
+</html>

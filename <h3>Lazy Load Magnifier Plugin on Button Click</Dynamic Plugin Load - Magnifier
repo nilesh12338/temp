@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynamic Plugin Load - Magnifier</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <style>
+    #myImage {
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h3>Lazy Load Magnifier Plugin on Button Click</h3>
+  <button id="loadMagnifier">Activate Magnifier</button>
+
+  <br><br>
+  <img id="myImage" src="https://via.placeholder.com/400x300" data-zoom-image="https://via.placeholder.com/800x600" width="400" />
+
+  <script>
+    document.getElementById("loadMagnifier").addEventListener("click", function () {
+      // Check if already loaded
+      if (typeof $.fn.elevateZoom === "function") {
+        $('#myImage').elevateZoom();
+        return;
+      }
+
+      // Load elevateZoom plugin script
+      const script = document.createElement('script');
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/jquery.elevatezoom.min.js";
+      script.onload = function () {
+        // Initialize the plugin
+        $('#myImage').elevateZoom({
+          zoomType: "lens",
+          lensShape: "round",
+          lensSize: 150
+        });
+      };
+      document.body.appendChild(script);
+    });
+  </script>
+
+</body>
+</html>

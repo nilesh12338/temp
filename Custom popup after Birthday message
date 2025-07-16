@@ -1,0 +1,49 @@
+setTimeout(function () {
+  if (_status != "y" && _birthDayFlag === "true") {
+    const birthdayModalHtml = `
+      <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <img src="newimg/birthday.svg" class="w-100">
+              <p class="userName hide"><%=userName%></p>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    $('header').after(birthdayModalHtml);
+    let myModal = new bootstrap.Modal(document.getElementById("staticBackdrop"), { keyboard: false });
+    myModal.show();
+
+    sessionStorage.setItem("status", "y");
+
+    document.getElementById("staticBackdrop").addEventListener("hidden.bs.modal", function () {
+      // Show custom popup after birthday popup
+      let customModal = new bootstrap.Modal(document.getElementById("customPopup"), { keyboard: false });
+      customModal.show();
+
+      document.getElementById("customPopup").addEventListener("hidden.bs.modal", function () {
+        // Call myToDoPopup after custom popup closes
+        if (typeof(myToDoPopup) !== "undefined") {
+          myToDoPopup();
+        }
+      });
+    });
+  } else {
+    // If no birthday popup, then check and show custom popup
+    let customModal = new bootstrap.Modal(document.getElementById("customPopup"), { keyboard: false });
+    customModal.show();
+
+    document.getElementById("customPopup").addEventListener("hidden.bs.modal", function () {
+      // Call myToDoPopup after custom popup closes
+      if (typeof(myToDoPopup) !== "undefined") {
+        myToDoPopup();
+      }
+    });
+  }
+}, 1000);

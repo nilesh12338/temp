@@ -13,3 +13,10 @@ Security is still maintained through:
 
 This setup allows us to retain required features without compromising essential security controls.
 
+
+This project uses multiple third-party plugins that depend on inline scripts (e.g., inline event handlers, dynamic JavaScript execution). While we have implemented CSRF protection and follow secure coding practices, these plugins require 'unsafe-inline' to function correctly.
+
+Due to plugin design limitations, rewriting or restructuring them to comply fully with CSP (e.g., using nonces or hashes) is not feasible without breaking functionality. Therefore, enabling 'unsafe-inline' at the server level is necessary to maintain application stability and plugin compatibility.
+
+Additionally, this configuration has already been present at the server level for a long time, and the centralized server-level policy ensures consistent control and monitoring. It also allows the server to handle script execution securely through ABC (e.g., internal script auditing, header-level restrictions, or logging mechanisms).
+

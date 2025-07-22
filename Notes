@@ -622,3 +622,37 @@ function updateChartFromRows(moduleEl) {
   moduleEl.querySelector('.chart-title').textContent = newTitle;
   document.querySelector('.chart-modal-title').textContent = newTitle;
 }
+
+
+=========
+Here's a professional and respectful email draft you can send to HR:
+
+---
+
+**Subject:** Concern Regarding Recent Increment Offer
+
+Dear \[HR's Name],
+
+I hope you are doing well.
+
+I am writing to formally express my concern regarding the recent salary increment offer.
+
+My last salary revision was effective from **01-May-2022**, and since then, there has been no further increment until the current offer, which is effective from **01-August-2025**. The new CTC offered is **₹18,15,000**, which includes all components such as variable pay that is not part of fixed monthly income. This translates to an approximate **10% overall increment** after more than **3 years**.
+
+If we consider the time span between the last increment (May 2022) and the next scheduled increment (likely August 2026), this is a **51-month duration**. When the 10% increment is distributed over this period, the effective **average monthly growth in fixed pay** comes down to **approximately ₹219**, which is quite discouraging in today’s market context.
+
+Given the increasing responsibilities, cost of living, and long duration without salary revision, I was expecting a more meaningful increment. I am quite disappointed with this revision, and I wanted to share my feedback transparently.
+
+I kindly request you to reconsider the increment structure or advise if there are any possibilities for a review.
+
+Looking forward to your response.
+
+Warm regards,
+**\[Your Full Name]**
+**\[Your Employee ID / Designation, if applicable]**
+**\[Contact Info]**
+
+---
+
+Let me know if you'd like to adjust the tone (more firm, softer, etc.) or add specifics about your role, performance, or expectations.
+

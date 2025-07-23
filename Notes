@@ -1,3 +1,49 @@
+function disabledEachField($input) {
+    if ($input.is(':input')) {
+        if ($input.is(':text, textarea')) {
+            if (!$input.prop('readonly')) {
+                $input.prop('readonly', true);
+            }
+        } else if ($input.is(':radio, :checkbox, select') || $input.hasClass('autoSave_multiselect')) {
+            if (!$input.prop('disabled')) {
+                $input.prop('disabled', true);
+            }
+        } else {
+            if (!$input.prop('disabled')) {
+                $input.prop('disabled', true);
+            }
+        }
+    }
+}
+
+function disabledPageFields(_argArray) {
+    if (!Array.isArray(_argArray) || _argArray.length === 0) return;
+
+    try {
+        _argArray.forEach(function (selector) {
+            const $elements = $(selector);
+            $elements.each(function () {
+                const $this = $(this);
+                const $inputs = $this.find(':input');
+
+                if ($inputs.length > 1) {
+                    $inputs.each(function () {
+                        disabledEachField($(this));
+                    });
+                } else {
+                    disabledEachField($this);
+                }
+            });
+        });
+    } catch (error) {
+        console.log('enablePageFields fn: ' + error);
+    }
+}
+
+==============
+
+
+
 const loginTimestamp = sessionStorage.getItem('login_timestamp');
 
 // Step 1: Set login timestamp if not already set

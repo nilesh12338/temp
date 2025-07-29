@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynamic Input Width with Triggers</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .form-row {
+      margin-bottom: 10px;
+    }
+    input.dynamicWidth {
+      min-width: 80px;
+      padding: 4px 8px;
+      font-size: 14px;
+      box-sizing: content-box;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+
+  <h2>Dynamic Input Width Demo with Triggers</h2>
+
+  <div id="formContainer">
+    <div class="form-row">
+      <input type="text" class="dynamicWidth" placeholder="First Name">
+    </div>
+    <div class="form-row">
+      <input type="text" class="dynamicWidth" placeholder="Last Name">
+    </div>
+  </div>
+
+  <button id="loadMore">Simulate AJAX Input Load</button>
+
+  <script>
+    $(document).ready(function () {
+      const $measurer = $('<span>').css({
+        'position': 'absolute',
+        'visibility': 'hidden',
+        'white-space': 'nowrap',
+        'padding': '0',
+        'margin': '0',
+        'font-family': 'inherit'
+      }).appendTo('body');
+
+      function getTextWidth(text, fontSize) {
+        $measurer.css('font-size', fontSize || '14px').text(text);
+        return $measurer.width();
+      }
+
+      function updateInputWidth($input) {
+        const val = $input.val();
+        const placeholder = $input.attr('placeholder') || '';
+        const fontSize = $input.css('font-size');
+        const text = val || placeholder;
+        if (!text) return;
+
+        const textWidth = getTextWidth(text, fontSize) + 20;
+        const parentWidth = $input.parent().width() || 500;
+
+        const finalWidth = Math.min(Math.max(textWidth, 80), parentWidth);
+        $input.css('width', finalWidth + 'px');
+      }
+
+      function debounce(fn, delay) {
+        let timer;
+        return function () {
+          const context = this, args = arguments;
+          clearTimeout(timer);
+          timer = setTimeout(() => fn.apply(context, args), delay);
+        };
+      }
+
+      function applyDynamicWidth($inputs) {
+        $inputs.each(function () {
+          const $input = $(this);
+          updateInputWidth($input);
+
+          const handler = debounce(() => updateInputWidth($input), 100);
+          $input.off('input.dynamicWidth').on('input.dynamicWidth', handler);
+          $input.off('focusout.dynamicWidth').on('focusout.dynamicWidth', () => {
+            requestAnimationFrame(() => updateInputWidth($input));
+          });
+        });
+      }
+
+      function triggerDynamicInputUpdate() {
+        const $inputs = $('input.dynamicWidth[type="text"]').not('[data-width-applied="true"]');
+        applyDynamicWidth($inputs);
+        $inputs.attr('data-width-applied', 'true');
+      }
+
+      // Initial run
+      triggerDynamicInputUpdate();
+
+      // Simulate AJAX call or Autocomplete plugin injection
+      $('#loadMore').on('click', function () {
+        setTimeout(() => {
+          $('#formContainer').append(`
+            <div class="form-row">
+              <input type="text" class="dynamicWidth" placeholder="Email from AJAX">
+            </div>
+          `);
+          $(document).trigger('ajaxComplete');
+        }, 500);
+      });
+
+      // Re-bind on custom triggers
+      $(document).on('ajaxComplete', function () {
+        console.log('ajaxComplete triggered');
+        triggerDynamicInputUpdate();
+      });
+
+      $(window).on('autocompleteCloseTrigger', function () {
+        console.log('autocompleteCloseTrigger called');
+        triggerDynamicInputUpdate();
+      });
+
+      $(window).on('autoSaveRestoreTrigger', function () {
+        console.log('autoSaveRestoreTrigger called');
+        triggerDynamicInputUpdate();
+      });
+    });
+  </script>
+
+</body>
+</html>

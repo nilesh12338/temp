@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Auto Resize Input + Table Layout Demo</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    td {
+      border: 1px solid #999;
+      padding: 10px;
+    }
+    input.auto-resize {
+      min-width: 80px;
+      padding: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<h3>Auto Resize Input Inside Table</h3>
+
+<table class="mainTbl">
+  <tr>
+    <td><input type="text" class="auto-resize" placeholder="Type here..."></td>
+    <td><input type="text" class="auto-resize" placeholder="Example input"></td>
+  </tr>
+</table>
+
+<br>
+
+<button id="ajaxLoad">Simulate AJAX Load</button>
+<button id="triggerAutocomplete">Trigger Autocomplete Close</button>
+
+<script>
+// Helper: Get text width for a string with font styling
+function getTextWidth(text, $element) {
+    const $temp = $('<span>').hide().appendTo(document.body);
+    $temp.css({
+        fontFamily: $element.css('font-family'),
+        fontSize: $element.css('font-size'),
+        fontWeight: $element.css('font-weight'),
+        whiteSpace: 'pre',
+        visibility: 'hidden',
+    }).text(text);
+
+    const width = $temp.width();
+    $temp.remove();
+    return width;
+}
+
+// Adjust input width and fix table layout if needed
+function adjustInputWidth(_cur, _value, _placeholder) {
+    const _ttag = true;
+
+    if (_ttag) {
+        const _closestTbl = _cur.closest('table');
+
+        if (_closestTbl.length > 0) {
+            const displayVal = _closestTbl.css('display')?.toLowerCase();
+            const isHidden = _closestTbl.hasClass('hide');
+
+            if (displayVal !== 'table' && displayVal !== 'none' && !isHidden) {
+                _closestTbl.css('display', 'table');
+            }
+
+            if (_closestTbl.hasClass('multiWithColtbl')) {
+                const layoutVal = _closestTbl.css('table-layout')?.toLowerCase();
+                if (layoutVal !== 'inherit') {
+                    _closestTbl.css('table-layout', 'inherit');
+                }
+            } else if (_closestTbl.hasClass('mainTbl')) {
+                const layoutVal = _closestTbl.css('table-layout')?.toLowerCase();
+                if (layoutVal !== 'fixed') {
+                    _closestTbl.css('table-layout', 'fixed');
+                }
+            }
+        }
+
+        if (_value.length > 0 || _placeholder.length > 0) {
+            const parentWidth = _cur.parent().outerWidth() - 20;
+            let _inputMinWidth = 80;
+
+            const textToMeasure = _value || _placeholder;
+            const valueWidth = getTextWidth(textToMeasure, _cur);
+
+            if (valueWidth > 0 && parentWidth > 0) {
+                _inputMinWidth = Math.min(valueWidth, parentWidth);
+            }
+
+            _cur.css('width', _inputMinWidth + 'px');
+        }
+    }
+}
+
+// Call this on all inputs with .auto-resize
+function updateAllInputs() {
+    $('input.auto-resize').each(function () {
+        const _cur = $(this);
+        adjustInputWidth(_cur, _cur.val(), _cur.attr('placeholder') || '');
+    });
+}
+
+// Bind on input events
+$(document).on('input', 'input.auto-resize', function () {
+    adjustInputWidth($(this), $(this).val(), $(this).attr('placeholder') || '');
+});
+
+// AJAX simulation
+$('#ajaxLoad').on('click', function () {
+    setTimeout(function () {
+        $(document).trigger('ajaxComplete');
+    }, 300);
+});
+
+// Autocomplete close simulation
+$('#triggerAutocomplete').on('click', function () {
+    $(document).trigger('autocompleteclose');
+});
+
+// Triggered on AJAX/Autocomplete complete
+$(document).on('ajaxComplete autocompleteclose', function () {
+    updateAllInputs();
+});
+
+// On page load
+$(document).ready(function () {
+    updateAllInputs();
+});
+</script>
+
+</body>
+</html>

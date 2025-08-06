@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Page Timing Demo</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .log { font-size: 1.2em; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <h1>DOM and Page Load Timing Demo</h1>
+  <div class="log" id="timingLog">
+    Calculating page timings...
+  </div>
+
+  <script>
+    window.addEventListener("load", function () {
+      const logEl = document.getElementById("timingLog");
+
+      let domTime, loadTime;
+
+      if (performance.getEntriesByType("navigation").length) {
+        // Modern browsers
+        const [nav] = performance.getEntriesByType("navigation");
+        domTime = nav.domContentLoadedEventEnd - nav.startTime;
+        loadTime = nav.loadEventEnd - nav.startTime;
+      } else {
+        // Fallback for older browsers
+        const t = performance.timing;
+        domTime = t.domContentLoadedEventEnd - t.navigationStart;
+        loadTime = t.loadEventEnd - t.navigationStart;
+      }
+
+      logEl.innerHTML = `
+        <strong>DOM Ready Time:</strong> ${domTime.toFixed(2)} ms<br>
+        <strong>Total Page Load Time:</strong> ${loadTime.toFixed(2)} ms
+      `;
+
+      console.log("DOM Ready Time:", domTime.toFixed(2), "ms");
+      console.log("Page Load Time:", loadTime.toFixed(2), "ms");
+    });
+  </script>
+
+</body>
+</html>

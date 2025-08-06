@@ -2,44 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Page Timing Demo</title>
+  <title>DOM Ready & Load Time</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .log { font-size: 1.2em; margin-top: 20px; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #output { font-size: 1.1em; margin-top: 20px; }
   </style>
 </head>
 <body>
 
-  <h1>DOM and Page Load Timing Demo</h1>
-  <div class="log" id="timingLog">
-    Calculating page timings...
-  </div>
+  <h2>Page Timing Metrics</h2>
+  <div id="output">Calculating...</div>
 
   <script>
-    window.addEventListener("load", function () {
-      const logEl = document.getElementById("timingLog");
+    function showTiming() {
+      const output = document.getElementById("output");
 
-      let domTime, loadTime;
+      let navEntry = performance.getEntriesByType("navigation")[0];
 
-      if (performance.getEntriesByType("navigation").length) {
-        // Modern browsers
-        const [nav] = performance.getEntriesByType("navigation");
-        domTime = nav.domContentLoadedEventEnd - nav.startTime;
-        loadTime = nav.loadEventEnd - nav.startTime;
-      } else {
+      if (!navEntry) {
         // Fallback for older browsers
         const t = performance.timing;
-        domTime = t.domContentLoadedEventEnd - t.navigationStart;
-        loadTime = t.loadEventEnd - t.navigationStart;
+        navEntry = {
+          domContentLoadedEventEnd: t.domContentLoadedEventEnd - t.navigationStart,
+          loadEventEnd: t.loadEventEnd - t.navigationStart,
+        };
+      } else {
+        navEntry = {
+          domContentLoadedEventEnd: navEntry.domContentLoadedEventEnd,
+          loadEventEnd: navEntry.loadEventEnd,
+        };
       }
 
-      logEl.innerHTML = `
-        <strong>DOM Ready Time:</strong> ${domTime.toFixed(2)} ms<br>
-        <strong>Total Page Load Time:</strong> ${loadTime.toFixed(2)} ms
+      output.innerHTML = `
+        <strong>DOM Ready Time:</strong> ${navEntry.domContentLoadedEventEnd.toFixed(2)} ms<br>
+        <strong>Total Page Load Time:</strong> ${navEntry.loadEventEnd.toFixed(2)} ms
       `;
+    }
 
-      console.log("DOM Ready Time:", domTime.toFixed(2), "ms");
-      console.log("Page Load Time:", loadTime.toFixed(2), "ms");
+    // Wait for the load event to ensure timings are fully available
+    window.addEventListener("load", () => {
+      setTimeout(showTiming, 0); // Delay to ensure loadEventEnd is populated
     });
   </script>
 

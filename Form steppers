@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Step Form Wizard with Progress Bar</title>
+  <title>Step Form Wizard with Validation</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
   <style>
     .step {
       position: absolute;
@@ -20,13 +21,15 @@
     }
     .step.slide-out-left { transform: translateX(-100%); opacity: 0; }
     .step.slide-out-right { transform: translateX(100%); opacity: 0; }
-    .form-container { position: relative; min-height: 220px; }
+    .form-container { position: relative; min-height: 250px; }
     #cityList { z-index: 10; }
+    .hidden { display: none; }
+    .error { color: red; font-size: 0.9em; }
   </style>
 </head>
 <body class="bg-light d-flex align-items-center justify-content-center vh-100">
 
-<div class="card shadow-lg p-4" style="width:500px;">
+<div class="card shadow-lg p-4" style="width:520px;">
   <h4 class="mb-3">Survey Form</h4>
 
   <!-- Progress bar -->
@@ -43,7 +46,7 @@
       <div class="step active" id="step1">
         <label class="form-label">1. Choose your gender</label><br>
         <div class="form-check">
-          <input type="radio" name="gender" value="Male" class="form-check-input"> Male
+          <input type="radio" name="gender" value="Male" class="form-check-input" required> Male
         </div>
         <div class="form-check">
           <input type="radio" name="gender" value="Female" class="form-check-input"> Female
@@ -53,35 +56,52 @@
       <!-- Step 2 -->
       <div class="step" id="step2">
         <label class="form-label">2. Enter your city (autocomplete)</label>
-        <input type="text" id="city" name="city" class="form-control" placeholder="Start typing city...">
+        <input type="text" id="city" name="city" class="form-control" placeholder="Start typing city..." required>
         <div id="cityList" class="list-group position-absolute w-100"></div>
       </div>
 
       <!-- Step 3 -->
       <div class="step" id="step3">
         <label class="form-label">3. Enter monthly income (amount)</label>
-        <input type="number" id="income" name="income" class="form-control" placeholder="Enter amount">
+        <input type="number" id="income" name="income" class="form-control" placeholder="Enter amount" required>
       </div>
 
       <!-- Step 4 -->
       <div class="step" id="step4">
         <label class="form-label">4. Choose your qualification</label>
-        <select id="qualification" name="qualification" class="form-select">
+        <select id="qualification" name="qualification" class="form-select" required>
           <option value="">-- Select --</option>
-          <option>Graduate</option>
-          <option>Post Graduate</option>
-          <option>Doctorate</option>
+          <option value="Graduate">Graduate</option>
+          <option value="Post Graduate">Post Graduate</option>
+          <option value="Doctorate">Doctorate</option>
         </select>
+
+        <!-- Extra fields for Graduate -->
+        <div id="graduateFields" class="mt-3 hidden">
+          <label class="form-label">4(a). College Name</label>
+          <input type="text" id="college" name="college" class="form-control" placeholder="Enter college name">
+
+          <label class="form-label mt-2">4(b). Year of Passout</label>
+          <input type="number" id="passoutYear" name="passoutYear" class="form-control" placeholder="YYYY">
+        </div>
       </div>
 
       <!-- Step 5 -->
       <div class="step" id="step5">
         <label class="form-label">5. Do you agree with terms?</label><br>
         <div class="form-check">
-          <input type="radio" name="terms" value="Yes" class="form-check-input"> Yes
+          <input type="radio" name="terms" value="Yes" class="form-check-input" required> Yes
         </div>
         <div class="form-check">
           <input type="radio" name="terms" value="No" class="form-check-input"> No
+        </div>
+      </div>
+
+      <!-- Final Step -->
+      <div class="step" id="step6">
+        <div class="text-center">
+          <h3 class="text-success">🎉 Congratulations!</h3>
+          <p>You have successfully completed the form.</p>
         </div>
       </div>
     </div>
@@ -99,16 +119,41 @@ $(function(){
   let currentStep = 1;
   const totalSteps = 5;
 
-  function validateStep(step) {
-    switch(step){
-      case 1: return $("input[name='gender']:checked").length > 0;
-      case 2: return $("#city").val().trim() !== "";
-      case 3: return $("#income").val().trim() !== "" && Number($("#income").val()) > 0;
-      case 4: return $("#qualification").val().trim() !== "";
-      case 5: return $("input[name='terms']:checked").length > 0;
+  // jQuery Validation setup
+  const validator = $("#surveyForm").validate({
+    rules: {
+      gender: { required: true },
+      city: { required: true },
+      income: { required: true, number: true, min: 1 },
+      qualification: { required: true },
+      terms: { required: true },
+      college: {
+        required: function() {
+          return $("#qualification").val() === "Graduate";
+        }
+      },
+      passoutYear: {
+        required: function() {
+          return $("#qualification").val() === "Graduate";
+        },
+        digits: true,
+        minlength: 4,
+        maxlength: 4
+      }
+    },
+    messages: {
+      gender: "Please select gender",
+      city: "Please enter city",
+      income: "Enter valid income",
+      qualification: "Select your qualification",
+      terms: "Please agree to terms",
+      college: "Please enter college name",
+      passoutYear: "Enter valid year (YYYY)"
+    },
+    errorPlacement: function(error, element) {
+      error.insertAfter(element);
     }
-    return false;
-  }
+  });
 
   function updateProgress() {
     const percent = (currentStep / totalSteps) * 100;
@@ -117,37 +162,30 @@ $(function(){
   }
 
   function showStep(newStep, direction) {
-    const $current = $("#step" + currentStep);
-    const $next = $("#step" + newStep);
-
-    if(direction === "forward"){
-      $current.removeClass("active").addClass("slide-out-left");
-    } else {
-      $current.removeClass("active").addClass("slide-out-right");
-    }
-
-    setTimeout(() => {
-      $current.removeClass("slide-out-left slide-out-right");
-    }, 500);
-
-    $next.addClass("active");
+    $("#step" + currentStep).removeClass("active");
+    $("#step" + newStep).addClass("active");
     updateProgress();
   }
 
   $("#nextBtn").click(function(){
-    if(!validateStep(currentStep)){
-      alert("Please fill this question before moving ahead!");
-      return;
+    if(currentStep <= totalSteps && !$("#surveyForm").valid()){
+      return; // stop if validation fails
     }
+
     if(currentStep < totalSteps){
       let newStep = currentStep + 1;
       showStep(newStep, "forward");
       currentStep = newStep;
-    } else {
-      // Final submit
-      $("#surveyForm").submit();
-      return;
+    } else if(currentStep === totalSteps) {
+      // show Congratulations screen
+      $("#step" + currentStep).removeClass("active");
+      $("#step6").addClass("active");
+      $("#progressBar").css("width","100%").text("Completed");
+      $("#nextBtn, #prevBtn").hide();
+
+      console.log("Form Data:", $("#surveyForm").serializeArray());
     }
+
     $("#prevBtn").prop("disabled", currentStep === 1);
     $(this).text(currentStep === totalSteps ? "Submit" : "Next");
   });
@@ -162,15 +200,17 @@ $(function(){
     $("#nextBtn").text("Next");
   });
 
-  // Form submit handler
-  $("#surveyForm").on("submit", function(e){
-    e.preventDefault();
-    let formData = $(this).serializeArray();
-    console.log("Form Data:", formData);
-    alert("Form submitted successfully! Check console for data.");
+  // Graduate extra fields toggle
+  $("#qualification").on("change", function(){
+    if($(this).val() === "Graduate"){
+      $("#graduateFields").removeClass("hidden");
+    } else {
+      $("#graduateFields").addClass("hidden");
+      $("#college, #passoutYear").val("");
+    }
   });
 
-  // Dummy autocomplete cities
+  // Dummy autocomplete
   const cities = ["Mumbai","Delhi","Bangalore","Pune","Chennai","Kolkata"];
   $("#city").on("input", function(){
     let val = $(this).val().toLowerCase();

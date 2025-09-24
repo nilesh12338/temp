@@ -1,0 +1,203 @@
+Assessment – UI Technology & Project Related Topics
+Section A: Descriptive Questions (16 Qs)
+(Answer in 5–7 lines each, with code examples where required)
+How can you enforce input field validations like fixed length, decimal restrictions, and positive numbers using HTML attributes and class without javascript? Provide examples.
+Answer : -
+            Validations for inputs
+Fixed length → maxlength="10" in <input>.
+Decimal restriction → custom class like allow2DecimalOnly with JS validation.
+Positive numbers → custom class acceptPositiveOnly.
+Example:
+<input type="number" maxlength="10" class="form-control acceptPositiveOnly">
+===========================================================
+Define the concept of autosave functionality. How is it implemented in the project? Which JS Plugin is needed for autoSave implementation.
+Answer : - 
+Autosave functionality
+Saves form progress automatically at intervals.
+Uses IndexedDB to store structured data locally.
+Uses CryptoJS for AES encryption of saved data.
+Prevents data loss if page crashes or reloads.
+
+===========================================================
+Write the step-by-step process to integrate autosave.js and CryptoJS.js in a project and explain how form data is stored securely.
+Answer : - 
+Steps to integrate autosave
+Include scripts:
+<script src="../js/CryptoJS.js"></script>
+<script src="../js/saveForm/autosave.js"></script>
+Add hidden fields (user_id, proposal_id).
+Initialize in $(document).ready() → autoSaveImplementation($("#form_id"), "on");.
+On form submit → clearAutoSaveFormData(formObj);.
+===========================================================
+Explain how the popup functionality is used in the project to dynamically fill table data. How does it improve the user experience?
+Answer : -
+Popup functionality
+Opens modal window to edit or add data dynamically.
+Prevents full page reload.
+Improves UX by allowing inline table updates.
+Example: Clicking "Edit" opens a popup with form fields → user updates → changes reflected in table.
+===========================================================
+Describe how sprite icons are used in CSS for multiple buttons (Add, Delete, Print, etc.). Why is using sprites more efficient than separate images?
+Answer : - 
+Sprite icons
+Single image containing multiple icons.
+CSS background-position used to display required part.
+More efficient because it reduces multiple HTTP requests.
+Example:
+.icon-add { background: url(sprite.png) -10px -20px; }
+        ===========================================================
+  6. Write the basic syntax of a jQuery $.ajax() call. Explain the purpose of url, type,        data, success, and error options with an example. What is the difference between get  and post?:
+Answer : -
+AJAX syntax:
+$.ajax({
+  url: "/getData",
+  type: "POST",
+  data: { id: 1 },
+  success: function(response) { console.log("Success:", response); },
+  error: function(xhr) {	console.log("Error:", xhr.status);  }
+});
+url: endpoint
+type: request method
+data: parameters sent to server
+success: callback on success
+error: callback on failure
+Difference between $.get() and $.post():
+$.get() → sends data via URL query string, used for fetching data.
+$.post() → sends data in the request body, used for form submissions.
+===========================================================
+     7. Describe the steps to validate a form using jQuery Validation plugin. Suppose you have a registration form with fields Name, Email, and Password. Explain how you would implement validation rules for:
+Name: required, minimum 3 characters
+Email: required, must be valid email
+Password: required, minimum 6 characters
+Answer : -
+Registration form validation rules:
+$("#registerForm").validate({
+  rules: {
+        name: { required: true, minlength: 3 },
+	email: { required: true, email: true },
+	password: { required: true, minlength: 6 }
+  }
+});
+===========================================================
+8. What is the difference between client-side validation (jQuery) and server-side validation? Why do we need both?
+Answer : -
+Client-side vs Server-side validation:
+Client-side (jQuery): instant feedback, reduces server load.
+Server-side: ensures security, validates even if client-side JS is bypassed.
+===========================================================
+9. Explain the overall page structure used in the project UI. Describe the usage of header, footer, content sections. 
+Answer : -
+===========================================================
+10. Explain how the "Add Row Functionality" works in forms. How can we add and delete rows dynamically?
+Answer : -
+The Add Row Functionality allows users to replicate existing row elements vertically in a table. It is useful when multiple entries (e.g., loan details) are required. A user can click the “Add” button to insert a new row and the “Delete” button to remove unwanted rows.
+ The implementation typically uses a function like:
+AddNewRowItem(target, mandateField, nested, serURL, delFromDBLnk, delItemTypeInOf
+===========================================================
+11. What is the purpose of the textarea element and how does the charcount property extend its functionality?
+Answer : -
+The textarea element is used to capture user responses or justifications in multi-line text format. By default, it can store a limited number of characters. The charcount property specifies the maximum number of characters that can be entered.
+ For example:
+<textarea charcount="250"></textarea>
+This ensures that users cannot exceed the allowed character limit.
+===========================================================
+12. What is a BLOB in web applications and how is it used? Explain HTML Web Storage.
+Answer : -
+BLOB stands for Binary Large Object. It is used to store large data such as text, images, multimedia files, and binary content. Unlike textarea, which only holds limited text, a BLOB can handle large or unstructured data.
+For example, in a database, BLOBs can store image data uploaded by the user.
+HTML storage, also known as Web Storage, is an HTML5 feature that allows web applications to store data locally within a user's browser.
+There are two main types of Web Storage:
+localStorage:
+Stores data with no expiration date. The data persists even after the browser is closed and reopened.
+Data stored in localStorage remains available until it is explicitly cleared by the user or the application.
+It is accessible across all tabs and windows from the same origin (domain and protocol).
+Example of using localStorage:
+JavaScript
+    // Save data
+    localStorage.setItem("username", "JohnDoe");
+    // Get data
+    let user = localStorage.getItem("username");
+    console.log(user); // Output: JohnDoe
+    // Remove data
+    localStorage.removeItem("username");
+sessionStorage:
+Stores data for the duration of a single browser session.
+The data is deleted when the specific browser tab or window is closed.
+It is unique to each tab/window, meaning data stored in one tab's sessionStorage is not accessible from another tab, even if they are from the same origin.
+Example of using sessionStorage:
+JavaScript
+    // Save data
+    sessionStorage.setItem("sessionID", "abc123xyz");
+    // Get data
+    let id = sessionStorage.getItem("sessionID");
+    console.log(id); // Output: abc123xyz
+    // Remove data
+    sessionStorage.removeItem("sessionID");
+===========================================================
+13. How does the Select2 plugin enhance dropdown fields in jQuery?
+Answer : -
+The Select2 plugin enhances the standard <select> element by providing:
+Search functionality within dropdowns.
+
+
+Support for large datasets with pagination.
+
+
+Custom styling and theming options.
+
+
+Tagging support (users can enter new options).
+
+
+To use Select2:
+<link rel="stylesheet" href="css/select2.min.css">
+<script src="js/jquery/select2.min.js"></script>
+This improves the user experience significantly for long or complex dropdowns.
+===========================================================
+14. Describe the Bootstrap grid system. How does it help in creating responsive designs?
+Answer : -
+Bootstrap grid: 12-column system, responsive layouts.
+<div class=”row”>
+<div class=”col”></div>
+</div>
+ Bootstrap defines a set of predefined screen sizes (extra small, small, medium, large, extra large, extra extra large) known as breakpoints. These breakpoints trigger changes in the layout based on the device's screen width.
+===========================================================
+15. Explain the difference between 'id' and 'class' selectors in CSS and jQuery with examples?
+Answer 
+ID Selectors:
+Uniqueness: An id attribute in HTML must be unique within a single HTML document. This means only one element on a page can have a specific id value.
+Purpose: Primarily used to uniquely identify and target a single, specific element for styling or JavaScript manipulation.
+CSS Syntax: Selected using the hash symbol (#) followed by the ID name.
+Code
+   #myUniqueElement {color: blue;}
+jQuery Syntax: Selected using the hash symbol (#) followed by the ID name.
+JavaScript
+   $('#myUniqueElement').hide();
+Class Selectors:
+Reusability: A class attribute in HTML can be applied to multiple elements within a single HTML document. Multiple elements can share the same class name, and a single element can also have multiple class names.
+Purpose: Primarily used to group and apply the same styles or behaviors to multiple elements or to categorize elements.
+CSS Syntax: Selected using the period symbol (.) followed by the class name.
+Code
+   .commonStyle { font-weight: bold;}
+jQuery Syntax: Selected using the period symbol (.) followed by the class name.
+JavaScript
+   $('.commonStyle').addClass('highlight');
+In summary:
+Use ID when you need to target a single, unique element on a page.
+Use Class when we need to apply styles or behaviors to multiple elements or categorize them.
+ ===========================================================
+16. What is the difference between 'var', 'let', and 'const' in JavaScript? Give suitable examples.
+Answer :
+Use const for values that should not change throughout your code.
+Use let for variables whose values might change.
+Avoid using var in modern JavaScript development due to its less predictable scoping and hoisting behavior.
+The var, let, and const keywords in JavaScript are used to declare variables, but they differ significantly in their scope, hoisting behavior, and re-assignment rules.
+ var
+Scope: var is function-scoped. This means a variable declared with var is accessible throughout the entire function in which it's declared, regardless of block boundaries (like if statements or for loops). If declared outside any function, it becomes globally scoped.
+let
+Scope: let is block-scoped. This means a variable declared with let is only accessible within the block (e.g., if block, for loop, or any {}) in which it's declared.
+const
+Scope: const is also block-scoped, similar to let.
+========================================================== 
+ 
+

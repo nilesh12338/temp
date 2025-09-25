@@ -25,3 +25,7 @@ const sanitizeInputs = (...inputs) => {
 const cleanText = sanitizeInputs('<div>Hello</div><script>alert(1)</script>');
 // OR multiple
 const [clean1, clean2] = sanitizeInputs('<p>Hi</p>', '<script>malicious()</script>');
+
+
+let clean = DOMPurify.sanitize(dirty);
+clean = clean.replace(/href="([^"]*?)&amp;([^"]*?)"/g, 'href="$1&$2"');

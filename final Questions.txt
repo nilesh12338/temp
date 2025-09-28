@@ -1,0 +1,24 @@
+1. What is the difference between 'var', 'let', and 'const' in JavaScript? Give suitable examples.
+2. Define the concept of autosave functionality. How is it implemented in the project? Which JS Plugin is needed for autoSave implementation.
+3. Write the step-by-step process to integrate autosave.js and CryptoJS.js in a project and explain how form data is stored securely.
+4. Explain how the popup functionality is used in the project to dynamically fill table data. How does it improve the user experience?
+5. Describe how sprite icons are used in CSS for multiple buttons (Add, Delete, Print, etc.). Why is using sprites more efficient than separate images?
+6. Write the basic syntax of a jQuery $.ajax() call. Explain the purpose of url, type, data, success, and error options with an example. What is the difference between get and post?
+7. Describe the steps to validate a form using jQuery Validation plugin. Suppose you have a registration form with fields Name, Email, and Password. Explain how you would implement validation rules for:
+Name: required, minimum 3 characters
+Email: required, must be valid email
+Password: required, minimum 6 characters
+8. What is the difference between client-side validation (jQuery) and server-side validation? Why do we need both?
+9. Explain the overall page structure used in the project UI. Describe the usage of header, footer, content sections. 
+10. Explain how the "Add Row Functionality" works in forms. explain type of parameter use add row functionality. 
+11. What is the purpose of the textarea element and how does the charcount property extend its functionality?
+12. What is a BLOB in web applications and how is it used? Explain HTML Web Storage.
+13. How does the Select2 plugin enhance dropdown fields in jQuery?
+14. Describe the Bootstrap grid system. How does it help in creating responsive designs?
+15. Explain types of css selector and explain the difference between 'id' and 'class' selectors in CSS and jQuery with examples? 
+16. Explain the difference between inline, internal, and external CSS with examples.
+17. Explain the working of the JavaScript 'this' keyword in different contexts.
+18. What is event delegation in JavaScript? How is it useful?
+19. What is the difference between == and === in JavaScript? Give an example.
+20. What are the differences between relative, absolute, fixed, and sticky positioning in CSS?
+

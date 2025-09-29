@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>HTML to PDF Example</title>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+  <div id="content" style="padding:20px; border:1px solid #ccc; width:600px;">
+    <h2>jQuery Export HTML to PDF Example</h2>
+    <p>This is a demo of exporting HTML content to a PDF file using jQuery and html2pdf.js plugin.</p>
+    <ul>
+      <li>Point 1</li>
+      <li>Point 2</li>
+      <li>Point 3</li>
+    </ul>
+  </div>
+
+  <br>
+  <button id="download">Download as PDF</button>
+
+  <script>
+    $(document).ready(function () {
+      $("#download").click(function () {
+        var element = document.getElementById("content");
+
+        // PDF Options
+        var opt = {
+          margin:       0.5,
+          filename:     'exported-file.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2 },
+          jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Export
+        html2pdf().set(opt).from(element).save();
+      });
+    });
+  </script>
+</body>
+</html>

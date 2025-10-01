@@ -43,3 +43,22 @@
   </script>
 </body>
 </html>
+document.getElementById("download").addEventListener("click", async () => {
+      const { jsPDF } = window.jspdf;
+
+      const content = document.getElementById("content");
+
+      // Capture content as canvas
+      const canvas = await html2canvas(content);
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      // Calculate image dimensions to fit A4
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("demo.pdf");
+    });

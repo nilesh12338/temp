@@ -1,3 +1,18 @@
+
+Subject: Request for Issuance of New Photo ID Card
+
+Dear [Manager’s Name],
+
+I would like to inform you that I have misplaced my official Photo ID card. However, I still have my access card with me.
+
+I kindly request your assistance in initiating the process for creating/reissuing a new Photo ID card at the earliest. Please let me know if any formalities or documents are required from my side.
+
+Thank you for your support.
+
+Best regards,
+[Your Full Name]
+
+
 function disabledEachField($input) {
     if ($input.is(':input')) {
         if ($input.is(':text, textarea')) {

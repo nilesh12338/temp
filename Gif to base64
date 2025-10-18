@@ -1,0 +1,39 @@
+/** dataLoader gif in session START HERE **/
+const dataLoaderGifElement = document.querySelector("img.dataLoaderGif");
+const sessionKey_dataLoaderGif = "dataLoaderGifBase64";
+
+if (!dataLoaderGifElement) return;
+
+// Try to get Base64 GIF from session storage
+const cachedBase64_gif = sessionStorage.getItem(sessionKey_dataLoaderGif);
+
+if (!cachedBase64_gif) {
+  // Load image from server and convert to Base64 (keeping animation)
+  const gifUrl = $("img.dataLoaderGif").attr("userpic-src");
+
+  fetch(gifUrl)
+    .then(response => {
+      if (!response.ok) throw new Error("GIF fetch failed");
+      return response.blob();
+    })
+    .then(blob => {
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        const base64String = reader.result;
+        try {
+          sessionStorage.setItem(sessionKey_dataLoaderGif, base64String);
+          dataLoaderGifElement.src = base64String; // apply directly
+          console.log("GIF Base64 stored successfully");
+        } catch (e) {
+          console.warn("Session storage limit or conversion failed:", e);
+        }
+      };
+      reader.readAsDataURL(blob);
+    })
+    .catch(err => console.warn("GIF Base64 load failed:", err));
+} else {
+  // Load directly from session storage
+  dataLoaderGifElement.src = cachedBase64_gif;
+  console.log("Loaded GIF from session storage");
+}
+/** dataLoader gif in session END HERE **/

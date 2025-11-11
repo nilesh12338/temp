@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DataTable Toggle: Table & Card View</title>
+
+  <!-- Bootstrap & DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <style>
+    body {
+      background: #f8f9fa;
+    }
+
+    /* --- TABLE VIEW DEFAULT --- */
+    #cardTable.dataTable thead th {
+      background-color: #343a40;
+      color: white;
+      text-align: center;
+    }
+
+    /* --- CARD VIEW STYLE --- */
+    .card-view table.dataTable {
+      border-collapse: separate !important;
+      border-spacing: 0 1rem;
+    }
+
+    .card-view table.dataTable thead {
+      display: none; /* Hide header for card view */
+    }
+
+    .card-view table.dataTable tbody tr {
+      display: block;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.2s ease-in-out;
+      margin-bottom: 1rem;
+    }
+
+    .card-view table.dataTable tbody tr:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .card-view table.dataTable tbody td {
+      display: block;
+      border: none !important;
+      padding: 0.6rem 1.2rem !important;
+    }
+
+    .card-view table.dataTable tbody td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: #495057;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+  </style>
+</head>
+
+<body class="p-4">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4>DataTable Toggle View</h4>
+      <button id="toggleView" class="btn btn-primary btn-sm">Switch to Card View</button>
+    </div>
+
+    <table id="cardTable" class="display w-100">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Position</th>
+          <th>Office</th>
+          <th>Age</th>
+          <th>Start date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="Name">Tiger Nixon</td>
+          <td data-label="Position">System Architect</td>
+          <td data-label="Office">Edinburgh</td>
+          <td data-label="Age">61</td>
+          <td data-label="Start date">2011/04/25</td>
+        </tr>
+        <tr>
+          <td data-label="Name">Garrett Winters</td>
+          <td data-label="Position">Accountant</td>
+          <td data-label="Office">Tokyo</td>
+          <td data-label="Age">63</td>
+          <td data-label="Start date">2011/07/25</td>
+        </tr>
+        <tr>
+          <td data-label="Name">Ashton Cox</td>
+          <td data-label="Position">Junior Technical Author</td>
+          <td data-label="Office">San Francisco</td>
+          <td data-label="Age">66</td>
+          <td data-label="Start date">2009/01/12</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- JS Dependencies -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      const table = $('#cardTable').DataTable({
+        paging: false,
+        info: false,
+        searching: false,
+        ordering: false,
+        responsive: true
+      });
+
+      let isCardView = false;
+
+      $('#toggleView').on('click', function () {
+        isCardView = !isCardView;
+        const wrapper = $('#cardTable').closest('.dataTables_wrapper');
+
+        if (isCardView) {
+          wrapper.addClass('card-view');
+          $(this).text('Switch to Table View');
+        } else {
+          wrapper.removeClass('card-view');
+          $(this).text('Switch to Card View');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -134,6 +134,24 @@
         toast.show();
       }
     });
+
+
+
+[
+  {
+    "name": "Petstore API",
+    "api_url": "https://petstore.swagger.io/v2/swagger.json"
+  },
+  {
+    "name": "GitHub API",
+    "api_url": "https://api.apis.guru/v2/specs/github.com/1.1.4/swagger.json"
+  },
+  {
+    "name": "Slack API",
+    "api_url": "https://api.apis.guru/v2/specs/slack.com/1.0.0/swagger.json"
+  }
+]
+
   </script>
 </body>
 </html>

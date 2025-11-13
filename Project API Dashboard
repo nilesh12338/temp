@@ -15,46 +15,15 @@
   <style>
     body { background-color: #f8f9fa; padding: 2rem; }
     .card { margin-bottom: 1rem; }
-
-    /* Modern translucent loader overlay */
     .loader-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(8px);
-      z-index: 1055;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 1050;
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      text-align: center;
-    }
-
-    .dot-loader {
-      display: inline-block;
-      font-weight: 600;
-      font-size: 1.2rem;
-      color: #0d6efd;
-    }
-
-    .dot-loader span {
-      display: inline-block;
-      animation: blink 1.4s infinite both;
-    }
-
-    .dot-loader span:nth-child(2) { animation-delay: .2s; }
-    .dot-loader span:nth-child(3) { animation-delay: .4s; }
-
-    @keyframes blink {
-      0%, 80%, 100% { opacity: 0; }
-      40% { opacity: 1; }
-    }
-
-    .loader-text {
-      font-weight: 500;
-      font-size: 1.1rem;
-      color: #333;
-      margin-top: 10px;
     }
   </style>
 </head>
@@ -66,9 +35,7 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5>Select Projects</h5>
-          <button id="downloadBtn" class="btn btn-primary">
-            <i class="bi bi-download me-1"></i> Download Selected APIs
-          </button>
+          <button id="downloadBtn" class="btn btn-primary">Download Selected APIs</button>
         </div>
 
         <div id="projectList" class="list-group mb-3">
@@ -86,14 +53,13 @@
     </div>
   </div>
 
-  <!-- Modern Loader Overlay -->
+  <!-- Loader Overlay -->
   <div class="loader-overlay d-flex" id="loaderOverlay">
-    <div>
+    <div class="text-center">
       <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
         <span class="visually-hidden">Loading...</span>
       </div>
-      <div class="dot-loader">Downloading<span>.</span><span>.</span><span>.</span></div>
-      <div id="loaderText" class="loader-text mt-2">Please wait while we fetch APIs</div>
+      <div id="loaderText" class="fw-semibold text-dark">Preparing download...</div>
     </div>
   </div>
 
@@ -124,16 +90,16 @@
 
       btn.disabled = true;
       loader.style.display = 'flex';
-      loaderText.textContent = 'Preparing API downloads...';
+      loaderText.textContent = 'Fetching API definitions...';
 
       const zip = new JSZip();
+      let completed = 0;
       const total = selected.length;
 
-      for (let i = 0; i < total; i++) {
-        const item = selected[i];
+      for (const item of selected) {
         const apiUrl = item.value;
         const name = item.dataset.name;
-        loaderText.textContent = `Downloading ${name} (${i + 1} of ${total})...`;
+        loaderText.textContent = `Downloading ${name} (${++completed} of ${total})...`;
 
         try {
           const res = await fetch(apiUrl);

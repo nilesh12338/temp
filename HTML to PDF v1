@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML to PDF - Smart Centered Reduced Area</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+  body { font-family: Arial; background:#f8f9fa; margin:20px; }
+  #content {
+    background:#fff; padding:20px; border:1px solid #ccc;
+  }
+  img, table, tr, td, th, dd, footer, h2, h3, h4, h5, h6, li {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border:1px solid #444; padding:8px; }
+  footer { margin-top:20px; text-align:center; }
+  button { padding:10px 20px; background:#007bff; color:#fff; border:none; }
+</style>
+</head>
+
+<body>
+
+<h1>Smart HTML to PDF</h1>
+<button id="downloadPdf">Download PDF</button>
+
+<div id="content">
+  <h2>Dynamic Content Example</h2>
+  <p>This content will be vertically centered ONLY when it fits inside the reduced printable area.</p>
+
+  <h3>Sample Image</h3>
+  <img src="https://via.placeholder.com/600x200" style="width:100%;height:auto;">
+
+  <h3>Sample Table</h3>
+  <table>
+    <tr><th>A</th><th>B</th><th>C</th></tr>
+    <tr><td>1</td><td>2</td><td>3</td></tr>
+    <tr><td>4</td><td>5</td><td>6</td></tr>
+  </table>
+
+  <footer>Footer text stays intact.</footer>
+</div>
+
+<script>
+document.getElementById('downloadPdf').addEventListener('click', function () {
+
+  const element = document.getElementById('content');
+
+  // Convert 15mm to px (≈56.7px)
+  const cropPx = (15 / 25.4) * 96;
+
+  // Calculate letter page height in px (279.4mm)
+  const letterHeightPx = (279.4 / 25.4) * 96;
+  const reducedArea = letterHeightPx - (cropPx * 2);
+
+  // Measure content height
+  const contentHeight = element.scrollHeight;
+
+  const options = {
+    margin: [15, 15, 15, 15],
+    filename: "smart-centered.pdf",
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      scrollY: 0,
+
+      onclone: (clonedDoc) => {
+        const clonedContent = clonedDoc.querySelector("#content");
+
+        // If content fits → center vertically
+        if (contentHeight < reducedArea) {
+          clonedContent.style.minHeight = `${reducedArea}px`;
+          clonedContent.style.display = "flex";
+          clonedContent.style.flexDirection = "column";
+          clonedContent.style.justifyContent = "center";
+          clonedContent.style.marginTop = `${cropPx}px`;
+          clonedContent.style.marginBottom = `${cropPx}px`;
+        }
+
+        // For large content, only apply crop padding (no centering)
+        else {
+          clonedContent.style.marginTop = `${cropPx}px`;
+          clonedContent.style.marginBottom = `${cropPx}px`;
+        }
+      }
+    },
+    jsPDF: { unit: "mm", format: "letter", orientation: "portrait" },
+    pagebreak: { mode: ["avoid-all", "css", "legacy"] }
+  };
+
+  html2pdf().set(options).from(element).save();
+});
+</script>
+
+</body>
+</html>

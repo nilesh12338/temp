@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF Flipbook Viewer (Plug & Play) — Fixed CORS Handling</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- jQuery (required by Turn.js) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Turn.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4/turn.min.js"></script>
+
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <style>
+    :root{
+      --thumb-width:160px;
+      --viewer-bg:#f6f7fb;
+      --modal-bg:#fff;
+    }
+    [data-theme="dark"]{
+      --viewer-bg:#111317;
+      --modal-bg:#0f1417;
+      color: #ddd;
+    }
+
+    body{background:var(--viewer-bg);}
+
+    /* Modal layout */
+    .modal-fullscreen .modal-content{height:100vh; background:var(--modal-bg);} 
+    .viewer-body{height:calc(100vh - 72px); display:flex; overflow:hidden}
+
+    /* Thumbnails column */
+    #thumbContainer{width:var(--thumb-width); overflow:auto; padding:12px; border-right:1px solid rgba(0,0,0,0.08);} 
+    [data-theme="dark"] #thumbContainer{border-color:rgba(255,255,255,0.06)}
+    .thumb{margin-bottom:12px; cursor:pointer; border-radius:6px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,0.06);} 
+    .thumb canvas{display:block; width:100%; height:auto}
+    .thumb .tlabel{padding:6px; font-size:12px; text-align:center}
+
+    /* Flipbook area */
+    .flip-area{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px;}
+    #flipbook{width:100%; max-width:1100px; height:calc(100vh - 180px); margin:auto;}
+
+    .controls{display:flex; gap:8px; align-items:center}
+
+    /* Spinner */
+    .spinner-cover{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.25); z-index:2000}
+
+    /* Responsive adjustments */
+    @media (max-width:900px){
+      #thumbContainer{display:none}
+      #flipbook{max-width:95%; height:60vh}
+    }
+
+    /* Page canvas inside turn.js pages */
+    .page-canvas{display:block; width:100%; height:100%}
+
+    /* Selected thumbnail highlight */
+    .thumb.selected{outline:3px solid #0d6efd}
+    [data-theme="dark"] .thumb.selected{outline-color:#66b2ff}
+
+  </style>
+</head>
+<body>
+
+<div class="container py-4">
+  <h3>PDF Flipbook Viewer - Demo (CORS-handling improved)</h3>
+  <p>Click any filename to open in the full-screen flipbook modal. If a remote server blocks CORS, you'll get options (open in new tab or try an alternate proxy).</p>
+
+  <!-- Example list of PDFs (direct links, no forced proxy) -->
+  <ul>
+    <!-- These are direct URLs — no proxy prefixed. If loading fails due to CORS, the viewer will show alternatives. -->
+    <li><a href="#" class="open-pdf" data-file="https://arxiv.org/pdf/2203.13474.pdf" data-filename="arxiv-sample.pdf">Sample PDF (arXiv)</a></li>
+    <li><a href="#" class="open-pdf" data-file="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" data-filename="dummy.pdf">Dummy PDF (1 page)</a></li>
+    <li><a href="#" class="open-pdf" data-file="https://www.orimi.com/pdf-test.pdf" data-filename="orimi-sample.pdf">Orimi PDF (test)</a></li>
+  </ul>
+
+  <small class="text-muted">Tip: If a PDF doesn't open because of CORS, host it on the same domain or enable CORS on the server. The viewer will offer a fallback to open the raw URL in a new tab or try an alternate public proxy.</small>
+</div>
+
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="pdfModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header d-flex align-items-center">
+        <div class="me-3">
+          <button id="toggleTheme" class="btn btn-outline-secondary btn-sm" title="Toggle dark/light">🌓</button>
+        </div>
+        <h5 class="modal-title flex-grow-1" id="pdfTitle">PDF Viewer</h5>
+
+        <div class="controls me-3">
+          <button id="downloadPDF" class="btn btn-primary btn-sm" title="Download PDF">⬇ Download</button>
+          <div class="vr"></div>
+          <div class="btn-group" role="group">
+            <button id="zoomOut" class="btn btn-light btn-sm">-</button>
+            <button id="zoomReset" class="btn btn-light btn-sm">100%</button>
+            <button id="zoomIn" class="btn btn-light btn-sm">+</button>
+          </div>
+
+          <div class="btn-group ms-2" role="group">
+            <button id="singlePageBtn" class="btn btn-outline-secondary btn-sm">Single</button>
+            <button id="doublePageBtn" class="btn btn-outline-secondary btn-sm active">Double</button>
+          </div>
+
+        </div>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body viewer-body position-relative" id="viewerRoot">
+
+        <div id="thumbContainer" aria-label="thumbnails column"></div>
+
+        <div class="flip-area position-relative" style="flex:1;">
+
+          <!-- Spinner -->
+          <div id="spinner" class="spinner-cover" style="display:none">
+            <div class="text-center">
+              <div class="spinner-border text-light" role="status" style="width:4rem;height:4rem"></div>
+              <div class="mt-2 text-white" id="spinnerText">Loading PDF...</div>
+            </div>
+          </div>
+
+          <!-- Error / fallback area (shown when CORS or other error occurs) -->
+          <div id="fallbackArea" style="display:none; position:absolute; inset:0; z-index:2500; background:rgba(0,0,0,0.6); color:#fff; align-items:center; justify-content:center; display:flex">
+            <div class="p-4 text-center">
+              <h5 id="fallbackTitle">Can't load PDF due to CORS or network restrictions</h5>
+              <p id="fallbackMessage">The server refused the request (403) or blocked cross-origin requests.</p>
+              <div class="d-flex gap-2 justify-content-center mt-3">
+                <button id="openInNewTab" class="btn btn-light">Open raw URL in new tab</button>
+                <button id="tryProxy" class="btn btn-outline-light">Try alternate proxy</button>
+                <button id="copyUrl" class="btn btn-outline-light">Copy URL</button>
+                <button id="closeFallback" class="btn btn-secondary">Close</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Book container used by turn.js -->
+          <div id="flipbook" class="mx-auto"></div>
+
+          <!-- Pagination controls -->
+          <div class="d-flex justify-content-between align-items-center mt-3 px-3">
+            <div>
+              <button id="prevPage" class="btn btn-secondary btn-sm">⟨ Prev</button>
+              <button id="nextPage" class="btn btn-secondary btn-sm ms-2">Next ⟩</button>
+            </div>
+
+            <div class="text-muted" id="pageIndicator">Page 0 / 0</div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <small class="text-muted">Flipbook powered by PDF.js + Turn.js — lazy rendering enabled.</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// PDF.js worker config
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// State variables
+let pdfDoc = null;
+let totalPages = 0;
+let currentUrl = '';
+let originalUrl = ''; // keep original raw url for fallback
+let renderScale = 1.2;      // base scale for pages
+let thumbScale = 0.25;      // thumbnail scale
+let visibleRange = 3;       // how many pages to pre-render around current (lazy rendering)
+let useDouble = true;       // two-page view by default
+let themeDark = false;
+let modalInstance = null;
+let rendering = {};
+
+// Helper: show spinner
+function showSpinner(msg){
+  document.getElementById('spinnerText').textContent = msg || 'Loading...';
+  document.getElementById('spinner').style.display = 'flex';
+}
+function hideSpinner(){document.getElementById('spinner').style.display = 'none'}
+
+function showFallback(message){
+  hideSpinner();
+  document.getElementById('fallbackMessage').textContent = message || 'The server refused the request or blocked cross-origin requests.';
+  document.getElementById('fallbackArea').style.display = 'flex';
+}
+function hideFallback(){ document.getElementById('fallbackArea').style.display = 'none'; }
+
+// Open PDF links
+$(document).on('click', '.open-pdf', function(e){
+  e.preventDefault();
+  const url = $(this).data('file');
+  const filename = $(this).data('filename') || url.split('/').pop();
+  openPdfModal(url, filename);
+});
+
+function openPdfModal(url, filename){
+  originalUrl = url;
+  currentUrl = url; // will be the URL we ask PDF.js to load; may change to proxy on fallback
+  $('#pdfTitle').text(filename);
+  $('#downloadPDF').data('url', url).text('⬇ Download ' + filename);
+
+  // Reset containers
+  $('#thumbContainer').empty();
+  $('#flipbook').empty();
+  $('#pageIndicator').text('Page 0 / 0');
+  hideFallback();
+
+  showSpinner('Fetching PDF...');
+
+  // Show modal
+  modalInstance = new bootstrap.Modal(document.getElementById('pdfModal'), {keyboard:true});
+  modalInstance.show();
+
+  // Load PDF (attempt direct fetch first)
+  loadPDF(currentUrl).catch(async err => {
+    console.error('First load failed:', err);
+    // If it looks like a CORS / 403-style failure, present fallback options to the user
+    const message = (err && err.message) ? err.message : 'Failed to load PDF';
+    showFallback(message + '\n\nYou can: open the raw URL in a new tab, copy the URL, or try an alternate proxy.');
+  });
+}
+
+// Try loading a PDF using pdf.js. Rejects with the original error for handling by caller.
+async function loadPDF(url){
+  // clear any existing state
+  try{ pdfDoc = null; }catch(e){}
+  const loadingTask = pdfjsLib.getDocument({url, cMapUrl: null});
+  // pdf.js will throw UnexpectedResponseException if server returns non-200/206, including 403
+  pdfDoc = await loadingTask.promise;
+  totalPages = pdfDoc.numPages || 0;
+
+  // build UI only after successful load
+  buildThumbnails();
+  buildFlipbookShell();
+  hideSpinner();
+
+  // render first pages lazily
+  const startPage = 1;
+  goToPage(startPage);
+}
+
+function buildFlipbookShell(){
+  $('#flipbook').html('');
+
+  // Calculate dimensions based on available area
+  const containerWidth = Math.min(1100, window.innerWidth * 0.85);
+  const containerHeight = Math.max(400, window.innerHeight - 260);
+
+  // Each page element is a wrapper that will contain a canvas
+  for(let i=1;i<=totalPages;i++){
+    const pageDiv = $(`<div class='page page-${i}' style='background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center;'></div>`);
+    pageDiv.append(`<div class='page-placeholder text-muted' style='padding:10px'>Page ${i} (loading...)</div>`);
+    $('#flipbook').append(pageDiv);
+  }
+
+  // Initialize turn.js
+  const displayMode = useDouble ? 'double' : 'single';
+  $('#flipbook').turn({
+    width: containerWidth,
+    height: containerHeight,
+    autoCenter: true,
+    display: displayMode,
+    acceleration: true,
+    duration: 700,
+    gradients: true,
+    elevation: 50,
+    when: {
+      turned: function(e, page) {
+        updatePageIndicator(page);
+        lazyRenderAround(page);
+        highlightThumb(page);
+      }
+    }
+  });
+
+  // Add swipe handling for mobile
+  addSwipeHandlers();
+}
+
+function buildThumbnails(){
+  $('#thumbContainer').html('');
+  for(let i=1;i<=totalPages;i++){
+    const tdiv = $(`<div class='thumb' data-page='${i}' title='Page ${i}'></div>`);
+    tdiv.append(`<div class='thumb-canvas' style='width:100%;height:auto;display:block;padding:4px'></div>`);
+    tdiv.append(`<div class='tlabel'>${i}</div>`);
+    $('#thumbContainer').append(tdiv);
+
+    // click jumps to page
+    tdiv.on('click', function(){
+      const p = parseInt($(this).attr('data-page'));
+      $('#flipbook').turn('page', p);
+    });
+
+    // lazy-render thumbnail small immediately (cheap)
+    renderThumbnail(i).catch(console.error);
+  }
+}
+
+async function renderThumbnail(pageNum){
+  try{
+    const page = await pdfDoc.getPage(pageNum);
+    const viewport = page.getViewport({scale: thumbScale});
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({canvasContext:ctx, viewport}).promise;
+    $(`.thumb[data-page='${pageNum}'] .thumb-canvas`).html(canvas);
+  }catch(e){console.warn('thumb render failed', e)}
+}
+
+// Render a single page into the flipbook page container
+async function renderPageToContainer(pageNum){
+  if(rendering[pageNum]) return; // already rendering
+  rendering[pageNum] = true;
+  try{
+    const page = await pdfDoc.getPage(pageNum);
+    const pageDiv = $('.page-' + pageNum)[0];
+    if(!pageDiv) return;
+    const turnPageWidth = $('.page-' + pageNum).innerWidth() || 700;
+    const vp = page.getViewport({scale:1});
+    const scale = Math.min( (turnPageWidth-20) / vp.width,  (vp.height>0? (600 / vp.height) : 1)) * renderScale;
+    const viewport = page.getViewport({scale: scale});
+
+    const canvas = document.createElement('canvas');
+    canvas.className = 'page-canvas';
+    canvas.width = Math.round(viewport.width);
+    canvas.height = Math.round(viewport.height);
+    const ctx = canvas.getContext('2d');
+
+    await page.render({canvasContext: ctx, viewport}).promise;
+
+    // replace page placeholder with canvas
+    $('.page-' + pageNum).empty().append(canvas);
+  }catch(e){console.error('render page error', e)}
+  finally{ delete rendering[pageNum]; }
+}
+
+function lazyRenderAround(centerPage){
+  const pagesToRender = new Set();
+  const half = Math.floor(visibleRange/2);
+  for(let p = Math.max(1, centerPage-half); p<=Math.min(totalPages, centerPage+half); p++) pagesToRender.add(p);
+  pagesToRender.add(centerPage);
+
+  pagesToRender.forEach(p => { if(!$('.page-' + p).find('canvas').length) renderPageToContainer(p); });
+}
+
+function updatePageIndicator(page){
+  document.getElementById('pageIndicator').textContent = `Page ${page} / ${totalPages}`;
+}
+
+function goToPage(p){
+  if($('#flipbook').data('turn')){
+    $('#flipbook').turn('page', p);
+  } else {
+    lazyRenderAround(p);
+  }
+}
+
+function highlightThumb(page){
+  $('.thumb').removeClass('selected');
+  const p = page;
+  $(`.thumb[data-page='${p}']`).addClass('selected');
+}
+
+// Controls
+$('#nextPage').on('click', ()=> $('#flipbook').turn('next'));
+$('#prevPage').on('click', ()=> $('#flipbook').turn('previous'));
+
+$('#downloadPDF').on('click', function(){
+  const url = $(this).data('url');
+  window.open(url, '_blank');
+});
+
+// Zoom controls
+$('#zoomIn').on('click', ()=> { renderScale = Math.min(3, renderScale + 0.2); reRenderVisible(); });
+$('#zoomOut').on('click', ()=> { renderScale = Math.max(0.6, renderScale - 0.2); reRenderVisible(); });
+$('#zoomReset').on('click', ()=> { renderScale = 1.2; reRenderVisible(); });
+
+function reRenderVisible(){
+  $('.page').each(function(){
+    const cls = $(this).attr('class') || '';
+    const match = cls.match(/page-(\d+)/);
+    if(match){
+      const p = parseInt(match[1]);
+      if($(this).find('canvas').length){
+        $(this).empty().append(`<div class='page-placeholder text-muted' style='padding:10px'>Page ${p} (reloading...)</div>`);
+        renderPageToContainer(p).catch(console.error);
+      }
+    }
+  });
+}
+
+// Single/Double toggle
+$('#singlePageBtn').on('click', function(){
+  useDouble = false;
+  $('#singlePageBtn').addClass('active');
+  $('#doublePageBtn').removeClass('active');
+  rebuildFlipbookPreservePage();
+});
+$('#doublePageBtn').on('click', function(){
+  useDouble = true;
+  $('#doublePageBtn').addClass('active');
+  $('#singlePageBtn').removeClass('active');
+  rebuildFlipbookPreservePage();
+});
+
+function rebuildFlipbookPreservePage(){
+  const current = $('#flipbook').data('turn') ? $('#flipbook').turn('page') : 1;
+  try{ $('#flipbook').turn('destroy'); }catch(e){}
+  buildFlipbookShell();
+  setTimeout(()=>{ if($('#flipbook').data('turn')){ $('#flipbook').turn('page', Math.max(1, Math.min(totalPages, current))); lazyRenderAround(current); } }, 120);
+}
+
+// Simple swipe support
+function addSwipeHandlers(){
+  const el = document.getElementById('flipbook');
+  if(!el) return;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  el.addEventListener('touchstart', function(e){
+    if(e.touches && e.touches.length==1){
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+  }, {passive:true});
+  el.addEventListener('touchend', function(e){
+    if(e.changedTouches && e.changedTouches.length==1){
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)){
+        if(dx < 0) $('#flipbook').turn('next'); else $('#flipbook').turn('previous');
+      }
+    }
+  });
+}
+
+// Theme toggle
+$('#toggleTheme').on('click', function(){
+  themeDark = !themeDark;
+  if(themeDark){ document.documentElement.setAttribute('data-theme','dark'); }
+  else document.documentElement.removeAttribute('data-theme');
+});
+
+// Fallback buttons behavior
+$('#openInNewTab').on('click', function(){ window.open(originalUrl, '_blank'); });
+$('#copyUrl').on('click', function(){ navigator.clipboard && navigator.clipboard.writeText(originalUrl).then(()=> alert('URL copied')); });
+$('#closeFallback').on('click', function(){ hideFallback(); });
+
+// Try an alternate proxy (best-effort): uses AllOrigins. If this fails, user can still open raw URL.
+$('#tryProxy').on('click', function(){
+  hideFallback();
+  showSpinner('Trying alternate proxy...');
+  const proxied = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(originalUrl);
+  // Attempt load via proxy
+  loadPDF(proxied).catch(err => {
+    console.error('Proxy load failed', err);
+    showFallback('Alternate proxy failed to fetch the PDF. You can open raw URL in a new tab or host the file with CORS enabled.');
+  });
+});
+
+// When modal shown, adjust sizes
+document.getElementById('pdfModal').addEventListener('shown.bs.modal', function(){
+  setTimeout(()=>{ if($('#flipbook').data('turn')) $('#flipbook').turn('size', Math.min(1100, window.innerWidth*0.85), Math.max(400, window.innerHeight-260)); }, 120);
+});
+
+// When modal hidden, cleanup
+document.getElementById('pdfModal').addEventListener('hidden.bs.modal', function(){
+  try{ $('#flipbook').turn('destroy'); }catch(e){}
+  pdfDoc = null; rendering = {}; $('#flipbook').empty(); $('#thumbContainer').empty(); hideFallback(); hideSpinner();
+});
+
+// Periodic sync for indicator
+setInterval(()=>{
+  if($('#flipbook').data('turn')){
+    const page = $('#flipbook').turn('page');
+    updatePageIndicator(page);
+    highlightThumb(page);
+  }
+}, 800);
+
+</script>
+</body>
+</html>

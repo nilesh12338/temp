@@ -1,3 +1,75 @@
+const pdfModal = document.getElementById('pdfModal');
+
+pdfModal.addEventListener('hidden.bs.modal', () => {
+
+    /* -------------------------------
+       1. DESTROY TURN.JS SAFELY
+    --------------------------------*/
+    const $book = $('#book_flip');
+
+    if ($book.length && $book.data('turn')) {
+        try {
+            $book.turn('destroy');
+        } catch (err) {
+            console.warn('Turn.js destroy error:', err);
+        }
+    }
+
+    /* -------------------------------
+       2. CLEAR FLIPBOOK DOM
+    --------------------------------*/
+    $book
+        .empty()
+        .removeAttr('style class');
+
+    /* -------------------------------
+       3. DESTROY PDF.js VIEWER
+    --------------------------------*/
+    if (window.PDFViewerApplication) {
+        try {
+            PDFViewerApplication.close();
+        } catch (err) {
+            console.warn('PDF.js close error:', err);
+        }
+    }
+
+    /* -------------------------------
+       4. RESET PDF VIEWER CONTAINER
+    --------------------------------*/
+    const viewerContainer = document.getElementById('viewerContainer');
+    if (viewerContainer) {
+        viewerContainer.innerHTML = '';
+    }
+
+    /* -------------------------------
+       5. REMOVE WINDOW EVENTS (LEAK FIX)
+    --------------------------------*/
+    $(window).off('resize.turn');
+    $(document).off('keydown.turn');
+
+    /* -------------------------------
+       6. OPTIONAL: RESET STATE FLAGS
+    --------------------------------*/
+    window.currentPDF = null;
+    window.isFlipbookInitialized = false;
+
+    console.log('✅ PDF Modal cleanup completed');
+});
+
+
+
+
+
+
+pdfModal.addEventListener('shown.bs.modal', () => {
+    if (!window.isFlipbookInitialized) {
+        initFlipbook();  // your init logic
+        window.isFlipbookInitialized = true;
+    }
+});
+
+
+
 
 Subject: Request for Issuance of New Photo ID Card
 

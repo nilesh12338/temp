@@ -1,3 +1,134 @@
+let isFlipbookInitialized = false;
+let currentPDF = null;
+-------
+const pdfModal = document.getElementById('pdfModal');
+
+pdfModal.addEventListener('shown.bs.modal', () => {
+
+    if (isFlipbookInitialized) return;
+
+    // 1️⃣ Load PDF pages into DOM (your logic here)
+    loadPDFPages(currentPDF);
+
+    // 2️⃣ Init Turn.js ONLY when modal is visible
+    setTimeout(() => {
+        initFlipbook();
+        isFlipbookInitialized = true;
+    }, 300);
+});
+--------
+
+pdfModal.addEventListener('hidden.bs.modal', () => {
+
+    /* =====================================
+       1️⃣ DESTROY PDF.js FIRST
+    ======================================*/
+    if (window.PDFViewerApplication) {
+        try {
+            if (PDFViewerApplication.pdfLoadingTask) {
+                PDFViewerApplication.pdfLoadingTask.destroy();
+            }
+
+            PDFViewerApplication.close();
+
+            if (PDFViewerApplication.pdfViewer) {
+                PDFViewerApplication.pdfViewer.cleanup();
+            }
+
+            if (PDFViewerApplication.pdfLinkService) {
+                PDFViewerApplication.pdfLinkService.setDocument(null);
+            }
+
+        } catch (e) {
+            console.warn('PDF.js cleanup skipped:', e);
+        }
+    }
+
+    document.getElementById('viewerContainer').innerHTML = '';
+    window.PDFViewerApplication = null;
+
+
+    /* =====================================
+       2️⃣ DESTROY TURN.JS SAFELY
+    ======================================*/
+    const $book = $('#book_flip');
+
+    // stop late events
+    $(window).off('resize.turn');
+    $(document).off('keydown.turn');
+
+    if ($book.length && $book.data('turn')) {
+        try {
+            $book.turn('disable', true);
+            $book.turn('stop');
+            $book.turn('destroy');
+        } catch (e) {
+            console.warn('Turn cleanup skipped:', e);
+        }
+    }
+
+    // replace DOM (critical)
+    $book.replaceWith('<div id="book_flip"></div>');
+
+
+    /* =====================================
+       3️⃣ RESET STATE
+    ======================================*/
+    isFlipbookInitialized = false;
+    currentPDF = null;
+
+    console.log('✅ PDF + Turn destroyed completely');
+});
+------------
+function initFlipbook() {
+    $('#book_flip').turn({
+        width: 900,
+        height: 600,
+        autoCenter: true,
+        display: 'double'
+    });
+}
+
+=============
+
+function destroyPDFJS() {
+
+    if (!window.PDFViewerApplication) return;
+
+    try {
+        // 1️⃣ Stop rendering & workers
+        if (PDFViewerApplication.pdfLoadingTask) {
+            PDFViewerApplication.pdfLoadingTask.destroy();
+        }
+
+        // 2️⃣ Close document
+        PDFViewerApplication.close();
+
+        // 3️⃣ Cleanup viewer
+        if (PDFViewerApplication.pdfViewer) {
+            PDFViewerApplication.pdfViewer.cleanup();
+        }
+
+        // 4️⃣ Cleanup link service
+        if (PDFViewerApplication.pdfLinkService) {
+            PDFViewerApplication.pdfLinkService.setDocument(null);
+        }
+
+    } catch (e) {
+        console.warn('PDF.js destroy skipped:', e);
+    }
+
+    // 5️⃣ Remove DOM content
+    const viewer = document.getElementById('viewerContainer');
+    if (viewer) viewer.innerHTML = '';
+
+    // 6️⃣ Reset global refs (IMPORTANT)
+    window.PDFViewerApplication = null;
+}
+
+
+
+
 const pdfModal = document.getElementById('pdfModal');
 
 pdfModal.addEventListener('hidden.bs.modal', () => {

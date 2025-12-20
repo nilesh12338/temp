@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PDF Flipbook Modal Demo</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+  body { padding: 20px; }
+  #flipbook div { background: #fff; }
+  #thumbs canvas {
+    cursor: pointer;
+    margin-bottom: 8px;
+    border: 1px solid #ccc;
+  }
+</style>
+</head>
+<body>
+
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pdfModal">
+  Open PDF
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="pdfModal" tabindex="-1">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">PDF Flipbook</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body d-flex p-0">
+
+        <!-- Thumbnails -->
+        <div id="thumbs" class="p-2 border-end" style="width:120px; overflow-y:auto;"></div>
+
+        <!-- Flipbook -->
+        <div class="flex-fill d-flex justify-content-center align-items-center">
+          <div id="flipbook"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS Libraries -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+
+let pdfDoc = null;
+let flipbookInitialized = false;
+const pdfURL = "sample.pdf"; // 👈 your server PDF
+
+document.getElementById("pdfModal").addEventListener("shown.bs.modal", loadPDF);
+
+function loadPDF() {
+  pdfjsLib.getDocument(pdfURL).promise.then(pdf => {
+    pdfDoc = pdf;
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      renderPage(pageNum);
+    }
+  });
+}
+
+function renderPage(pageNum) {
+  pdfDoc.getPage(pageNum).then(page => {
+    const viewport = page.getViewport({ scale: 1.5 });
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+
+      // Add to flipbook
+      const pageDiv = document.createElement("div");
+      pageDiv.appendChild(canvas);
+      document.getElementById("flipbook").appendChild(pageDiv);
+
+      // Thumbnail
+      const thumb = document.createElement("canvas");
+      thumb.width = 80;
+      thumb.height = 110;
+      thumb.getContext("2d").drawImage(canvas, 0, 0, 80, 110);
+
+      thumb.onclick = () => {
+        if ($("#flipbook").data("turn")) {
+          $("#flipbook").turn("page", pageNum);
+        }
+      };
+      document.getElementById("thumbs").appendChild(thumb);
+
+      // Init turn.js when last page loaded
+      if (!flipbookInitialized && pageNum === pdfDoc.numPages) {
+        $("#flipbook").turn({
+          width: viewport.width * 2,
+          height: viewport.height,
+          autoCenter: true,
+          acceleration: true
+        });
+        flipbookInitialized = true;
+      }
+    });
+  });
+}
+
+/* CLEANUP – VERY IMPORTANT */
+document.getElementById("pdfModal").addEventListener("hidden.bs.modal", () => {
+  if ($("#flipbook").data("turn")) {
+    $("#flipbook").turn("destroy");
+  }
+  $("#flipbook").empty();
+  $("#thumbs").empty();
+  pdfDoc = null;
+  flipbookInitialized = false;
+});
+</script>
+
+</body>
+</html>

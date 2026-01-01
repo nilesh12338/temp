@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>PDF Modal Viewer – Single Page</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+  body { padding: 20px; }
+  .pdf-link { cursor: pointer; color: #0d6efd; }
+</style>
+</head>
+
+<body>
+
+<h4>PDF List</h4>
+<ul>
+  <li><span class="pdf-link" onclick="openPdfModal('pdfs/sample1.pdf')">Sample PDF 1</span></li>
+  <li><span class="pdf-link" onclick="openPdfModal('pdfs/sample2.pdf')">Sample PDF 2</span></li>
+  <li><span class="pdf-link" onclick="openPdfModal('pdfs/sample3.pdf')">Sample PDF 3</span></li>
+</ul>
+
+<!-- PDF Modal -->
+<div class="modal fade" id="pdfModal" tabindex="-1">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">PDF Viewer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <!-- viewer.html injected here -->
+        <div id="pdfViewerWrapper"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* ===============================
+   GLOBAL STATE
+================================ */
+let viewerLoaded = false;
+let viewerReady = false;
+let pendingPdfUrl = null;
+let openInProgress = false;
+
+/* ===============================
+   LOAD viewer.html ONLY ONCE
+================================ */
+async function loadViewerOnce() {
+  if (viewerLoaded) return;
+
+  const res = await fetch('viewer.html');
+  document.getElementById('pdfViewerWrapper').innerHTML = await res.text();
+  viewerLoaded = true;
+}
+
+/* ===============================
+   WAIT FOR viewer.js READY
+================================ */
+document.addEventListener('webviewerloaded', () => {
+  viewerReady = true;
+
+  if (pendingPdfUrl) {
+    openPdfInternal(pendingPdfUrl);
+    pendingPdfUrl = null;
+  }
+});
+
+/* ===============================
+   CORE PDF OPEN LOGIC
+================================ */
+async function openPdfInternal(pdfUrl) {
+  const app = window.PDFViewerApplication;
+  if (!app) return;
+
+  if (app.pdfLoadingTask) {
+    await app.close();
+  }
+
+  await app.open(pdfUrl);
+}
+
+/* ===============================
+   PUBLIC FUNCTION (CLICK HANDLER)
+================================ */
+async function openPdfModal(pdfUrl) {
+  if (openInProgress) return;
+  openInProgress = true;
+
+  const modalEl = document.getElementById('pdfModal');
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+  modal.show();
+
+  await loadViewerOnce();
+
+  if (!viewerReady) {
+    pendingPdfUrl = pdfUrl;
+    openInProgress = false;
+    return;
+  }
+
+  await openPdfInternal(pdfUrl);
+  openInProgress = false;
+}
+
+/* ===============================
+   MODAL CLOSE CLEANUP
+================================ */
+document.getElementById('pdfModal')
+  .addEventListener('hidden.bs.modal', () => {
+    if (window.PDFViewerApplication?.pdfLoadingTask) {
+      PDFViewerApplication.close();
+    }
+  });
+</script>
+
+</body>
+</html>

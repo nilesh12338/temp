@@ -1,0 +1,17 @@
+Dear ISD Team,
+
+This is with reference to your observation regarding the usage of the `Math.random()` function in the PDF plugin.
+
+We would like to clarify that the `Math.random()` function is defined internally within the PDF viewer plugin library and is part of its standard frontend implementation. This function is not being used by our application to generate any OTPs, authentication tokens, security credentials, or encryption-related values.
+
+The PDF plugin is implemented strictly on the frontend to fetch and display PDF files in a popup/modal window for user viewing purposes only. There is no backend interaction, data modification, database update, or security-sensitive operation associated with this implementation.
+
+The plugin is used solely for rendering PDF documents in the browser, and the referenced function is part of the library’s internal logic.
+
+For your reference, please find the attached screenshot of the implementation.
+
+Kindly let us know if any further clarification is required.
+
+Thanks & Regards,
+Nilesh Rahate
+

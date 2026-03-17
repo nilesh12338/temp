@@ -937,4 +937,62 @@ Kindly review and let us know the modules and pages where development work is cu
 
 Best regards,
 [Your Name]
+================
+Hi [Manager Name],
+
+We have analyzed the reported increase in page size (up to ~3 MB) and the high number of requests (>50 on page load). Below is a summary of our findings along with proposed optimizations:
+
+**1. Bootstrap Dependency**
+
+* Our application uses Bootstrap, which requires common JS and CSS files across the application.
+* Additionally, Bootstrap Icons are included, contributing to overall page size.
+* These are essential dependencies, but we will evaluate opportunities for optimization (e.g., minified builds, selective imports).
+
+**2. Image Reloading with OSAP Token**
+
+* Some `.png` and `.svg` files are being reloaded from the server with an OSAP token appended to the URL.
+* Although this is intended as a one-time call, the server replaces the original request, effectively doubling the calls.
+* We will work on optimizing this behavior to avoid redundant requests.
+
+**3. Custom Icons in Top Menu**
+
+* The current implementation uses custom image-based icons, resulting in multiple HTTP requests.
+* **Suggestion:** Replace these with Bootstrap Icons where feasible to eliminate image calls and reduce request count.
+
+**4. Header Features (Calendar & Customer Search)**
+
+* These components currently use individual icon assets.
+* **Improvement Plan:** Use sprite images or icon fonts to consolidate multiple image requests into a single request, reducing backend calls.
+
+**5. CSS Optimization**
+
+* We have identified and removed unnecessary spaces, blank lines, and formatting issues in CSS files.
+* This has helped reduce file size and will continue to be applied across all stylesheets.
+
+**6. Duplicate JS Loading**
+
+* On some pages, `common.js` and `csrf.js` are being loaded more than once.
+* This redundancy will be addressed to prevent duplicate network calls and improve performance.
+
+**7. Page Title Icons**
+
+* Custom icons used in page titles are contributing to additional size.
+* We will coordinate with the design team to optimize or replace these with lighter alternatives.
+
+---
+
+**Next Steps / Callouts:**
+
+* Evaluate replacing custom icons with Bootstrap Icons wherever possible.
+* Fix OSAP token-related duplicate image requests.
+* Implement sprite-based icon handling for header components.
+* Remove duplicate JS file inclusions.
+* Continue CSS and asset optimization with support from the design team.
+
+These improvements should significantly reduce both page size and the number of network requests, leading to better performance.
+
+Please let us know if you would like a before/after comparison report once changes are implemented.
+
+Thanks & Regards,
+[Your Name]
 

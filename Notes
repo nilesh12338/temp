@@ -1009,3 +1009,21 @@ Please let me know once the branch is created or if any additional details are r
 
 Thanks & Regards,
 Nilesh
+
+
+
+
+
+
+=========================
+$(document).on('click', 'a[href*=".do"]:not(.no-loader)', function () {
+    const href = $(this).attr('href');
+
+    if (/\.do(\?|$)/.test(href) &&
+        !/^javascript:/i.test(href) &&
+        !/\(.*\)/.test(href)) {
+
+        showDataLoader();
+    }
+});
+========================

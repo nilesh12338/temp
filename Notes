@@ -1027,3 +1027,20 @@ $(document).on('click', 'a[href*=".do"]:not(.no-loader)', function () {
     }
 });
 ========================
+Dear [Manager's Name],
+
+I would like to request leave for one day on 2nd May as I have a scheduled doctor’s appointment for a routine checkup.
+
+Kindly approve my leave for the mentioned date.
+
+Please let me know if any further information is required.
+
+Thank you for your consideration.
+
+Best regards,
+[Your Name]
+
+==========
+
+
+

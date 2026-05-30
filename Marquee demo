@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Marquee Alternative</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Marquee Demo</title>
 
 <style>
 body{
@@ -13,23 +14,17 @@ body{
 .marquee-container{
     width:100%;
     height:40px;
-    overflow:hidden;
     border:1px solid #ccc;
+    overflow:hidden;
     position:relative;
-    white-space:nowrap;
 }
 
 .marquee-text{
     position:absolute;
-    left:0;
     top:50%;
-    transform:translateY(-50%);
     white-space:nowrap;
+    transform:translateY(-50%);
     will-change:transform;
-}
-
-.marquee-container:hover .marquee-text{
-    animation-play-state:paused;
 }
 
 @keyframes marqueeScroll{
@@ -44,65 +39,76 @@ body{
 </head>
 <body>
 
-<h3>Dynamic Marquee</h3>
+<h3>Marquee Alternative</h3>
 
-<div class="marquee-container" id="marquee1">
+<div class="marquee-container" id="marqueeContainer">
     <div class="marquee-text" id="marqueeText">
-        This is a very long dynamic text loaded from API which can change at any time and should always move at the same speed.
+        This is a dynamic marquee text. Hover over me to pause scrolling.
     </div>
 </div>
 
 <br>
 
-<button onclick="changeText()">
-    Change Text
-</button>
+<button id="changeTextBtn">Change Text</button>
 
 <script>
 
+const container = document.getElementById("marqueeContainer");
+const text = document.getElementById("marqueeText");
+
 function startMarquee() {
 
-    const container = document.getElementById('marquee1');
-    const text = document.getElementById('marqueeText');
-
-    const containerWidth = container.offsetWidth;
+    const containerWidth = container.clientWidth;
     const textWidth = text.scrollWidth;
 
     const distance = containerWidth + textWidth;
 
-    // Fixed speed (pixels per second)
+    // pixels per second
     const speed = 100;
 
     const duration = distance / speed;
 
-    text.style.setProperty('--start', containerWidth + 'px');
-    text.style.setProperty('--end', -textWidth + 'px');
+    text.style.setProperty("--start", containerWidth + "px");
+    text.style.setProperty("--end", (-textWidth) + "px");
 
-    text.style.animation = 'none';
-    text.offsetHeight; // reflow
+    text.style.animation = "none";
+
+    // force reflow
+    void text.offsetWidth;
 
     text.style.animation =
         `marqueeScroll ${duration}s linear infinite`;
+
+    text.style.animationPlayState = "running";
 }
 
-function changeText(){
+// Pause on hover
+container.addEventListener("mouseenter", function(){
+    text.style.animationPlayState = "paused";
+});
+
+// Resume on mouse leave
+container.addEventListener("mouseleave", function(){
+    text.style.animationPlayState = "running";
+});
+
+// Dynamic text examples
+document.getElementById("changeTextBtn").addEventListener("click", function(){
 
     const samples = [
-        'Short Text',
-        'This is medium length scrolling text example',
-        'This is a very very very long dynamic string coming from server API and it should scroll with exactly same speed as shorter strings.'
+        "Short Text",
+        "This is a medium length scrolling text.",
+        "This is a very long dynamic string loaded from server API and the scrolling speed remains exactly the same regardless of how many characters are present in the text."
     ];
 
-    const text = document.getElementById('marqueeText');
-
-    text.innerHTML =
-        samples[Math.floor(Math.random()*samples.length)];
+    text.textContent =
+        samples[Math.floor(Math.random() * samples.length)];
 
     startMarquee();
-}
+});
 
-window.addEventListener('load', startMarquee);
-window.addEventListener('resize', startMarquee);
+window.addEventListener("load", startMarquee);
+window.addEventListener("resize", startMarquee);
 
 </script>
 

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Marquee Alternative</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    padding:20px;
+}
+
+.marquee-container{
+    width:100%;
+    height:40px;
+    overflow:hidden;
+    border:1px solid #ccc;
+    position:relative;
+    white-space:nowrap;
+}
+
+.marquee-text{
+    position:absolute;
+    left:0;
+    top:50%;
+    transform:translateY(-50%);
+    white-space:nowrap;
+    will-change:transform;
+}
+
+.marquee-container:hover .marquee-text{
+    animation-play-state:paused;
+}
+
+@keyframes marqueeScroll{
+    from{
+        transform:translate(var(--start), -50%);
+    }
+    to{
+        transform:translate(var(--end), -50%);
+    }
+}
+</style>
+</head>
+<body>
+
+<h3>Dynamic Marquee</h3>
+
+<div class="marquee-container" id="marquee1">
+    <div class="marquee-text" id="marqueeText">
+        This is a very long dynamic text loaded from API which can change at any time and should always move at the same speed.
+    </div>
+</div>
+
+<br>
+
+<button onclick="changeText()">
+    Change Text
+</button>
+
+<script>
+
+function startMarquee() {
+
+    const container = document.getElementById('marquee1');
+    const text = document.getElementById('marqueeText');
+
+    const containerWidth = container.offsetWidth;
+    const textWidth = text.scrollWidth;
+
+    const distance = containerWidth + textWidth;
+
+    // Fixed speed (pixels per second)
+    const speed = 100;
+
+    const duration = distance / speed;
+
+    text.style.setProperty('--start', containerWidth + 'px');
+    text.style.setProperty('--end', -textWidth + 'px');
+
+    text.style.animation = 'none';
+    text.offsetHeight; // reflow
+
+    text.style.animation =
+        `marqueeScroll ${duration}s linear infinite`;
+}
+
+function changeText(){
+
+    const samples = [
+        'Short Text',
+        'This is medium length scrolling text example',
+        'This is a very very very long dynamic string coming from server API and it should scroll with exactly same speed as shorter strings.'
+    ];
+
+    const text = document.getElementById('marqueeText');
+
+    text.innerHTML =
+        samples[Math.floor(Math.random()*samples.length)];
+
+    startMarquee();
+}
+
+window.addEventListener('load', startMarquee);
+window.addEventListener('resize', startMarquee);
+
+</script>
+
+</body>
+</html>

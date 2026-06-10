@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>State Connector Demo</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+body{
+    padding:20px;
+}
+
+.map-wrapper{
+    position:relative;
+    height:550px;
+    border:1px solid #ddd;
+    overflow:visible;
+}
+
+#indiaMap{
+    width:100%;
+    height:100%;
+}
+
+.state{
+    fill:#bfbfbf;
+    stroke:#fff;
+    stroke-width:2;
+    cursor:pointer;
+}
+
+.active-state{
+    fill:#f6b3d2;
+}
+
+#lineLayer{
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    overflow:visible;
+    pointer-events:none;
+}
+
+.scheme-card{
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:15px;
+    margin-bottom:15px;
+    background:#fff;
+}
+
+.connector{
+    stroke:#8a8a8a;
+    stroke-width:2;
+    fill:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <button class="nav-link active"
+                data-bs-toggle="tab"
+                data-bs-target="#tab1">
+            State Schemes
+        </button>
+    </li>
+
+    <li class="nav-item">
+        <button class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#tab2">
+            Other Tab
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content mt-3">
+
+    <div class="tab-pane fade show active"
+         id="tab1">
+
+        <div class="row">
+
+            <div class="col-md-5">
+
+                <div class="map-wrapper">
+
+                    <!-- MAP -->
+                    <svg id="indiaMap"
+                         viewBox="0 0 400 500">
+
+                        <!-- Demo states -->
+
+                        <path id="MP"
+                              class="state"
+                              d="M120 180 L190 180 L190 250 L120 250 Z"/>
+
+                        <path id="TS"
+                              class="state"
+                              d="M190 260 L240 260 L240 310 L190 310 Z"/>
+
+                        <path id="AP"
+                              class="state"
+                              d="M220 320 L300 320 L300 400 L220 400 Z"/>
+
+                        <path id="OR"
+                              class="state"
+                              d="M260 200 L320 200 L320 260 L260 260 Z"/>
+
+                    </svg>
+
+                    <!-- LINE SVG -->
+                    <svg id="lineLayer">
+
+                        <defs>
+
+                            <marker id="arrowEnd"
+                                    markerWidth="10"
+                                    markerHeight="10"
+                                    refX="8"
+                                    refY="3"
+                                    orient="auto">
+
+                                <path d="M0,0 L0,6 L9,3 z"
+                                      fill="#8a8a8a"/>
+
+                            </marker>
+
+                        </defs>
+
+                    </svg>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-7">
+
+                <div id="cards"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="tab-pane fade"
+         id="tab2">
+
+        Other Content
+
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+const schemeData = [
+
+{
+    stateCode:"TS",
+    stateName:"Telangana",
+    schemeName:"Rajiv Yuva Vikasam"
+},
+
+{
+    stateCode:"AP",
+    stateName:"Andhra Pradesh",
+    schemeName:"Jagananna Thodu"
+},
+
+{
+    stateCode:"OR",
+    stateName:"Odisha",
+    schemeName:"SWAYAM"
+},
+
+{
+    stateCode:"MP",
+    stateName:"Madhya Pradesh",
+    schemeName:"Street Vendor Loan"
+}
+
+];
+
+$(function(){
+
+    renderCards();
+
+    setTimeout(drawAllLines,200);
+
+});
+
+$('button[data-bs-toggle="tab"]').on(
+'shown.bs.tab',
+function(){
+
+    setTimeout(drawAllLines,100);
+
+});
+
+$(window).on('resize',function(){
+
+    drawAllLines();
+
+});
+
+function renderCards(){
+
+    let html='';
+
+    schemeData.forEach(function(item){
+
+        html += `
+        <div class="scheme-card"
+             id="card_${item.stateCode}">
+
+            <small>${item.stateName}</small>
+
+            <h5>${item.schemeName}</h5>
+
+        </div>
+        `;
+
+    });
+
+    $('#cards').html(html);
+
+}
+
+function drawAllLines(){
+
+    $('.state').removeClass('active-state');
+
+    $('#lineLayer .connector').remove();
+    $('#lineLayer circle').remove();
+
+    schemeData.forEach(function(item){
+
+        $('#' + item.stateCode)
+            .addClass('active-state');
+
+        createLine(
+            item.stateCode,
+            'card_' + item.stateCode
+        );
+
+    });
+
+}
+
+function createLine(stateId, cardId){
+
+    let state =
+        document.getElementById(stateId);
+
+    let card =
+        document.getElementById(cardId);
+
+    if(!state || !card)
+        return;
+
+    let stateBox =
+        state.getBoundingClientRect();
+
+    let cardBox =
+        card.getBoundingClientRect();
+
+    let mapBox =
+        document.querySelector('.map-wrapper')
+        .getBoundingClientRect();
+
+    /* center of state */
+
+    let x1 =
+        stateBox.left +
+        stateBox.width/2 -
+        mapBox.left;
+
+    let y1 =
+        stateBox.top +
+        stateBox.height/2 -
+        mapBox.top;
+
+    /* card left edge */
+
+    let x2 =
+        mapBox.width + 20;
+
+    let y2 =
+        cardBox.top +
+        cardBox.height/2 -
+        mapBox.top;
+
+    let svg =
+        document.getElementById('lineLayer');
+
+    let poly =
+        document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "polyline"
+        );
+
+    poly.setAttribute(
+        "points",
+        `${x1},${y1}
+         ${x1+50},${y1}
+         ${x1+50},${y2}
+         ${x2},${y2}`
+    );
+
+    poly.setAttribute(
+        "class",
+        "connector"
+    );
+
+    poly.setAttribute(
+        "marker-end",
+        "url(#arrowEnd)"
+    );
+
+    svg.appendChild(poly);
+
+    /* start dot */
+
+    let circle =
+        document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+        );
+
+    circle.setAttribute("cx",x1);
+    circle.setAttribute("cy",y1);
+    circle.setAttribute("r",4);
+    circle.setAttribute("fill","#8a8a8a");
+
+    svg.appendChild(circle);
+
+}
+
+</script>
+
+</body>
+</html>

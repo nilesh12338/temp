@@ -354,3 +354,90 @@ function createLine(stateId, cardId){
 
 </body>
 </html>
+function createLine(stateId, cardId){
+
+    const state = document.getElementById(stateId);
+    const card  = document.getElementById(cardId);
+
+    if(!state || !card) return;
+
+    const stateBox = state.getBoundingClientRect();
+    const cardBox  = card.getBoundingClientRect();
+    const mapBox   = document.querySelector('.map-wrapper')
+                            .getBoundingClientRect();
+
+    /* State center */
+
+    const x1 =
+        stateBox.left +
+        (stateBox.width / 2) -
+        mapBox.left;
+
+    const y1 =
+        stateBox.top +
+        (stateBox.height / 2) -
+        mapBox.top;
+
+    /* Connect to left-middle of card */
+
+    const x2 =
+        cardBox.left -
+        mapBox.left;
+
+    const y2 =
+        cardBox.top +
+        (cardBox.height / 2) -
+        mapBox.top;
+
+    /*
+       Bend only near card
+       ↓
+       ---------------------┐
+                            │
+                            ├─►
+    */
+
+    const bendX = x2 - 25;
+
+    const svg = document.getElementById('lineLayer');
+
+    const poly =
+        document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "polyline"
+        );
+
+    poly.setAttribute(
+        "points",
+        [
+            `${x1},${y1}`,
+            `${bendX},${y1}`,
+            `${bendX},${y2}`,
+            `${x2},${y2}`
+        ].join(' ')
+    );
+
+    poly.setAttribute("class", "connector");
+
+    poly.setAttribute(
+        "marker-end",
+        "url(#arrowEnd)"
+    );
+
+    svg.appendChild(poly);
+
+    /* Dot at state center */
+
+    const circle =
+        document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+        );
+
+    circle.setAttribute("cx", x1);
+    circle.setAttribute("cy", y1);
+    circle.setAttribute("r", 4);
+    circle.setAttribute("fill", "#5aa9c8");
+
+    svg.appendChild(circle);
+}

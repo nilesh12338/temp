@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Digital Products</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+<style>
+
+body{
+    background:#f5f7fb;
+    font-family:'Segoe UI',sans-serif;
+}
+
+.page-title{
+    font-size:28px;
+    font-weight:600;
+}
+
+.page-subtitle{
+    color:#6c757d;
+}
+
+.product-card{
+    background:#fff;
+    border-radius:18px;
+    border:none;
+    overflow:hidden;
+    height:100%;
+    transition:.3s;
+    box-shadow:0 4px 12px rgba(0,0,0,.06);
+    position:relative;
+}
+
+.product-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.product-card::before{
+    content:'';
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:5px;
+}
+
+.border-purple::before{
+    background:#7c4dff;
+}
+
+.border-blue::before{
+    background:#2196f3;
+}
+
+.border-orange::before{
+    background:#ff9800;
+}
+
+.border-green::before{
+    background:#4caf50;
+}
+
+.border-cyan::before{
+    background:#00bcd4;
+}
+
+.border-pink::before{
+    background:#e91e63;
+}
+
+.border-violet::before{
+    background:#8b5cf6;
+}
+
+.border-indigo::before{
+    background:#2563eb;
+}
+
+.product-icon{
+    width:85px;
+    height:85px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+    font-size:34px;
+}
+
+.bg-purple{
+    background:#f1e8ff;
+    color:#7c4dff;
+}
+
+.bg-blue{
+    background:#e7f2ff;
+    color:#2196f3;
+}
+
+.bg-orange{
+    background:#fff3e0;
+    color:#ff9800;
+}
+
+.bg-green{
+    background:#e8f5e9;
+    color:#4caf50;
+}
+
+.bg-cyan{
+    background:#e0f7fa;
+    color:#00bcd4;
+}
+
+.bg-pink{
+    background:#fce4ec;
+    color:#e91e63;
+}
+
+.bg-violet{
+    background:#ede9fe;
+    color:#8b5cf6;
+}
+
+.bg-indigo{
+    background:#e8f0ff;
+    color:#2563eb;
+}
+
+.product-title{
+    font-weight:700;
+    font-size:24px;
+}
+
+.product-desc{
+    color:#6c757d;
+    min-height:48px;
+}
+
+.open-link{
+    text-decoration:none;
+    font-weight:600;
+}
+
+.side-card{
+    border:none;
+    border-radius:18px;
+    box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.status-chip{
+    padding:8px 18px;
+    border-radius:50px;
+    font-size:14px;
+    font-weight:500;
+    display:inline-block;
+    margin:4px;
+}
+
+.pending{
+    background:#dff5e1;
+    color:#198754;
+}
+
+.progress-chip{
+    background:#e7f0ff;
+    color:#0d6efd;
+}
+
+.account{
+    background:#f3e8ff;
+    color:#7c3aed;
+}
+
+.rejected{
+    background:#f3f4f6;
+}
+
+.cancelled{
+    background:#ffe6e6;
+    color:#dc3545;
+}
+
+.expired{
+    background:#fff0f0;
+    color:#dc3545;
+}
+
+.validation{
+    background:#fff3cd;
+    color:#b7791f;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container-fluid py-4">
+
+<div class="row">
+
+<div class="col-lg-9">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+<div>
+<h2 class="page-title mb-1">
+Digital Products
+</h2>
+
+<p class="page-subtitle mb-0">
+Select a product to initialize lead management
+</p>
+</div>
+
+<select class="form-select w-auto">
+<option>CLP</option>
+<option>BRE</option>
+<option>ERFS</option>
+</select>
+
+</div>
+
+<div class="row g-4">
+
+<!-- BRE -->
+<div class="col-md-6 col-xl-3">
+<div class="card product-card border-purple">
+<div class="card-body text-center p-4">
+
+<div class="product-icon bg-purple mb-4">
+<i class="fas fa-sitemap"></i>
+</div>
+
+<div class="product-title mb-2">BRE</div>
+
+<div class="product-desc">
+Business Rule Engine
+</div>
+
+<a href="#" class="open-link text-primary">
+Open Product
+<i class="fas fa-arrow-right ms-1"></i>
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- CLP -->
+<div class="col-md-6 col-xl-3">
+<div class="card product-card border-blue">
+<div class="card-body text-center p-4">
+
+<div class="product-icon bg-blue mb-4">
+<i class="fas fa-hand-holding-dollar"></i>
+</div>
+
+<div class="product-title mb-2">CLP</div>
+
+<div class="product-desc">
+Consumer Loan Processing
+</div>
+
+<a href="#" class="open-link text-primary">
+Open Product
+<i class="fas fa-arrow-right ms-1"></i>
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- ERFS -->
+<div class="col-md-6 col-xl-3">
+<div class="card product-card border-orange">
+<div class="card-body text-center p-4">
+
+<div class="product-icon bg-orange mb-4">
+<i class="fas fa-laptop-code"></i>
+</div>
+
+<div class="product-title mb-2">ERFS</div>
+
+<div class="product-desc">
+Electronic Request Workflow
+</div>
+
+<a href="#" class="open-link text-warning">
+Open Product
+<i class="fas fa-arrow-right ms-1"></i>
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- JanSamarth -->
+<div class="col-md-6 col-xl-3">
+<div class="card product-card border-green">
+<div class="card-body text-center p-4">
+
+<div class="product-icon bg-green mb-4">
+<i class="fas fa-building-columns"></i>
+</div>
+
+<div class="product-title mb-2">
+JanSamarth
+</div>
+
+<div class="product-desc">
+Government Schemes Portal
+</div>
+
+<a href="#" class="open-link text-success">
+Open Product
+<i class="fas fa-arrow-right ms-1"></i>
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- LLMS -->
+<div class="col-md-6 col-xl-3">
+<div class="card product-card border-cyan">
+<div class="card-body text-center p-4">
+
+<div class="product-icon bg-cyan mb-4">
+<i class="fas fa-file-contract"></i>
+</div>
+
+<div class="product-title mb-2">
+LLMS BRE 2.0
+</div>
+
+<div class="product-desc">
+Loan Lifecycle Management
+</div>
+
+<a href="#" class="open-link text-info">
+Open Product
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- PABL -->
+<div class="col-md-6 col-xl-3">
+<div class="card product-card border-pink">
+<div class="card-body text-center p-4">
+
+<div class="product-icon bg-pink mb-4">
+<i class="fas fa-briefcase"></i>
+</div>
+
+<div class="product-title mb-2">
+PABL
+</div>
+
+<div class="product-desc">
+Personal & Business Loans
+</div>
+
+<a href="#" class="open-link text-danger">
+Open Product
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- PAsBL -->
+<div class="col-md-6 col-xl-3">
+<div class="card product-card border-violet">
+<div class="card-body text-center p-4">
+
+<div class="product-icon bg-violet mb-4">
+<i class="fas fa-chart-line"></i>
+</div>
+
+<div class="product-title mb-2">
+PAsBL
+</div>
+
+<div class="product-desc">
+Priority Sector Business Loan
+</div>
+
+<a href="#" class="open-link">
+Open Product
+</a>
+
+</div>
+</div>
+</div>
+
+<!-- SBOSS -->
+<div class="col-md-6 col-xl-3">
+<div class="card product-card border-indigo">
+<div class="card-body text-center p-4">
+
+<div class="product-icon bg-indigo mb-4">
+<i class="fas fa-display"></i>
+</div>
+
+<div class="product-title mb-2">
+SBOSS
+</div>
+
+<div class="product-desc">
+Business Operations Support
+</div>
+
+<a href="#" class="open-link">
+Open Product
+</a>
+
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- Right Panel -->
+
+<div class="col-lg-3">
+
+<div class="card side-card mb-4">
+<div class="card-body">
+
+<h5 class="mb-3">
+<i class="fas fa-file-lines me-2"></i>
+CLP Lead Processing
+</h5>
+
+<input type="text"
+class="form-control mb-3"
+placeholder="Enter Lead ID">
+
+<button class="btn btn-primary w-100">
+Check Status
+</button>
+
+</div>
+</div>
+
+<div class="card side-card mb-4">
+<div class="card-body">
+
+<h5 class="mb-3">
+<i class="fas fa-search me-2"></i>
+Lead Search
+</h5>
+
+<input type="text"
+class="form-control mb-3"
+placeholder="Search Lead">
+
+<button class="btn btn-outline-primary w-100">
+Search
+</button>
+
+</div>
+</div>
+
+<div class="card side-card">
+<div class="card-body">
+
+<h5>Select Status</h5>
+
+<div class="mt-3">
+
+<span class="status-chip pending">Pending</span>
+
+<span class="status-chip progress-chip">
+In Progress
+</span>
+
+<span class="status-chip account">
+Account Opened
+</span>
+
+<span class="status-chip rejected">
+Rejected
+</span>
+
+<span class="status-chip cancelled">
+Cancelled
+</span>
+
+<span class="status-chip expired">
+Expired
+</span>
+
+<span class="status-chip validation">
+Validation Rejections
+</span>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,83 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiple Timer Demo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bootstrap Timer Popup Demo</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        .timer-box {
-            text-align: center;
-            padding: 20px;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            background: #f8f9fa;
-            margin-bottom: 15px;
-        }
+<style>
+.timer-box{
+    border:1px solid #dee2e6;
+    border-radius:10px;
+    padding:15px;
+    margin-bottom:15px;
+    text-align:center;
+}
 
-        .timer-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #0d6efd;
-        }
+.timer{
+    font-size:28px;
+    font-weight:bold;
+    color:#0d6efd;
+}
 
-        .completed {
-            color: #198754;
-        }
-    </style>
+.completed{
+    color:green;
+}
+</style>
 </head>
 <body>
 
 <div class="container mt-5">
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#timerModal">
-        Open Popup
+    <button class="btn btn-primary" id="btnOpenPopup">
+        Open Timer Popup
     </button>
 </div>
 
-<!-- Modal -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+const popupHtml = `
 <div class="modal fade" id="timerModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
             <div class="modal-header">
                 <h5 class="modal-title">Independent Timers</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
             </div>
 
             <div class="modal-body">
 
                 <div class="timer-box">
                     <h6>1 Minute Timer</h6>
-                    <div id="oneMinuteDisplay" class="timer-value">
+
+                    <div id="oneMinuteDisplay"
+                         class="timer">
                         01:00
                     </div>
 
                     <button class="btn btn-success btn-sm mt-2"
-                            onclick="startOneMinuteTimer()">
+                            id="btnStart1">
                         Start
                     </button>
 
                     <button class="btn btn-danger btn-sm mt-2"
-                            onclick="clearOneMinuteTimer()">
+                            id="btnStop1">
                         Stop
                     </button>
                 </div>
 
                 <div class="timer-box">
                     <h6>10 Minute Timer</h6>
-                    <div id="tenMinuteDisplay" class="timer-value">
+
+                    <div id="tenMinuteDisplay"
+                         class="timer">
                         10:00
                     </div>
 
                     <button class="btn btn-success btn-sm mt-2"
-                            onclick="startTenMinuteTimer()">
+                            id="btnStart10">
                         Start
                     </button>
 
                     <button class="btn btn-danger btn-sm mt-2"
-                            onclick="clearTenMinuteTimer()">
+                            id="btnStop10">
                         Stop
                     </button>
                 </div>
@@ -87,145 +98,155 @@
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-
-let oneMinuteInterval = null;
-let tenMinuteInterval = null;
-
-let oneMinuteRemaining = 60;
-let tenMinuteRemaining = 600;
+`;
 
 function formatTime(seconds) {
-    let mins = Math.floor(seconds / 60);
-    let secs = seconds % 60;
 
-    return String(mins).padStart(2, '0') +
-        ":" +
-        String(secs).padStart(2, '0');
-}
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
 
-function updateDisplays() {
-    document.getElementById("oneMinuteDisplay").innerHTML =
-        formatTime(oneMinuteRemaining);
-
-    document.getElementById("tenMinuteDisplay").innerHTML =
-        formatTime(tenMinuteRemaining);
+    return String(mins).padStart(2, '0')
+           + ':'
+           + String(secs).padStart(2, '0');
 }
 
 /* ----------------------------
    1 Minute Timer
------------------------------*/
+---------------------------- */
+
 function startOneMinuteTimer() {
+
+    const $modal = $('#timerModal');
 
     clearOneMinuteTimer();
 
-    oneMinuteRemaining = 60;
-    updateDisplays();
+    const expiry = Date.now() + (60 * 1000);
 
-    oneMinuteInterval = setInterval(() => {
+    $modal.data('oneMinuteExpiry', expiry);
 
-        oneMinuteRemaining--;
+    const intervalId = setInterval(function() {
 
-        updateDisplays();
+        const remaining = Math.max(
+            0,
+            Math.floor(
+                ($modal.data('oneMinuteExpiry') - Date.now()) / 1000
+            )
+        );
 
-        if (oneMinuteRemaining <= 0) {
+        $('#oneMinuteDisplay').text(formatTime(remaining));
+
+        if (remaining <= 0) {
 
             clearOneMinuteTimer();
 
-            document.getElementById("oneMinuteDisplay")
-                .innerHTML = "Completed";
-
-            document.getElementById("oneMinuteDisplay")
-                .classList.add("completed");
+            $('#oneMinuteDisplay')
+                .text('Completed')
+                .addClass('completed');
         }
 
     }, 1000);
+
+    $modal.data('oneMinuteInterval', intervalId);
 }
 
 function clearOneMinuteTimer() {
 
-    if (oneMinuteInterval) {
-        clearInterval(oneMinuteInterval);
-        oneMinuteInterval = null;
+    const $modal = $('#timerModal');
+
+    const intervalId = $modal.data('oneMinuteInterval');
+
+    if (intervalId) {
+        clearInterval(intervalId);
+        $modal.removeData('oneMinuteInterval');
     }
 }
 
 /* ----------------------------
    10 Minute Timer
------------------------------*/
+---------------------------- */
+
 function startTenMinuteTimer() {
+
+    const $modal = $('#timerModal');
 
     clearTenMinuteTimer();
 
-    tenMinuteRemaining = 600;
-    updateDisplays();
+    const expiry = Date.now() + (10 * 60 * 1000);
 
-    tenMinuteInterval = setInterval(() => {
+    $modal.data('tenMinuteExpiry', expiry);
 
-        tenMinuteRemaining--;
+    const intervalId = setInterval(function() {
 
-        updateDisplays();
+        const remaining = Math.max(
+            0,
+            Math.floor(
+                ($modal.data('tenMinuteExpiry') - Date.now()) / 1000
+            )
+        );
 
-        if (tenMinuteRemaining <= 0) {
+        $('#tenMinuteDisplay').text(formatTime(remaining));
+
+        if (remaining <= 0) {
 
             clearTenMinuteTimer();
 
-            document.getElementById("tenMinuteDisplay")
-                .innerHTML = "Completed";
-
-            document.getElementById("tenMinuteDisplay")
-                .classList.add("completed");
+            $('#tenMinuteDisplay')
+                .text('Completed')
+                .addClass('completed');
         }
 
     }, 1000);
+
+    $modal.data('tenMinuteInterval', intervalId);
+
 }
 
 function clearTenMinuteTimer() {
 
-    if (tenMinuteInterval) {
-        clearInterval(tenMinuteInterval);
-        tenMinuteInterval = null;
+    const $modal = $('#timerModal');
+
+    const intervalId = $modal.data('tenMinuteInterval');
+
+    if (intervalId) {
+        clearInterval(intervalId);
+        $modal.removeData('tenMinuteInterval');
     }
 }
 
 /* ----------------------------
-   Modal Events
------------------------------*/
-const modal = document.getElementById('timerModal');
+   Open Popup
+---------------------------- */
 
-modal.addEventListener('shown.bs.modal', function () {
+$('#btnOpenPopup').on('click', function() {
 
-    document.getElementById("oneMinuteDisplay")
-        .classList.remove("completed");
+    if ($('#timerModal').length === 0) {
 
-    document.getElementById("tenMinuteDisplay")
-        .classList.remove("completed");
+        $('body').append(popupHtml);
+
+        $(document).on('click', '#btnStart1', startOneMinuteTimer);
+        $(document).on('click', '#btnStop1', clearOneMinuteTimer);
+
+        $(document).on('click', '#btnStart10', startTenMinuteTimer);
+        $(document).on('click', '#btnStop10', clearTenMinuteTimer);
+
+        $(document).on('hidden.bs.modal', '#timerModal', function() {
+
+            clearOneMinuteTimer();
+            clearTenMinuteTimer();
+
+            $(this).remove();
+        });
+    }
+
+    const modal = new bootstrap.Modal(
+        document.getElementById('timerModal')
+    );
+
+    modal.show();
 
     startOneMinuteTimer();
     startTenMinuteTimer();
 });
-
-modal.addEventListener('hidden.bs.modal', function () {
-
-    clearOneMinuteTimer();
-    clearTenMinuteTimer();
-
-    oneMinuteRemaining = 60;
-    tenMinuteRemaining = 600;
-
-    updateDisplays();
-
-    document.getElementById("oneMinuteDisplay")
-        .classList.remove("completed");
-
-    document.getElementById("tenMinuteDisplay")
-        .classList.remove("completed");
-});
-
-updateDisplays();
 
 </script>
 

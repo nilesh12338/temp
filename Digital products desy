@@ -11,7 +11,532 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
+/* =====================================================
+   Digital Products Dashboard
+   Bootstrap 5.3
+======================================================*/
 
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:'Segoe UI',sans-serif;
+
+    background:#f4f7fc;
+
+    overflow-x:hidden;
+
+    position:relative;
+}
+
+
+/*============================
+ Background
+=============================*/
+
+.bg-pattern{
+
+    position:fixed;
+
+    inset:0;
+
+    background:
+
+    radial-gradient(circle at top left,#dfe9ff 0%,transparent 28%),
+
+    radial-gradient(circle at bottom right,#d6fff5 0%,transparent 25%),
+
+    radial-gradient(circle at center,#ffffff 35%,#eef4ff 100%);
+
+    z-index:-1;
+
+}
+
+
+/*============================
+ Header
+=============================*/
+
+.dashboard-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.dashboard-header h2{
+
+    font-weight:700;
+
+    color:#183153;
+
+}
+
+.dashboard-header p{
+
+    color:#7c8899;
+
+}
+
+
+/*============================
+ Hero
+=============================*/
+
+.hero-section{
+
+    background:#fff;
+
+    border-radius:25px;
+
+    padding:55px;
+
+    box-shadow:
+
+    0 15px 40px rgba(0,0,0,.06);
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+.hero-section::after{
+
+    content:"";
+
+    width:260px;
+
+    height:260px;
+
+    background:#4e73ff15;
+
+    position:absolute;
+
+    right:-70px;
+
+    top:-70px;
+
+    border-radius:50%;
+
+}
+
+.hero-badge{
+
+    display:inline-block;
+
+    background:#eaf2ff;
+
+    color:#356dff;
+
+    padding:8px 20px;
+
+    border-radius:40px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+}
+
+.hero-section h1{
+
+    margin-top:20px;
+
+    font-size:48px;
+
+    font-weight:700;
+
+    color:#17304d;
+
+    line-height:1.2;
+
+}
+
+.hero-section p{
+
+    margin-top:20px;
+
+    color:#6f7f92;
+
+    font-size:18px;
+
+}
+
+.hero-svg{
+
+    width:100%;
+
+    max-width:360px;
+
+}
+
+
+/*============================
+ Product Card
+=============================*/
+
+.product-card{
+
+    background:rgba(255,255,255,.82);
+
+    backdrop-filter:blur(14px);
+
+    border-radius:24px;
+
+    padding:30px;
+
+    text-align:center;
+
+    position:relative;
+
+    overflow:hidden;
+
+    transition:.35s;
+
+    border:1px solid rgba(255,255,255,.5);
+
+    box-shadow:
+
+    0 10px 30px rgba(15,23,42,.08);
+
+    height:100%;
+
+}
+
+.product-card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:
+
+    0 25px 50px rgba(0,0,0,.12);
+
+}
+
+
+/*============================
+ Top Border
+=============================*/
+
+.product-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:0;
+
+    width:100%;
+
+    height:6px;
+
+}
+
+
+/*============================
+ Card Colors
+=============================*/
+
+.purple::before{
+background:#7C4DFF;
+}
+
+.blue::before{
+background:#2196F3;
+}
+
+.orange::before{
+background:#FB8C00;
+}
+
+.green::before{
+background:#43A047;
+}
+
+.cyan::before{
+background:#00BCD4;
+}
+
+.pink::before{
+background:#E91E63;
+}
+
+.violet::before{
+background:#8E24AA;
+}
+
+.indigo::before{
+background:#3F51B5;
+}
+
+
+/*============================
+ Number Badge
+=============================*/
+
+.card-number{
+
+    position:absolute;
+
+    right:18px;
+
+    top:18px;
+
+    width:40px;
+
+    height:40px;
+
+    background:#eef3ff;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    color:#5674ff;
+
+    font-weight:700;
+
+}
+
+
+/*============================
+ SVG Circle
+=============================*/
+
+.svg-box{
+
+    width:120px;
+
+    height:120px;
+
+    margin:auto;
+
+    border-radius:50%;
+
+    background:linear-gradient(135deg,#ffffff,#edf4ff);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    box-shadow:
+
+    inset 0 0 25px rgba(0,0,0,.04),
+
+    0 12px 30px rgba(0,0,0,.08);
+
+    transition:.4s;
+
+}
+
+.svg-box img{
+
+    width:78px;
+
+    transition:.4s;
+
+}
+
+.product-card:hover .svg-box{
+
+    transform:rotate(6deg) scale(1.08);
+
+}
+
+.product-card:hover .svg-box img{
+
+    transform:scale(1.1);
+
+}
+
+
+/*============================
+ Text
+=============================*/
+
+.product-card h4{
+
+    margin-top:28px;
+
+    font-weight:700;
+
+    color:#183153;
+
+}
+
+.product-card p{
+
+    color:#73839c;
+
+    font-size:15px;
+
+    min-height:46px;
+
+}
+
+
+/*============================
+ Button
+=============================*/
+
+.btn-open{
+
+    border:none;
+
+    padding:12px 28px;
+
+    border-radius:40px;
+
+    color:#fff;
+
+    background:linear-gradient(90deg,#356dff,#5f8dff);
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.btn-open:hover{
+
+    transform:scale(1.05);
+
+    box-shadow:
+
+    0 8px 20px rgba(53,109,255,.35);
+
+}
+
+
+/*============================
+ Floating Animation
+=============================*/
+
+.product-card{
+
+    animation:floatCard 5s ease-in-out infinite;
+
+}
+
+@keyframes floatCard{
+
+0%{
+
+transform:translateY(0);
+
+}
+
+50%{
+
+transform:translateY(-5px);
+
+}
+
+100%{
+
+transform:translateY(0);
+
+}
+
+}
+
+
+/*============================
+ Hover Glow
+=============================*/
+
+.product-card:hover{
+
+    border-color:#4c7cff55;
+
+}
+
+
+/*============================
+ Responsive
+=============================*/
+
+@media(max-width:992px){
+
+.hero-section{
+
+padding:35px;
+
+}
+
+.hero-section h1{
+
+font-size:34px;
+
+}
+
+.dashboard-header{
+
+display:block;
+
+text-align:center;
+
+}
+
+.dashboard-header button{
+
+margin-top:15px;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.hero-section{
+
+text-align:center;
+
+}
+
+.hero-section h1{
+
+font-size:30px;
+
+}
+
+.hero-svg{
+
+margin-top:25px;
+
+}
+
+.product-card{
+
+padding:25px;
+
+}
+
+.svg-box{
+
+width:100px;
+
+height:100px;
+
+}
+
+}
 </head>
 
 <body>

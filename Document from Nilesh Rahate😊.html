@@ -1,3 +1,20 @@
+start: function (event, ui) {
+
+    const rect = dialog[0].getBoundingClientRect();
+
+    dialog.css({
+        position: "fixed",
+        margin: 0,
+        top: rect.top + "px",
+        left: rect.left + "px",
+        transform: "none"
+    });
+
+    // Tell jQuery UI where the element now starts
+    ui.position.left = rect.left;
+    ui.position.top = rect.top;
+}
+
 <!DOCTYPE html>
 <html lang="en">
 

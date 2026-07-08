@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Bootstrap Dynamic AJAX Popup Demo</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f7fb;
+            padding: 40px;
+        }
+
+        /* Modal */
+
+#dynamicModal .modal-dialog{
+
+    width:fit-content;
+    max-width:95vw;
+    margin:auto;
+}
+
+        #dynamicModal .modal-content {
+            max-height: 90vh;
+        }
+
+        #dynamicModal .modal-body {
+            max-height: calc(90vh - 120px);
+        }
+
+        /* Loading */
+
+        .loader {
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 180px;
+        }
+
+        /* Demo card */
+
+        .demo-card {
+
+            width: 280px;
+        }
+
+        /* Demo table */
+
+        .demo-table {
+
+            min-width: 900px;
+        }
+
+        /* Animation */
+
+        .modal-content {
+
+            animation: zoomIn .25s;
+        }
+
+        @keyframes zoomIn {
+
+            from {
+
+                transform: scale(.9);
+                opacity: 0;
+
+            }
+
+            to {
+
+                transform: scale(1);
+                opacity: 1;
+
+            }
+
+        }
+    </style>
+<style>
+    .modal-header{
+
+cursor:move;
+user-select:none;
+
+}
+
+.ui-resizable-handle{
+
+background:#0d6efd;
+
+opacity:.35;
+
+}
+
+.ui-resizable-se{
+
+width:14px;
+height:14px;
+
+}
+
+.fullscreen-dialog{
+
+width:100vw!important;
+
+max-width:none!important;
+
+height:100vh!important;
+
+margin:0!important;
+
+}
+
+.fullscreen-dialog .modal-content{
+
+height:100vh;
+
+border-radius:0;
+
+}
+
+.fullscreen-dialog .modal-body{
+
+max-height:calc(100vh - 58px);
+
+}
+    </style>
+    <style>
+.table-container {
+    max-height: 60vh;
+    overflow: auto;
+}
+
+.table-container thead th {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #212529;
+    color: #fff;
+}
+        </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2 class="mb-4">
+            Bootstrap 5 Dynamic AJAX Modal
+        </h2>
+
+        <div class="mb-4">
+
+            <button class="btn btn-primary me-2" onclick="loadPopup('small')">
+
+                Small HTML
+
+            </button>
+
+            <button class="btn btn-success me-2" onclick="loadPopup('medium')">
+
+                Medium HTML
+
+            </button>
+
+            <button class="btn btn-danger" onclick="loadPopup('large')">
+
+                Large Table
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+
+    <div class="modal fade" id="dynamicModal" tabindex="-1">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+<!--modal-head start here-->
+<div class="modal-header">
+
+<h5 class="modal-title">
+Dynamic AJAX Popup
+</h5>
+
+<div>
+
+<button class="btn btn-sm btn-outline-secondary me-2" id="btnFullscreen">⛶</button>
+
+<button
+class="btn-close"
+data-bs-dismiss="modal">
+
+</button>
+
+</div>
+
+</div>
+ <!--modal-head end here-->
+
+                <div class="modal-body" id="popupBody">
+                      <div id="popupBodyWrapper">
+        <div id="popupBody"></div>
+    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.min.js"></script>
+
+    <script>
+
+        let modal = new bootstrap.Modal(
+            document.getElementById("dynamicModal")
+        );
+
+        /*------------------------------------------
+            Open popup and simulate AJAX
+        -------------------------------------------*/
+        function loadPopup(type) {
+resetModalPosition();
+            // Show loading spinner
+            $("#popupBody").html(`
+        <div class="loader">
+            <div class="spinner-border text-primary"></div>
+        </div>
+    `);
+
+            modal.show();
+
+            // Simulate AJAX delay
+            setTimeout(function () {
+
+                let html = "";
+
+                switch (type) {
+
+                    case "small":
+                        html = getSmallHtml();
+                        break;
+
+                    case "medium":
+                        html = getMediumHtml();
+                        break;
+
+                    case "large":
+                        html = getLargeHtml();
+                        break;
+
+                }
+
+                $("#popupBody").html(html);
+
+                // Wait for browser to render
+                setTimeout(function () {
+    resizeModal();
+    refreshDesktopWindow();
+}, 50);
+
+            }, 800);
+
+        }
+
+
+        /*------------------------------------------
+            Resize popup according to content
+        -------------------------------------------*/
+
+        function resizeModal(){
+
+    let dialog=$("#dynamicModal .modal-dialog");
+
+    dialog.css({
+        width:"",
+        maxWidth:"95vw"
+    });
+
+    requestAnimationFrame(function(){
+
+        let width=$("#popupBodyWrapper").outerWidth(true)+32;
+
+        width=Math.max(width,350);
+
+        width=Math.min(width,window.innerWidth*0.95);
+
+        dialog.width(width);
+
+    });
+
+}
+
+
+        /*------------------------------------------
+            Window resize
+        -------------------------------------------*/
+
+        $(window).on("resize", function () {
+
+            resizeModal();
+
+        });
+
+
+        /*=========================================================
+            SMALL CONTENT
+        =========================================================*/
+        function getSmallHtml() {
+
+            return `
+
+<div class="demo-card">
+
+    <div class="alert alert-success">
+        AJAX response loaded successfully.
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Full Name</label>
+        <input class="form-control"
+               placeholder="Enter name">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input class="form-control"
+               placeholder="Enter email">
+    </div>
+
+    <button class="btn btn-primary w-100">
+        Save
+    </button>
+
+</div>
+
+`;
+
+        }
+
+
+        /*=========================================================
+            MEDIUM CONTENT
+        =========================================================*/
+        function getMediumHtml() {
+
+            return `
+
+<div class="container-fluid">
+
+<div class="row g-3">
+
+<div class="col-md-4">
+
+<div class="card">
+
+<div class="card-body">
+
+<h5>User Profile</h5>
+
+<p>
+Dynamic HTML received from AJAX.
+</p>
+
+<ul class="list-group">
+
+<li class="list-group-item">
+Name : John Doe
+</li>
+
+<li class="list-group-item">
+Department : IT
+</li>
+
+<li class="list-group-item">
+Location : Mumbai
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-8">
+
+<div class="card">
+
+<div class="card-header">
+Recent Activities
+</div>
+
+<div class="card-body">
+
+<p>
+Lorem ipsum dolor sit amet,
+consectetur adipiscing elit.
+</p>
+
+<p>
+Bootstrap modal automatically
+adjusted its width according to
+content.
+</p>
+
+<button class="btn btn-success">
+Approve
+</button>
+
+<button class="btn btn-outline-secondary">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+        }
+
+
+        /*=========================================================
+            LARGE TABLE
+        =========================================================*/
+
+        function getLargeHtml() {
+
+            let html = `
+
+<div>
+
+<div class="alert alert-info">
+
+Large table loaded from AJAX.
+Popup width is automatically adjusted.
+
+</div>
+<div class="table-container">
+
+<table class="table table-bordered table-striped demo-table">
+
+<thead class="table-dark">
+
+<tr>
+
+<th>ID</th>
+<th>Name</th>
+<th>Department</th>
+<th>Designation</th>
+<th>Location</th>
+<th>Salary</th>
+<th>Status</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+</div>
+
+`;
+
+            for (let i = 1; i <= 20; i++) {
+
+                html += `
+
+<tr>
+
+<td>${i}</td>
+
+<td>Employee ${i}</td>
+
+<td>IT</td>
+
+<td>Software Engineer</td>
+
+<td>Mumbai</td>
+
+<td>₹ ${(50000 + i * 1000).toLocaleString()}</td>
+
+<td>
+
+<span class="badge bg-success">
+
+Active
+
+</span>
+
+</td>
+
+<td>
+
+<button class="btn btn-sm btn-primary">
+
+View
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+            }
+
+            html += `
+
+</tbody>
+
+</table>
+
+</div>
+
+`;
+
+            return html;
+
+        }
+    </script>
+    <script>
+        /*=====================================================
+    DESKTOP WINDOW SUPPORT
+=====================================================*/
+
+let isFullscreen = false;
+
+let originalState = {
+    width: null,
+    height: null,
+    top: null,
+    left: null
+};
+
+function resetModalPosition() {
+
+    const dialog = $("#dynamicModal .modal-dialog");
+
+    // Remove draggable inline styles
+    dialog.css({
+        top: "",
+        left: "",
+        right: "",
+        bottom: "",
+        position: "",
+        margin: ""
+    });
+
+    // Remove jQuery UI generated inline style
+    dialog.removeAttr("style");
+
+    // Restore required styles
+    dialog.css({
+        width: "",
+        maxWidth: "95vw"
+    });
+}
+
+/*=====================================================
+    Enable Drag & Resize
+=====================================================*/
+
+function enableDesktopWindow(){
+
+    let dialog = $("#dynamicModal .modal-dialog");
+
+    // Remove previous instance
+    if(dialog.data("ui-draggable")){
+        dialog.draggable("destroy");
+    }
+
+    if(dialog.data("ui-resizable")){
+        dialog.resizable("destroy");
+    }
+
+    dialog.draggable({
+
+        handle: ".modal-header",
+
+        containment: "window",
+
+        scroll: false,
+        start: function () {
+
+        // Remove Bootstrap centering margin once dragging starts
+        dialog.css("margin", 0);
+
+    },
+
+    drag: function (event, ui) {
+
+        const w = $(window).width();
+        const h = $(window).height();
+
+        const dialogWidth = dialog.outerWidth();
+        const dialogHeight = dialog.outerHeight();
+
+        // Keep title bar visible
+        ui.position.left = Math.max(0, Math.min(ui.position.left, w - dialogWidth));
+        ui.position.top = Math.max(0, Math.min(ui.position.top, h - dialogHeight));
+
+    }
+
+    });
+
+    dialog.resizable({
+
+        handles: "n,e,s,w,ne,nw,se,sw",
+
+        minWidth: 350,
+
+        minHeight: 220,
+
+        resize: function(){
+
+            let h = dialog.outerHeight();
+
+            dialog.find(".modal-body").css({
+
+                maxHeight: h - 120
+
+            });
+
+        }
+
+    });
+
+
+
+}
+
+
+/*=====================================================
+    Enable when popup opens
+=====================================================*/
+
+$("#dynamicModal").on("shown.bs.modal",function(){
+
+    enableDesktopWindow();
+
+});
+
+$("#dynamicModal").on("hidden.bs.modal", function () {
+
+    let dialog = $("#dynamicModal .modal-dialog");
+
+    dialog.draggable("destroy");
+    dialog.resizable("destroy");
+
+    dialog.removeAttr("style");
+
+    dialog.css({
+        width: "",
+        maxWidth: "95vw",
+        margin: "1.75rem auto"
+    });
+
+});
+
+
+/*=====================================================
+    FULLSCREEN
+=====================================================*/
+
+$("#btnFullscreen").click(function(){
+
+    let dialog=$("#dynamicModal .modal-dialog");
+
+    if(!isFullscreen){
+
+        originalState.width=dialog.width();
+        originalState.height=dialog.height();
+
+        originalState.top=dialog.position().top;
+        originalState.left=dialog.position().left;
+
+        dialog.addClass("fullscreen-dialog");
+
+        dialog.css({
+
+            top:0,
+            left:0
+
+        });
+
+        isFullscreen=true;
+
+        $(this).html("🗗");
+
+    }
+    else{
+
+        dialog.removeClass("fullscreen-dialog");
+
+        dialog.css({
+
+            width:null,
+
+            height:null,
+
+            top:null,
+
+            left:null
+
+        });
+
+        isFullscreen=false;
+
+        $(this).html("⛶");
+
+        enableDesktopWindow();
+
+    }
+
+});
+
+
+/*=====================================================
+    ESC restores if fullscreen
+=====================================================*/
+
+$(document).keydown(function(e){
+
+    if(e.key==="Escape" && isFullscreen){
+
+        $("#btnFullscreen").click();
+
+    }
+
+});
+
+
+/*=====================================================
+    Re-enable after AJAX content changes
+=====================================================*/
+
+function refreshDesktopWindow(){
+
+    enableDesktopWindow();
+
+}
+        </script>
+</body>
+
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Analytics Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #334155;
+            overflow-x: hidden;
+        }
+        
+        /* Base Card Styling with Hover Enhancements */
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            background-color: #ffffff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.06);
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title-text {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #1e293b;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 0;
+        }
+
+        .dropdown-icon {
+            color: #94a3b8;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .dropdown-icon:hover { color: #0f172a; }
+
+        /* Top Cards - Vibrant Gradients */
+        .bg-grad-blue { background: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%); color: white; }
+        .bg-grad-pink { background: linear-gradient(135deg, #e11d48 0%, #fb923c 100%); color: white; }
+        .bg-grad-orange { background: linear-gradient(135deg, #ea580c 0%, #facc15 100%); color: white; }
+        .bg-grad-purple { background: linear-gradient(135deg, #7c3aed 0%, #c084fc 100%); color: white; }
+        
+        .metric-label { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; opacity: 0.9; letter-spacing: 0.3px;}
+        .metric-value { font-size: 2.4rem; font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; }
+        .trend-white { color: rgba(255,255,255,0.9); font-weight: 700; font-size: 0.85rem; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 20px;}
+        
+        .sparkline-container {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 110px;
+            height: 45px;
+        }
+
+        /* Custom Doughnut Legend */
+        .legend-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 0.85rem; padding: 6px; border-radius: 8px; transition: background 0.2s;}
+        .legend-item:hover { background-color: #f8fafc; }
+        .legend-color-box { width: 14px; height: 14px; border-radius: 4px; margin-right: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        .legend-label { width: 60px; font-weight: 600; color: #475569; }
+        .legend-value { font-weight: 800; color: #0f172a; margin-right: 5px; }
+        .legend-percent { color: #94a3b8; font-weight: 500;}
+
+        /* Quick Summary Bar */
+        .summary-container { background: #ffffff; border-radius: 16px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 20px;
+            border-right: 2px dashed #f1f5f9;
+            transition: transform 0.2s;
+        }
+        .summary-item:hover { transform: scale(1.02); }
+        .summary-item:last-child { border-right: none; }
+        
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+        .icon-blue { background-color: #eff6ff; color: #2563eb; }
+        .icon-green { background-color: #ecfdf5; color: #10b981; }
+        
+        .summary-item:hover .icon-blue { background-color: #2563eb; color: #ffffff; }
+        .summary-item:hover .icon-green { background-color: #10b981; color: #ffffff; }
+
+        .summary-label { font-size: 0.8rem; color: #64748b; font-weight: 700; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .summary-val { font-size: 1.3rem; font-weight: 800; color: #0f172a; line-height: 1; }
+
+        /* Enhanced Callout (Glassmorphism) */
+        .custom-callout {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 12px;
+            padding: 10px 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .custom-callout-val { font-weight: 800; font-size: 1.2rem; color: #0f172a; }
+        .custom-callout-date { font-size: 0.75rem; color: #64748b; font-weight: 600;}
+
+        /* Entrance Animations */
+        .animate-fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Staggered animation delays */
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+
+    </style>
+</head>
+<body>
+
+<div class="container-fluid p-4">
+
+    <!-- Row 1: Top Metrics -->
+    <div class="row g-4 mb-4">
+        <!-- Card 1 -->
+        <div class="col-xl-3 col-md-6 animate-fade-up delay-1">
+            <div class="card bg-grad-blue h-100 p-4 position-relative">
+                <div class="metric-label">Logged In Users</div>
+                <div class="metric-value">1,254</div>
+                <div class="mt-3"><span class="trend-white"><i class="bi bi-arrow-up-right"></i> 8.30%</span></div>
+                <div class="sparkline-container"><canvas id="spark1"></canvas></div>
+            </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="col-xl-3 col-md-6 animate-fade-up delay-2">
+            <div class="card bg-grad-pink h-100 p-4 position-relative">
+                <div class="metric-label">Created Users</div>
+                <div class="metric-value">58</div>
+                <div class="mt-3"><span class="trend-white"><i class="bi bi-arrow-up-right"></i> 11.54%</span></div>
+                <div class="sparkline-container"><canvas id="spark2"></canvas></div>
+            </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="col-xl-3 col-md-6 animate-fade-up delay-3">
+            <div class="card bg-grad-orange h-100 p-4 position-relative">
+                <div class="metric-label">Customers Created</div>
+                <div class="metric-value">425</div>
+                <div class="mt-3"><span class="trend-white"><i class="bi bi-arrow-up-right"></i> 4.17%</span></div>
+                <div class="sparkline-container"><canvas id="spark3"></canvas></div>
+            </div>
+        </div>
+        <!-- Card 4 -->
+        <div class="col-xl-3 col-md-6 animate-fade-up delay-4">
+            <div class="card bg-grad-purple h-100 p-4 position-relative">
+                <div class="metric-label">Leads Created</div>
+                <div class="metric-value">1,326</div>
+                <div class="mt-3"><span class="trend-white text-danger bg-white bg-opacity-75"><i class="bi bi-arrow-down-right"></i> -2.36%</span></div>
+                <div class="sparkline-container"><canvas id="spark4"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Middle Section -->
+    <div class="row g-4 mb-4">
+        <!-- Department Comparison -->
+        <div class="col-lg-7 animate-fade-up delay-2">
+            <div class="card p-4 h-100">
+                <div class="card-header-custom">
+                    <h5 class="card-title-text">Department Comparison</h5>
+                    <i class="bi bi-three-dots dropdown-icon fs-5"></i>
+                </div>
+                <div style="height: 300px; width: 100%;">
+                    <canvas id="deptChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Created Users Distribution -->
+        <div class="col-lg-5 animate-fade-up delay-3">
+            <div class="card p-4 h-100">
+                <div class="card-header-custom">
+                    <h5 class="card-title-text">Created Users Distribution</h5>
+                    <i class="bi bi-three-dots dropdown-icon fs-5"></i>
+                </div>
+                
+                <div class="row h-100 align-items-center">
+                    <div class="col-sm-6 d-flex justify-content-center mb-4 mb-sm-0">
+                        <div style="width: 230px; height: 230px; position: relative;">
+                            <!-- Inner shadow effect for doughnut -->
+                            <div style="position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); width: 120px; height: 120px; border-radius: 50%; box-shadow: inset 0 4px 10px rgba(0,0,0,0.05); pointer-events: none;"></div>
+                            <canvas id="doughnutChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 d-flex flex-column justify-content-center pl-sm-4">
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background: linear-gradient(135deg, #3b82f6, #2563eb);"></div>
+                            <div class="legend-label">NBG</div>
+                            <div class="legend-value">15</div>
+                            <div class="legend-percent">(25.9%)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
+                            <div class="legend-label">CCG</div>
+                            <div class="legend-value">12</div>
+                            <div class="legend-percent">(20.7%)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background: linear-gradient(135deg, #f97316, #ea580c);"></div>
+                            <div class="legend-label">CAG</div>
+                            <div class="legend-value">9</div>
+                            <div class="legend-percent">(15.5%)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"></div>
+                            <div class="legend-label">IBG</div>
+                            <div class="legend-value">6</div>
+                            <div class="legend-percent">(10.3%)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background: linear-gradient(135deg, #06b6d4, #0891b2);"></div>
+                            <div class="legend-label">PFSBU</div>
+                            <div class="legend-value">5</div>
+                            <div class="legend-percent">(8.6%)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background: linear-gradient(135deg, #f43f5e, #e11d48);"></div>
+                            <div class="legend-label">Others</div>
+                            <div class="legend-value">11</div>
+                            <div class="legend-percent">(19.0%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 3: Lower Charts -->
+    <div class="row g-4 mb-4">
+        <!-- Customer Growth -->
+        <div class="col-lg-6 animate-fade-up delay-3">
+            <div class="card p-4 h-100 position-relative">
+                <div class="card-header-custom mb-3">
+                    <h5 class="card-title-text">Customer Growth (7 Days)</h5>
+                </div>
+                <div class="custom-callout">
+                    <div class="custom-callout-val">425</div>
+                    <div class="custom-callout-date">17 Jul</div>
+                </div>
+                <div style="height: 260px; width: 100%;">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leads Created -->
+        <div class="col-lg-6 animate-fade-up delay-4">
+            <div class="card p-4 h-100 position-relative">
+                <div class="card-header-custom mb-3">
+                    <h5 class="card-title-text">Leads Created (7 Days)</h5>
+                </div>
+                <div class="custom-callout">
+                    <div class="custom-callout-val">1,326</div>
+                    <div class="custom-callout-date">17 Jul</div>
+                </div>
+                <div style="height: 260px; width: 100%;">
+                    <canvas id="leadsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 4: Quick Summary -->
+    <div class="row animate-fade-up delay-4">
+        <div class="col-12">
+            <h5 class="card-title-text mb-3 ms-2">Quick Summary</h5>
+            <div class="summary-container">
+                <div class="d-flex flex-wrap justify-content-between">
+                    
+                    <div class="summary-item flex-fill">
+                        <div class="summary-icon icon-blue"><i class="bi bi-people-fill"></i></div>
+                        <div>
+                            <div class="summary-label">Total Logins</div>
+                            <div class="summary-val">1,254</div>
+                        </div>
+                    </div>
+
+                    <div class="summary-item flex-fill">
+                        <div class="summary-icon icon-blue"><i class="bi bi-person-fill"></i></div>
+                        <div>
+                            <div class="summary-label">New Users</div>
+                            <div class="summary-val">58</div>
+                        </div>
+                    </div>
+
+                    <div class="summary-item flex-fill">
+                        <div class="summary-icon icon-green"><i class="bi bi-person-plus-fill"></i></div>
+                        <div>
+                            <div class="summary-label">New Customers</div>
+                            <div class="summary-val">425</div>
+                        </div>
+                    </div>
+
+                    <div class="summary-item flex-fill">
+                        <div class="summary-icon icon-green"><i class="bi bi-bullseye"></i></div>
+                        <div>
+                            <div class="summary-label">New Leads</div>
+                            <div class="summary-val">1,326</div>
+                        </div>
+                    </div>
+
+                    <div class="summary-item flex-fill border-0">
+                        <div class="summary-icon icon-green"><i class="bi bi-check-circle-fill"></i></div>
+                        <div>
+                            <div class="summary-label">Success Rate</div>
+                            <div class="summary-val">78%</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap 5.3 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Chart.js & DataLabels Plugin CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<script>
+    // Register the DataLabels plugin globally, but disable it by default
+    Chart.register(ChartDataLabels);
+    Chart.defaults.plugins.datalabels.display = false;
+    Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+
+    // Utility for random data
+    function getRandomData(length, min, max) {
+        return Array.from({length}, () => Math.floor(Math.random() * (max - min + 1)) + min);
+    }
+
+    // --- 1. Top Cards Sparklines ---
+    const sparklineOptions = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { x: { display: false }, y: { display: false } },
+        elements: { point: { radius: 0 }, line: { borderWidth: 3, tension: 0.5 } } // Smoother tension, thicker line
+    };
+
+    new Chart(document.getElementById('spark1'), {
+        type: 'line',
+        data: { labels: ['1','2','3','4','5'], datasets: [{ data: getRandomData(5, 10, 30), borderColor: 'rgba(255,255,255,1)', backgroundColor: 'rgba(255,255,255,0.25)', fill: true }] },
+        options: sparklineOptions
+    });
+    new Chart(document.getElementById('spark2'), {
+        type: 'line',
+        data: { labels: ['1','2','3','4','5'], datasets: [{ data: getRandomData(5, 10, 30), borderColor: 'rgba(255,255,255,1)', backgroundColor: 'rgba(255,255,255,0.25)', fill: true }] },
+        options: sparklineOptions
+    });
+    new Chart(document.getElementById('spark3'), {
+        type: 'line',
+        data: { labels: ['1','2','3','4','5'], datasets: [{ data: getRandomData(5, 10, 30), borderColor: 'rgba(255,255,255,1)', backgroundColor: 'rgba(255,255,255,0.25)', fill: true }] },
+        options: sparklineOptions
+    });
+    new Chart(document.getElementById('spark4'), {
+        type: 'line',
+        data: { labels: ['1','2','3','4','5'], datasets: [{ data: getRandomData(5, 10, 30), borderColor: 'rgba(255,255,255,1)', backgroundColor: 'rgba(255,255,255,0.25)', fill: true }] },
+        options: sparklineOptions
+    });
+
+    // --- 2. Department Comparison (Vertical Bar Chart) - IMPROVED GRADIENTS ---
+    const deptCtx = document.getElementById('deptChart').getContext('2d');
+    
+    function getVibrantGradient(ctx, colorStart, colorEnd) {
+        let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, colorStart);
+        gradient.addColorStop(1, colorEnd);
+        return gradient;
+    }
+
+    // More vibrant and modern color pairings
+    const barColors = [
+        getVibrantGradient(deptCtx, '#00c6ff', '#0072ff'), // Blue
+        getVibrantGradient(deptCtx, '#11998e', '#38ef7d'), // Green
+        getVibrantGradient(deptCtx, '#f5af19', '#f12711'), // Orange/Red
+        getVibrantGradient(deptCtx, '#b224ef', '#7579ff'), // Purple
+        getVibrantGradient(deptCtx, '#4facfe', '#00f2fe'), // Cyan
+        getVibrantGradient(deptCtx, '#667eea', '#764ba2'), // Deep Indigo
+        getVibrantGradient(deptCtx, '#fa709a', '#fee140')  // Sunset
+    ];
+
+    new Chart(deptCtx, {
+        type: 'bar',
+        data: {
+            labels: ['NBG', 'CCG', 'CAG', 'IBG', 'PFSBU', 'REHBU', 'GMU'],
+            datasets: [{
+                data: [1200, 850, 520, 310, 85, 18, 12],
+                backgroundColor: barColors,
+                borderRadius: {topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0}, // Modern rounded tops
+                borderSkipped: false,
+                barPercentage: 0.55
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            animation: { duration: 2000, easing: 'easeOutQuart' },
+            plugins: { 
+                legend: { display: false },
+                datalabels: {
+                    display: true,
+                    anchor: 'end',
+                    align: 'top',
+                    offset: 6,
+                    color: '#1e293b',
+                    font: { weight: '800', size: 12 },
+                    formatter: function(value) { return value.toLocaleString(); }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleFont: { size: 13, weight: '700' },
+                    bodyFont: { size: 14, weight: '600' },
+                    padding: 12,
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: { display: false, beginAtZero: true, max: 1450 },
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: { color: '#64748b', font: {weight: '700', size: 11} }
+                }
+            }
+        }
+    });
+
+    // --- 3. Doughnut Chart ---
+    new Chart(document.getElementById('doughnutChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['NBG', 'CCG', 'CAG', 'IBG', 'PFSBU', 'Others'],
+            datasets: [{
+                data: [15, 12, 9, 6, 5, 11],
+                backgroundColor: ['#2563eb', '#10b981', '#ea580c', '#8b5cf6', '#06b6d4', '#e11d48'],
+                borderWidth: 0, 
+                hoverOffset: 8 // Pops out on hover
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '70%',
+            animation: { animateScale: true, animateRotate: true, duration: 1500 },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1e293b',
+                    bodyColor: '#0f172a',
+                    bodyFont: { weight: 'bold', size: 14 },
+                    borderColor: '#e2e8f0',
+                    borderWidth: 1,
+                    padding: 10,
+                    boxPadding: 6,
+                    usePointStyle: true
+                }
+            }
+        }
+    });
+
+    // --- 4. Customer Growth Area Chart ---
+    const growthCtx = document.getElementById('growthChart').getContext('2d');
+    let growthGradient = growthCtx.createLinearGradient(0, 0, 0, 300);
+    growthGradient.addColorStop(0, 'rgba(124, 58, 237, 0.5)'); // Vivid Purple
+    growthGradient.addColorStop(1, 'rgba(124, 58, 237, 0.0)');
+
+    new Chart(growthCtx, {
+        type: 'line',
+        data: {
+            labels: ['11 Jul', '12 Jul', '13 Jul', '14 Jul', '15 Jul', '16 Jul', '17 Jul'],
+            datasets: [{
+                data: [120, 180, 250, 200, 310, 220, 425],
+                borderColor: '#7c3aed',
+                backgroundColor: growthGradient,
+                borderWidth: 3,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#7c3aed',
+                pointBorderWidth: 3,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                tension: 0.4, // Smooth curves
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#7c3aed',
+                    padding: 10,
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true, max: 500,
+                    ticks: { stepSize: 100, color: '#94a3b8', font: {weight: '600'} },
+                    border: { display: false },
+                    grid: { color: '#f1f5f9', drawTicks: false }
+                },
+                x: {
+                    ticks: { color: '#94a3b8', font: {weight: '600'} },
+                    border: { display: false },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // --- 5. Leads Created Bar Chart - IMPROVED GRADIENT ---
+    const leadsCtx = document.getElementById('leadsChart').getContext('2d');
+    let leadsGradient = leadsCtx.createLinearGradient(0, 0, 0, 260);
+    leadsGradient.addColorStop(0, '#00b09b'); // Vibrant Teal/Green
+    leadsGradient.addColorStop(1, '#96c93d');
+
+    new Chart(leadsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['11 Jul', '12 Jul', '13 Jul', '15 Jul', '16 Jul', '17 Jul'],
+            datasets: [{
+                data: [750, 950, 1200, 1200, 1300, 1326],
+                backgroundColor: leadsGradient,
+                borderRadius: {topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0},
+                barPercentage: 0.45
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            animation: { duration: 2000, easing: 'easeOutBounce' },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#059669',
+                    padding: 10,
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true, max: 1600,
+                    ticks: { stepSize: 400, color: '#94a3b8', font: {weight: '600'} },
+                    border: { display: false },
+                    grid: { color: '#f1f5f9', drawTicks: false }
+                },
+                x: {
+                    ticks: { color: '#94a3b8', font: {weight: '600'} },
+                    border: { display: false },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+</script>
+</body>
+</html>

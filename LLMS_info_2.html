@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard V3</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+        }
+        
+        .card {
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            margin-bottom: 1.5rem;
+            background-color: #ffffff;
+        }
+        
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title-text {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #1e293b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        .dropdown-icon {
+            color: #94a3b8;
+            cursor: pointer;
+        }
+
+        /* Top Cards */
+        .top-card-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+        .bg-icon-blue { background-color: #eff6ff; color: #3b82f6; }
+        .bg-icon-green { background-color: #ecfdf5; color: #10b981; }
+        .bg-icon-orange { background-color: #fff7ed; color: #f97316; }
+        .bg-icon-purple { background-color: #f5f3ff; color: #8b5cf6; }
+
+        .top-card-title { font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.2rem;}
+        .top-card-value { font-size: 1.8rem; font-weight: 700; color: #0f172a; line-height: 1.1; margin-bottom: 0.2rem;}
+        .top-card-subtitle { font-size: 0.75rem; color: #64748b; font-weight: 500;}
+        
+        .trend-up { color: #10b981; font-weight: 600; font-size: 0.8rem; }
+        .trend-down { color: #ef4444; font-weight: 600; font-size: 0.8rem; }
+
+        .top-sparkline-wrapper { width: 100px; height: 35px; }
+
+        /* Custom Horizontal Bars */
+        .custom-bar-row { display: flex; align-items: center; margin-bottom: 12px; }
+        .custom-bar-label { width: 65px; font-size: 0.8rem; font-weight: 700; color: #334155; }
+        .custom-bar-container { flex-grow: 1; padding-right: 15px; }
+        .custom-bar-fill { height: 8px; background-color: #2563eb; border-radius: 4px; }
+        .custom-bar-value { font-size: 0.85rem; font-weight: 700; color: #0f172a; min-width: 35px; text-align: right;}
+
+        /* Custom Doughnut Legend */
+        .legend-item { display: flex; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
+        .legend-color-box { width: 12px; height: 12px; border-radius: 2px; margin-right: 10px; }
+        .legend-label { width: 60px; font-weight: 600; color: #334155; }
+        .legend-value { font-weight: 700; color: #0f172a; margin-right: 5px; }
+        .legend-percent { color: #64748b; }
+
+        /* Table Styles */
+        .custom-table th {
+            background-color: #0b1a4a !important; /* Dark blue header */
+            color: #ffffff !important;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 12px 16px;
+            border: none;
+        }
+        .custom-table td {
+            vertical-align: middle;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #334155;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .table-sparkline-wrapper { width: 60px; height: 20px; margin: 0 auto;}
+        
+        /* Badges */
+        .badge-status { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .status-excellent { background-color: #ecfdf5; color: #10b981; }
+        .status-good { background-color: #eff6ff; color: #3b82f6; }
+        .status-average { background-color: #fff7ed; color: #f97316; }
+        .status-low { background-color: #fef2f2; color: #ef4444; }
+
+    </style>
+</head>
+<body>
+
+<div class="container-fluid p-4">
+
+    <!-- Row 1: Top Metrics -->
+    <div class="row g-4">
+        <!-- Card 1 -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 p-3">
+                <div class="d-flex align-items-center mb-3 gap-3">
+                    <div class="top-card-icon bg-icon-blue"><i class="bi bi-people-fill"></i></div>
+                    <div>
+                        <div class="top-card-title">Logged in USERS</div>
+                        <div class="top-card-value">1,254</div>
+                        <div class="top-card-subtitle">Yesterday : 1,158</div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-end mt-2 px-1">
+                    <div class="trend-up"><i class="bi bi-caret-up-fill"></i> 8.30%</div>
+                    <div class="top-sparkline-wrapper"><canvas id="sparkTop1"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 p-3">
+                <div class="d-flex align-items-center mb-3 gap-3">
+                    <div class="top-card-icon bg-icon-green"><i class="bi bi-person-plus-fill"></i></div>
+                    <div>
+                        <div class="top-card-title">CREATED Users</div>
+                        <div class="top-card-value">58</div>
+                        <div class="top-card-subtitle">Yesterday : 52</div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-end mt-2 px-1">
+                    <div class="trend-up"><i class="bi bi-caret-up-fill"></i> 11.54%</div>
+                    <div class="top-sparkline-wrapper"><canvas id="sparkTop2"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 p-3">
+                <div class="d-flex align-items-center mb-3 gap-3">
+                    <div class="top-card-icon bg-icon-orange"><i class="bi bi-person-lines-fill"></i></div>
+                    <div>
+                        <div class="top-card-title">CUSTomers CReated</div>
+                        <div class="top-card-value">425</div>
+                        <div class="top-card-subtitle">Yesterday : 408</div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-end mt-2 px-1">
+                    <div class="trend-up"><i class="bi bi-caret-up-fill"></i> 4.17%</div>
+                    <div class="top-sparkline-wrapper"><canvas id="sparkTop3"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <!-- Card 4 -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 p-3">
+                <div class="d-flex align-items-center mb-3 gap-3">
+                    <div class="top-card-icon bg-icon-purple"><i class="bi bi-bullseye"></i></div>
+                    <div>
+                        <div class="top-card-title">Leads CreAted</div>
+                        <div class="top-card-value">1,326</div>
+                        <div class="top-card-subtitle">Yesterday : 1,358</div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-end mt-2 px-1">
+                    <div class="trend-down"><i class="bi bi-caret-down-fill"></i> -2.36%</div>
+                    <div class="top-sparkline-wrapper"><canvas id="sparkTop4"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Middle Section (Horizontal Bars & Doughnut) -->
+    <div class="row g-4 mt-1">
+        <!-- Department Login Comparison -->
+        <div class="col-lg-6">
+            <div class="card p-4 h-100">
+                <div class="card-header-custom">
+                    <h5 class="card-title-text">DEPARTMENT LOGIN COMPARISON</h5>
+                    <i class="bi bi-three-dots-vertical dropdown-icon"></i>
+                </div>
+                
+                <div class="d-flex flex-column justify-content-center h-100 mt-2">
+                    <div class="custom-bar-row">
+                        <div class="custom-bar-label">NBG</div>
+                        <div class="custom-bar-container"><div class="custom-bar-fill" style="width: 100%;"></div></div>
+                        <div class="custom-bar-value">1,200</div>
+                    </div>
+                    <div class="custom-bar-row">
+                        <div class="custom-bar-label">CCG</div>
+                        <div class="custom-bar-container"><div class="custom-bar-fill" style="width: 71%;"></div></div>
+                        <div class="custom-bar-value">850</div>
+                    </div>
+                    <div class="custom-bar-row">
+                        <div class="custom-bar-label">CAG</div>
+                        <div class="custom-bar-container"><div class="custom-bar-fill" style="width: 43%;"></div></div>
+                        <div class="custom-bar-value">520</div>
+                    </div>
+                    <div class="custom-bar-row">
+                        <div class="custom-bar-label">IBG</div>
+                        <div class="custom-bar-container"><div class="custom-bar-fill" style="width: 26%;"></div></div>
+                        <div class="custom-bar-value">310</div>
+                    </div>
+                    <div class="custom-bar-row">
+                        <div class="custom-bar-label">PFSBU</div>
+                        <div class="custom-bar-container"><div class="custom-bar-fill" style="width: 7%;"></div></div>
+                        <div class="custom-bar-value">85</div>
+                    </div>
+                    <div class="custom-bar-row">
+                        <div class="custom-bar-label">REHBU</div>
+                        <div class="custom-bar-container"><div class="custom-bar-fill" style="width: 2%;"></div></div>
+                        <div class="custom-bar-value">18</div>
+                    </div>
+                    <div class="custom-bar-row">
+                        <div class="custom-bar-label">GMU</div>
+                        <div class="custom-bar-container"><div class="custom-bar-fill" style="width: 1%;"></div></div>
+                        <div class="custom-bar-value">12</div>
+                    </div>
+                    <div class="custom-bar-row mb-0">
+                        <div class="custom-bar-label">SARG</div>
+                        <div class="custom-bar-container"><div class="custom-bar-fill" style="width: 0.6%;"></div></div>
+                        <div class="custom-bar-value">8</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Created Users Distribution -->
+        <div class="col-lg-6">
+            <div class="card p-4 h-100">
+                <div class="card-header-custom">
+                    <h5 class="card-title-text">CREATED USERS DISTRIBUTION</h5>
+                    <i class="bi bi-three-dots-vertical dropdown-icon"></i>
+                </div>
+                
+                <div class="row h-100 align-items-center pt-2">
+                    <div class="col-6 d-flex justify-content-center">
+                        <div style="width: 200px; height: 200px;">
+                            <canvas id="doughnutChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background-color: #2563eb;"></div>
+                            <div class="legend-label">NBG</div>
+                            <div class="legend-value">15</div>
+                            <div class="legend-percent">(25.9%)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background-color: #10b981;"></div>
+                            <div class="legend-label">CCG</div>
+                            <div class="legend-value">12</div>
+                            <div class="legend-percent">(20.7%)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background-color: #f97316;"></div>
+                            <div class="legend-label">CAG</div>
+                            <div class="legend-value">9</div>
+                            <div class="legend-percent">(15.5%)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background-color: #8b5cf6;"></div>
+                            <div class="legend-label">IBG</div>
+                            <div class="legend-value">6</div>
+                            <div class="legend-percent">(10.3%)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background-color: #06b6d4;"></div>
+                            <div class="legend-label">PFSBU</div>
+                            <div class="legend-value">5</div>
+                            <div class="legend-percent">(8.6%)</div>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color-box" style="background-color: #f43f5e;"></div>
+                            <div class="legend-label">Others</div>
+                            <div class="legend-value">11</div>
+                            <div class="legend-percent">(19.0%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 3: Lower Charts -->
+    <div class="row g-4 mt-1">
+        <!-- Customer Growth -->
+        <div class="col-lg-6">
+            <div class="card p-4 h-100">
+                <div class="card-header-custom">
+                    <h5 class="card-title-text">CUSTOMER GROWTH (7 DAYS)</h5>
+                </div>
+                <div style="height: 250px; width: 100%;">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leads Created -->
+        <div class="col-lg-6">
+            <div class="card p-4 h-100">
+                <div class="card-header-custom">
+                    <h5 class="card-title-text">LEADS CREATED (7 DAYS)</h5>
+                </div>
+                <div style="height: 250px; width: 100%;">
+                    <canvas id="leadsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 4: Data Table -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white border-0 pt-4 pb-2 px-4">
+                    <h5 class="card-title-text">DEPARTMENT PERFORMANCE SUMMARY</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table custom-table text-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-start pl-4">Department</th>
+                                    <th>Logged in</th>
+                                    <th>Users</th>
+                                    <th>Customers</th>
+                                    <th>Leads</th>
+                                    <th>Conversion Rate</th>
+                                    <th>Status</th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-start fw-bold pl-4">NBG</td>
+                                    <td>1,200</td>
+                                    <td>15</td>
+                                    <td>145</td>
+                                    <td>216</td>
+                                    <td>17.92%</td>
+                                    <td><span class="badge badge-status status-excellent">Excellent</span></td>
+                                    <td><div class="table-sparkline-wrapper"><canvas id="tblSpark1"></canvas></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start fw-bold pl-4">CCG</td>
+                                    <td>850</td>
+                                    <td>12</td>
+                                    <td>98</td>
+                                    <td>135</td>
+                                    <td>15.88%</td>
+                                    <td><span class="badge badge-status status-excellent">Excellent</span></td>
+                                    <td><div class="table-sparkline-wrapper"><canvas id="tblSpark2"></canvas></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start fw-bold pl-4">CAG</td>
+                                    <td>520</td>
+                                    <td>9</td>
+                                    <td>76</td>
+                                    <td>88</td>
+                                    <td>14.82%</td>
+                                    <td><span class="badge badge-status status-good">Good</span></td>
+                                    <td><div class="table-sparkline-wrapper"><canvas id="tblSpark3"></canvas></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start fw-bold pl-4">IBG</td>
+                                    <td>310</td>
+                                    <td>6</td>
+                                    <td>32</td>
+                                    <td>41</td>
+                                    <td>13.29%</td>
+                                    <td><span class="badge badge-status status-good">Good</span></td>
+                                    <td><div class="table-sparkline-wrapper"><canvas id="tblSpark4"></canvas></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start fw-bold pl-4">PFSBU</td>
+                                    <td>85</td>
+                                    <td>5</td>
+                                    <td>18</td>
+                                    <td>22</td>
+                                    <td>12.94%</td>
+                                    <td><span class="badge badge-status status-average">Average</span></td>
+                                    <td><div class="table-sparkline-wrapper"><canvas id="tblSpark5"></canvas></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start fw-bold pl-4">REHBU</td>
+                                    <td>18</td>
+                                    <td>1</td>
+                                    <td>5</td>
+                                    <td>6</td>
+                                    <td>11.22%</td>
+                                    <td><span class="badge badge-status status-low">Low</span></td>
+                                    <td><div class="table-sparkline-wrapper"><canvas id="tblSpark6"></canvas></div></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-start fw-bold pl-4">GMU</td>
+                                    <td>12</td>
+                                    <td>1</td>
+                                    <td>3</td>
+                                    <td>4</td>
+                                    <td>10.81%</td>
+                                    <td><span class="badge badge-status status-low">Low</span></td>
+                                    <td><div class="table-sparkline-wrapper"><canvas id="tblSpark7"></canvas></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap 5.3 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // --- Utility Function to generate random data for sparklines ---
+    function getRandomData(length, min, max) {
+        return Array.from({length}, () => Math.floor(Math.random() * (max - min + 1)) + min);
+    }
+
+    // --- 1. Top Cards Sparklines ---
+    function createTopSparkline(ctxId, color, fillOpacity) {
+        const ctx = document.getElementById(ctxId).getContext('2d');
+        
+        // Gradient fill
+        let gradient = ctx.createLinearGradient(0, 0, 0, 35);
+        gradient.addColorStop(0, color.replace('1)', `${fillOpacity})`)); 
+        gradient.addColorStop(1, color.replace('1)', '0)'));
+
+        new Chart(ctx, {
+            type: 'line',
+            data: { 
+                labels: ['1','2','3','4','5','6','7'], 
+                datasets: [{ 
+                    data: getRandomData(7, 10, 30), 
+                    borderColor: color, 
+                    backgroundColor: gradient,
+                    borderWidth: 2, 
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0
+                }] 
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                scales: { x: { display: false }, y: { display: false } }
+            }
+        });
+    }
+
+    createTopSparkline('sparkTop1', 'rgba(59, 130, 246, 1)', 0.2); // Blue
+    createTopSparkline('sparkTop2', 'rgba(16, 185, 129, 1)', 0.2); // Green
+    createTopSparkline('sparkTop3', 'rgba(249, 115, 22, 1)', 0.2); // Orange
+    createTopSparkline('sparkTop4', 'rgba(139, 92, 246, 1)', 0.2); // Purple
+
+    // --- 2. Doughnut Chart ---
+    new Chart(document.getElementById('doughnutChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['NBG', 'CCG', 'CAG', 'IBG', 'PFSBU', 'Others'],
+            datasets: [{
+                data: [15, 12, 9, 6, 5, 11],
+                backgroundColor: [
+                    '#2563eb', // Blue
+                    '#10b981', // Green
+                    '#f97316', // Orange
+                    '#8b5cf6', // Purple
+                    '#06b6d4', // Teal
+                    '#f43f5e'  // Pink/Red
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { display: false } // Hidden because we use custom HTML legend
+            }
+        }
+    });
+
+    // --- 3. Customer Growth Line Chart ---
+    const growthCtx = document.getElementById('growthChart').getContext('2d');
+    let growthGradient = growthCtx.createLinearGradient(0, 0, 0, 250);
+    growthGradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
+    growthGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+    new Chart(growthCtx, {
+        type: 'line',
+        data: {
+            labels: ['11 Jul', '12 Jul', '13 Jul', '14 Jul', '15 Jul', '16 Jul', '17 Jul'],
+            datasets: [{
+                label: 'Customers',
+                data: [100, 160, 210, 275, 220, 350, 425],
+                borderColor: '#3b82f6',
+                backgroundColor: growthGradient,
+                borderWidth: 2,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#3b82f6',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                tension: 0, // Straight lines in the image
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true, max: 500,
+                    ticks: { stepSize: 100, color: '#64748b', font: {size: 11} },
+                    grid: { color: '#f1f5f9', drawBorder: false }
+                },
+                x: {
+                    ticks: { color: '#64748b', font: {size: 11} },
+                    grid: { display: false, drawBorder: false }
+                }
+            }
+        }
+    });
+
+    // --- 4. Leads Created Bar Chart ---
+    new Chart(document.getElementById('leadsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['11 Jul', '12 Jul', '13 Jul', '14 Jul', '15 Jul', '16 Jul', '17 Jul'],
+            datasets: [{
+                label: 'Leads',
+                data: [620, 850, 1100, 1350, 1200, 1320, 1326],
+                backgroundColor: '#8b5cf6',
+                borderRadius: 4,
+                barPercentage: 0.5
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true, max: 1500,
+                    ticks: { stepSize: 300, color: '#64748b', font: {size: 11} },
+                    grid: { color: '#f1f5f9', drawBorder: false }
+                },
+                x: {
+                    ticks: { color: '#64748b', font: {size: 11} },
+                    grid: { display: false, drawBorder: false }
+                }
+            }
+        }
+    });
+
+    // --- 5. Table Mini Sparklines ---
+    function createTableSparkline(ctxId, color) {
+        new Chart(document.getElementById(ctxId).getContext('2d'), {
+            type: 'line',
+            data: { 
+                labels: ['1','2','3','4','5'], 
+                datasets: [{ 
+                    data: getRandomData(5, 5, 20), 
+                    borderColor: color, 
+                    borderWidth: 2, 
+                    tension: 0.4,
+                    pointRadius: 0
+                }] 
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                scales: { x: { display: false }, y: { display: false, min: 0, max: 25 } }
+            }
+        });
+    }
+
+    // Colors matching the status
+    const colorGreen = '#10b981';
+    const colorBlue = '#3b82f6';
+    const colorOrange = '#f97316';
+    const colorRed = '#ef4444';
+
+    createTableSparkline('tblSpark1', colorGreen);
+    createTableSparkline('tblSpark2', colorGreen);
+    createTableSparkline('tblSpark3', colorGreen); 
+    createTableSparkline('tblSpark4', colorGreen); 
+    createTableSparkline('tblSpark5', colorOrange);
+    createTableSparkline('tblSpark6', colorRed);
+    createTableSparkline('tblSpark7', colorRed);
+
+</script>
+</body>
+</html>

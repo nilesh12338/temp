@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Double Bar Chart Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 60vh; /* Adjust height as needed */
+            width: 80vw;  /* Adjust width as needed */
+            max-width: 800px;
+        }
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card p-4">
+                    <h2 class="text-center mb-4 text-primary">Monthly Sales & Revenue Comparison</h2>
+                    <p class="text-center text-muted mb-4">A demonstration of a double bar chart using Chart.js</p>
+                    
+                    <div class="chart-container">
+                        <!-- Canvas element where Chart.js will render the chart -->
+                        <canvas id="myDoubleBarChart"></canvas>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button class="btn btn-outline-primary" onclick="randomizeData()">Randomize Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('myDoubleBarChart').getContext('2d');
+            
+            // Labels for the X-axis
+            const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+
+            // Initial data sets
+            const data = {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Sales (Units)',
+                        data: [65, 59, 80, 81, 56, 55, 40],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)', // Blue with opacity
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4 // slightly rounded corners on bars
+                    },
+                    {
+                        label: 'Revenue ($K)',
+                        data: [28, 48, 40, 19, 86, 27, 90],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)', // Red with opacity
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }
+                ]
+            };
+
+            // Configuration for the chart
+            const config = {
+                type: 'bar', // Specify chart type as bar
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Allows custom height via CSS
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '2023 Performance Metrics',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index', // Show tooltip for both datasets on hover
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Value'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                }
+            };
+
+            // Create the chart instance and attach it to the window object for global access
+            window.myChart = new Chart(ctx, config);
+        });
+
+        // Function to randomize data when the button is clicked
+        function randomizeData() {
+            if (window.myChart) {
+                // Generate random data for both datasets
+                window.myChart.data.datasets.forEach(dataset => {
+                    dataset.data = dataset.data.map(() => {
+                        return Math.floor(Math.random() * 100);
+                    });
+                });
+                
+                // Update the chart with new data and a smooth animation
+                window.myChart.update();
+            }
+        }
+    </script>
+</body>
+</html>

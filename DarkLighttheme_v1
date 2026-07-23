@@ -3,163 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bootstrap 5.3 Theme Switcher Demo</title>
+    <title>Bootstrap 5.3 Theme Switcher</title>
     
-    <!-- 1. ANTI-FLASH SCRIPT: Instantly sets theme before page paints -->
-    <script>
-        (function () {
-            const savedTheme = localStorage.getItem('theme');
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-bs-theme', theme);
-        })();
-    </script>
-
     <!-- Bootstrap 5.3 CSS -->
-    <link href="https://jsdelivr.net" rel="stylesheet">
-    <!-- Bootstrap Icons (for beautiful sun/moon icons) -->
-    <link href="https://jsdelivr.net" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons (for sun/moon icons) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
-<body class="bg-body text-body">
+<body>
 
-    <!-- NAVIGATION BAR -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">
-                <i class="bi bi-cpu border border-primary text-primary rounded p-1 me-2"></i>AppDash
-            </a>
+    <div class="container py-5">
+        <!-- Header & Toggle Button -->
+        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom">
+            <h2>Theme Switcher Demo</h2>
             
-            <!-- THEME TOGGLE BUTTON -->
-            <button class="btn btn-link nav-link order-lg-last ms-3" id="themeToggle" type="button" aria-label="Toggle theme">
-                <i class="bi bi-sun-fill fs-5" id="themeIcon"></i>
+            <button class="btn btn-outline-secondary d-flex align-items-center gap-2" id="theme-toggle" type="button">
+                <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
+                <span id="theme-text">Dark Mode</span>
             </button>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" href="#">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Analytics</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Settings</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="container my-5">
-        
-        <!-- HERO SECTION -->
-        <div class="p-5 mb-4 bg-body-tertiary rounded-3 border">
-            <div class="container-fluid py-3">
-                <h1 class="display-5 fw-bold">Bootstrap 5.3 Theme Demo</h1>
-                <p class="col-md-8 fs-4 text-secondary">This demo utilizes native CSS variables embedded within Bootstrap 5.3. Use the toggle button in the navbar to seamlessly switch modes without any layout breakages.</p>
-                <button class="btn btn-primary btn-lg" type="button">Primary Action</button>
-                <button class="btn btn-outline-secondary btn-lg ms-2" type="button">Secondary</button>
-            </div>
         </div>
 
-        <!-- CARDS MATRIX -->
-        <div class="row g-4 mb-5">
-            <div class="col-md-4">
+        <!-- Demo Content -->
+        <div class="row g-4">
+            <div class="col-md-6">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title text-primary"><i class="bi bi-lightning-charge me-2"></i>Adaptive Colors</h5>
-                        <p class="card-text text-secondary">Cards, borders, and general body backgrounds dynamically transition because they rely on native Bootstrap semantic tokens.</p>
+                        <h5 class="card-title">Bootstrap Card</h5>
+                        <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>
+                        <p class="card-text">Notice how the background, text colors, and borders automatically adjust when you toggle the theme.</p>
+                        <a href="#" class="btn btn-primary">Primary Button</a>
+                        <a href="#" class="btn btn-outline-danger">Outline Button</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title text-success"><i class="bi bi-shield-check me-2"></i>Persistent Choice</h5>
-                        <p class="card-text text-secondary">Your preference is safely written to browser localStorage, retaining your setting even after refreshing the page.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title text-warning"><i class="bi bi-moon-stars me-2"></i>System Syncing</h5>
-                        <p class="card-text text-secondary">If no local preference is configured, it falls back gracefully to your underlying OS dark/light system state.</p>
-                    </div>
+
+            <div class="col-md-6">
+                <div class="p-4 rounded-3 bg-body-tertiary h-100 border shadow-sm">
+                    <h3>Tertiary Background</h3>
+                    <p>This box uses the <code>bg-body-tertiary</code> class. Bootstrap 5.3 uses a sophisticated color system that maps differently in light and dark modes to maintain contrast.</p>
+                    
+                    <ul class="list-group mt-3">
+                        <li class="list-group-item">List item 1</li>
+                        <li class="list-group-item">List item 2</li>
+                        <li class="list-group-item disabled" aria-disabled="true">A disabled item</li>
+                    </ul>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- DATA TABLES SECTION -->
-        <div class="card border mb-5">
-            <div class="card-header bg-body-tertiary fw-bold">Recent Invoices</div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>Invoice</th>
-                            <th>Customer</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><span class="fw-medium">#INV-0012</span></td>
-                            <td>Alex Mercer</td>
-                            <td>July 23, 2026</td>
-                            <td><span class="badge bg-success-subtle text-success">Paid</span></td>
-                            <td>$450.00</td>
-                        </tr>
-                        <tr>
-                            <td><span class="fw-medium">#INV-0013</span></td>
-                            <td>Jane Doe</td>
-                            <td>July 22, 2026</td>
-                            <td><span class="badge bg-warning-subtle text-warning">Pending</span></td>
-                            <td>$1,200.00</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    </main>
-
-    <!-- Bootstrap 5.3 JavaScript Bundle -->
-    <script src="https://jsdelivr.net"></script>
-
-    <!-- THEME SWITCHER LOGIC -->
+    <!-- Theme Switcher Logic -->
     <script>
-        const themeToggleBtn = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
+        document.addEventListener('DOMContentLoaded', () => {
+            const htmlElement = document.documentElement;
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
 
-        // Main theme sync engine
-        function syncThemeUI(theme) {
-            document.documentElement.setAttribute('data-bs-theme', theme);
-            localStorage.setItem('theme', theme);
+            // 1. Check local storage for saved theme, default to 'light'
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
 
-            // Dynamically alter icons based on state
-            if (theme === 'dark') {
-                themeIcon.className = 'bi bi-moon-stars-fill fs-5 text-warning';
-            } else {
-                themeIcon.className = 'bi bi-sun-fill fs-5 text-primary';
-            }
-        }
+            // 2. Listen for click events on the toggle button
+            themeToggleBtn.addEventListener('click', () => {
+                const currentTheme = htmlElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                setTheme(newTheme);
+            });
 
-        // Initialize state on render
-        const activeTheme = document.documentElement.getAttribute('data-bs-theme');
-        syncThemeUI(activeTheme);
+            // 3. Helper function to apply the theme and update UI
+            function setTheme(theme) {
+                // Apply theme to the HTML tag
+                htmlElement.setAttribute('data-bs-theme', theme);
+                // Save to local storage
+                localStorage.setItem('theme', theme);
 
-        // Click interaction handler
-        themeToggleBtn.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-            const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            syncThemeUI(nextTheme);
-        });
-
-        // Watch OS preferences live if no local override exists
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-            if (!localStorage.getItem('theme')) {
-                syncThemeUI(e.matches ? 'dark' : 'light');
+                // Update Button Icon & Text
+                if (theme === 'dark') {
+                    themeIcon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
+                    themeText.textContent = 'Light Mode';
+                } else {
+                    themeIcon.classList.replace('bi-sun-fill', 'bi-moon-stars-fill');
+                    themeText.textContent = 'Dark Mode';
+                }
             }
         });
     </script>

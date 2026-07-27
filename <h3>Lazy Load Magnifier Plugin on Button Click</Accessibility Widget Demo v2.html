@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Accessibility Widget Demo</title>
+
+    <!-- jQuery and jQuery UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <style>
+        /* =========================================
+           DEMO PAGE STYLES
+           ========================================= */
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; color: #333; transition: background-color 0.3s, color 0.3s; }
+        .demo-container { max-width: 800px; margin: 50px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #280071; }
+        p { line-height: 1.6; margin-bottom: 15px; }
+        a { color: #12a8e0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* =========================================
+           WIDGET CSS & ICONS
+           ========================================= */
+        @font-face {
+            font-family: 'Open-Dyslexic';
+            src: local('Comic Sans MS'); /* Fallback for demo purposes */
+        }
+        :root { --color-black: #000; --color-black3: #161519; --color-white: #fff; --color-dark-blue-1: #280071; }
+        .relative { position: relative; }
+        .sbi-icon { background-color: #12a8e0; display: inline-block; width: 32px; height: 32px; mask-size: contain; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; mask-position: center; }
+        
+        /* Icons */
+        .icon-bigger-text { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2243%22%20viewBox%3D%220%200%2032%2043%22%3E%3Ctext%20id%3D%22TT%22%20transform%3D%22translate(0%2034)%22%20fill%3D%22%2300a9e0%22%20font-size%3D%2221%22%20font-family%3D%22Roboto-Medium%2C%20Roboto%22%20font-weight%3D%22500%22%3E%3Ctspan%20x%3D%220%22%20y%3D%220%22%3ET%3C%2Ftspan%3E%3Ctspan%20y%3D%220%22%20font-size%3D%2232%22%20font-family%3D%22Roboto-Regular%2C%20Roboto%22%20font-weight%3D%22400%22%3ET%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E"); }
+        .icon-smaller-text { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2243%22%20viewBox%3D%220%200%2032%2043%22%3E%3Ctext%20id%3D%22TT%22%20transform%3D%22translate(32%209)%20rotate(180)%22%20fill%3D%22%2300a9e0%22%20font-size%3D%2221%22%20font-family%3D%22Roboto-Medium%2C%20Roboto%22%20font-weight%3D%22500%22%3E%3Ctspan%20x%3D%220%22%20y%3D%220%22%3ET%3C%2Ftspan%3E%3Ctspan%20y%3D%220%22%20font-size%3D%2232%22%20font-family%3D%22Roboto-Regular%2C%20Roboto%22%20font-weight%3D%22400%22%3ET%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E"); transform: rotate(-180deg); }
+        .icon-text-spacing { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20id%3D%22character_horizontal_spacing%22%20width%3D%2236.911%22%20height%3D%2236.911%22%20viewBox%3D%220%200%2036.911%2036.911%22%3E%3Cg%20id%3D%22Group_57777%22%20data-name%3D%22Group%2057777%22%20transform%3D%22translate(5.767%205.767)%22%3E%3Cpath%20id%3D%22Path_78739%22%20data-name%3D%22Path%2078739%22%20d%3D%22M23.841%2C7.307V5H10V7.307%22%20transform%3D%22translate(-4.233%20-5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78740%22%20data-name%3D%22Path%2078740%22%20d%3D%22M16%2C21.148V5%22%20transform%3D%22translate(-3.312%20-5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78741%22%20data-name%3D%22Path%2078741%22%20d%3D%22M14%2C19h4.614%22%20transform%3D%22translate(-3.619%20-2.852)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78742%22%20data-name%3D%22Path%2078742%22%20d%3D%22M9.615%2C19%2C5%2C23.614l4.614%2C4.614%22%20transform%3D%22translate(-5%20-2.852)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78743%22%20data-name%3D%22Path%2078743%22%20d%3D%22M5%2C23H30.376%22%20transform%3D%22translate(-5%20-2.238)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78744%22%20data-name%3D%22Path%2078744%22%20d%3D%22M23%2C19l4.615%2C4.614L23%2C28.228%22%20transform%3D%22translate(-2.238%20-2.852)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3C%2Fg%3E%3Cpath%20id%3D%22Path_78745%22%20data-name%3D%22Path%2078745%22%20d%3D%22M0%2C0H36.911V36.911H0Z%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E"); }
+        .icon-line-hight { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20id%3D%22height%22%20d%3D%22M20.273%2C29h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182ZM10.467%2C5h-.024a1.088%2C1.088%2C0%2C0%2C0-.5.128l-.014.008a1.075%2C1.075%2C0%2C0%2C0-.129.083L5.436%2C8.491a1.091%2C1.091%2C0%2C1%2C0%2C1.309%2C1.745L9.364%2C8.273V25.727L6.745%2C23.764a1.091%2C1.091%2C0%2C0%2C0-1.309%2C1.745L9.8%2C28.782a1.075%2C1.075%2C0%2C0%2C0%2C.129.083l.014.008a1.088%2C1.088%2C0%2C0%2C0%2C.5.128h.024a1.088%2C1.088%2C0%2C0%2C0%2C.5-.128l.014-.008a1.075%2C1.075%2C0%2C0%2C0%2C.129-.083l4.364-3.273a1.091%2C1.091%2C0%2C0%2C0-1.309-1.745l-2.618%2C1.964V8.273l2.618%2C1.964a1.091%2C1.091%2C0%2C1%2C0%2C1.309-1.745L11.109%2C5.218a1.076%2C1.076%2C0%2C0%2C0-.129-.083l-.014-.008a1.088%2C1.088%2C0%2C0%2C0-.5-.128Zm9.806%2C18.545h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Zm0-5.455h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Zm0-5.455h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Zm0-5.455h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Z%22%20transform%3D%22translate(-5%20-5)%22%20fill%3D%22%2300a9e0%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E"); }
+        .icon-dyslexia-font { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2226%22%20height%3D%2228%22%20viewBox%3D%220%200%2026%2028%22%3E%3Ctext%20id%3D%22DF%22%20transform%3D%22translate(0%2022)%22%20fill%3D%22%2300a9e0%22%20font-size%3D%2221%22%20font-family%3D%22Roboto-Medium%2C%20Roboto%22%20font-weight%3D%22500%22%3E%3Ctspan%20x%3D%220%22%20y%3D%220%22%3EDF%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E"); }
+        .icon-adhd-friendly { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2228.708%22%20height%3D%2231.626%22%20viewBox%3D%220%200%2028.708%2031.626%22%3E%3Cg%20id%3D%22adhd%22%20transform%3D%22translate(-30.857%20-6.75)%22%3E%3Cg%20id%3D%22Group_57779%22%20data-name%3D%22Group%2057779%22%20transform%3D%22translate(31.612%207.5)%22%3E%3Cpath%20id%3D%22Path_78752%22%20data-name%3D%22Path%2078752%22%20d%3D%22M335.754%2C45.909V45m1.818%2C1.818v-.909%22%20transform%3D%22translate(-317.318%20-42.727)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-width%3D%221.5%22%20fill-rule%3D%22evenodd%22%2F%3E%3Cpath%20id%3D%22Path_78753%22%20data-name%3D%22Path%2078753%22%20d%3D%22M113.113%2C80.447c1.227%2C6.325%2C8.979%2C9.027%2C10.01%2C4.91.638-2.545-1.978-7.571-4.826-6.747-1.685.487-2.626%2C2.92-.657%2C5.508%2C1.558%2C2.048%2C4.62%2C3.64%2C6.831%2C3.536%2C4.911-.231%2C6.659-8.3-2.611-13.056-4.482-2.3-6.859.376-5.873%2C3.437%2C2.18%2C6.768%2C11.442%2C8.032%2C13.86%2C4.9%2C2.589-3.349-2.132-9.343-7.129-9.892-2.936-.323-3.472%2C3.333%2C1.229%2C5.969%2C4.88%2C2.737%2C7.5.865%2C8.63-.091%22%20transform%3D%22translate(-108.173%20-69.056)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-width%3D%221.5%22%20fill-rule%3D%22evenodd%22%2F%3E%3Cpath%20id%3D%22Path_78754%22%20data-name%3D%22Path%2078754%22%20d%3D%22M50.084%2C37.626h2.273V35.591a7.678%2C7.678%2C0%2C0%2C1%2C2.479-6.376%2C12.67%2C12.67%2C0%2C0%2C0%2C3.979-9.194C58.815%2C12.544%2C52.735%2C7.5%2C45.5%2C7.5a11.447%2C11.447%2C0%2C0%2C0-8.225%2C3.409m-.636.692a13.022%2C13.022%2C0%2C0%2C0-3.051%2C8.421l-1.922%2C7.015a.97.97%2C0%2C0%2C0%2C.926%2C1.35h2.323v5.189h5.491v4.051h8.766%22%20transform%3D%22translate(-31.612%20-7.5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-width%3D%221.5%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"); }
+        .icon-saturate { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2221.316%22%20height%3D%2229.235%22%20fill%3D%22none%22%20viewBox%3D%220%200%2021.316%2029.235%22%3E%3Cg%20transform%3D%22translate(-10.5%20-2.527)%22%3E%3Cpath%20d%3D%22M21.738%2C2.791a.768.768%2C0%2C0%2C0-1.16%2C0C20.167%2C3.307%2C10.5%2C15.432%2C10.5%2C21.1a10.658%2C10.658%2C0%2C1%2C0%2C21.316%2C0c0-5.671-9.667-17.8-10.078-18.312ZM11.987%2C21.1c0-3.966%2C5.76-12.111%2C8.427-15.66V30.23A9.176%2C9.176%2C0%2C0%2C1%2C11.987%2C21.1Z%22%20fill%3D%22%2300a9e0%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"); width: 28px; height: 28px; }
+        .icon-moon { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg fill='none' fill-rule='evenodd' transform='translate(-442 -200)'%3E%3Cg fill='currentColor' transform='translate(356 144)'%3E%3Cpath fill-rule='nonzero' d='M108.5 24C108.5 27.5902136 105.590214 30.5 102 30.5 98.4097864 30.5 95.5 27.5902136 95.5 24 95.5 20.4097864 98.4097864 17.5 102 17.5 105.590214 17.5 108.5 24zM107 24C107 21.2382136 104.761786 19 102 19 99.2382136 19 97 21.2382136 97 24 97 26.7617864 99.2382136 29 102 29 104.761786 29 107 26.7617864 107 24zM101 12.75L101 14.75C101 15.1642136 101.335786 15.5 101.75 15.5 102.164214 15.5 102.5 15.1642136 102.5 14.75L102.5 12.75C102.5 12.3357864 102.164214 12 101.75 12 101.335786 12 101 12.3357864 101 12.75zM95.7255165 14.6323616L96.7485165 16.4038616C96.9556573 16.7625614 97.4143618 16.8854243 97.7730616 16.6782835 98.1317614 16.4711427 98.2546243 16.0124382 98.0474835 15.6537384L97.0244835 13.8822384C96.8173427 13.5235386 96.3586382 13.4006757 95.9999384 13.6078165 95.6412386 13.8149573 95.5183757 14.2736618 95.7255165 14.6323616zM91.8822384 19.0244835L93.6537384 20.0474835C94.0124382 20.2546243 94.4711427 20.1317614 94.6782835 19.7730616 94.8854243 19.4143618 94.7625614 18.9556573 94.4038616 18.7485165L92.6323616 17.7255165C92.2736618 17.5183757 91.8149573 17.6412386 91.6078165 17.9999384 91.4006757 18.3586382 91.5235386 18.8173427 91.8822384 19.0244835zM90.75 25L92.75 25C93.1642136 25 93.5 24.6642136 93.5 24.25 93.5 23.8357864 93.1642136 23.5 92.75 23.5L90.75 23.5C90.3357864 23.5 90 23.8357864 90 24.25 90 24.6642136 90.3357864 25 90.75 25zM92.6323616 30.2744835L94.4038616 29.2514835C94.7625614 29.0443427 94.8854243 28.5856382 94.6782835 28.2269384 94.4711427 27.8682386 94.0124382 27.7453757 93.6537384 27.9525165L91.8822384 28.9755165C91.5235386 29.1826573 91.4006757 29.6413618 91.6078165 30.0000616 91.8149573 30.3587614 92.2736618 30.4816243 92.6323616 30.2744835zM97.0244835 34.1177616L98.0474835 32.3462616C98.2546243 31.9875618 98.1317614 31.5288573 97.7730616 31.3217165 97.4143618 31.1145757 96.9556573 31.2374386 96.7485165 31.5961384L95.7255165 33.3676384C95.5183757 33.7263382 95.6412386 34.1850427 95.9999384 34.3921835 96.3586382 34.5993243 96.8173427 34.4764614 97.0244835 34.1177616zM103 35.25L103 33.25C103 32.8357864 102.664214 32.5 102.25 32.5 101.835786 32.5 101.5 32.8357864 101.5 33.25L101.5 35.25C101.5 35.6642136 101.835786 36 102.25 36 102.664214 36 103 35.6642136 103 35.25zM108.274483 33.3676384L107.251483 31.5961384C107.044343 31.2374386 106.585638 31.1145757 106.226938 31.3217165 105.868239 31.5288573 105.745376 31.9875618 105.952517 32.3462616L106.975517 34.1177616C107.182657 34.4764614 107.641362 34.5993243 108.000062 34.3921835 108.358761 34.1850427 108.481624 33.7263382 108.274483 33.3676384zM112.117762 28.9755165L110.346262 27.9525165C109.987562 27.7453757 109.528857 27.8682386 109.321717 28.2269384 109.114576 28.5856382 109.237439 29.0443427 109.596138 29.2514835L111.367638 30.2744835C111.726338 30.4816243 112.185043 30.3587614 112.392183 30.0000616 112.599324 29.6413618 112.476461 29.1826573 112.117762 28.9755165zM113.25 23L111.25 23C110.835786 23 110.5 23.3357864 110.5 23.75 110.5 24.1642136 110.835786 24.5 111.25 24.5L113.25 24.5C113.664214 24.5 114 24.1642136 114 23.75 114 23.3357864 113.664214 23 113.25 23zM111.367638 17.7255165L109.596138 18.7485165C109.237439 18.9556573 109.114576 19.4143618 109.321717 19.7730616 109.528857 20.1317614 109.987562 20.2546243 110.346262 20.0474835L112.117762 19.0244835C112.476461 18.8173427 112.599324 18.3586382 112.392183 17.9999384 112.185043 17.6412386 111.726338 17.5183757 111.367638 17.7255165zM106.975517 13.8822384L105.952517 15.6537384C105.745376 16.0124382 105.868239 16.4711427 106.226938 16.6782835 106.585638 16.8854243 107.044343 16.7625614 107.251483 16.4038616L108.274483 14.6323616C108.481624 14.2736618 108.358761 13.8149573 108.000062 13.6078165 107.641362 13.4006757 107.182657 13.5235386 106.975517 13.8822384z' transform='translate(0 48)' stroke='currentColor' stroke-width='0.25'%3E%3C/path%3E%3Cpath d='M98.6123,60.1372 C98.6123,59.3552 98.8753,58.6427 99.3368,58.0942 C99.5293,57.8657 99.3933,57.5092 99.0943,57.5017 C99.0793,57.5012 99.0633,57.5007 99.0483,57.5007 C97.1578,57.4747 95.5418,59.0312 95.5008,60.9217 C95.4578,62.8907 97.0408,64.5002 98.9998,64.5002 C99.7793,64.5002 100.4983,64.2452 101.0798,63.8142 C101.3183,63.6372 101.2358,63.2627 100.9478,63.1897 C99.5923,62.8457 98.6123,61.6072 98.6123,60.1372' transform='translate(3 11)'%3E%3C/path%3E%3C/g%3E%3Cpolygon points='444 228 468 228 468 204 444 204'%3E%3C/polygon%3E%3C/g%3E%3C/svg%3E"); }
+        .icon-invert { mask-image: url("data:image/svg+xml,%0A%3Csvg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 34.1666C16.5299 34.1666 13.5791 32.9674 11.1474 30.5689C8.71581 28.1704 7.5 25.2639 7.5 21.8494C7.5 20.1122 7.82853 18.5192 8.48558 17.0705C9.14264 15.6218 10.0342 14.3184 11.1602 13.1603L20 4.48724L28.8397 13.1603C29.9657 14.3184 30.8573 15.6298 31.5143 17.0946C32.1714 18.5593 32.4999 20.1442 32.4999 21.8494C32.4999 25.2639 31.2841 28.1704 28.8525 30.5689C26.4209 32.9674 23.47 34.1666 20 34.1666ZM20 31.6667V7.99999L12.9166 15C11.9444 15.9167 11.2152 16.9541 10.7291 18.1122C10.243 19.2703 9.99996 20.516 9.99996 21.8494C9.99996 24.5438 10.9722 26.8536 12.9166 28.7788C14.8611 30.7041 17.2222 31.6667 20 31.6667Z' fill='%231C1B1F'/%3E%3C/svg%3E%0A"); transform: scaleX(-1); }
+        .icon-highlight-links { mask-image: url("data:image/svg+xml,%0A%3Csvg width='33' height='16' viewBox='0 0 33 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M14.6796 15.564H8.39758C6.30486 15.564 4.521 14.8266 3.046 13.3518C1.571 11.877 0.833496 10.0934 0.833496 8.0009C0.833496 5.90843 1.571 4.12449 3.046 2.64907C4.521 1.17365 6.30486 0.435944 8.39758 0.435944H14.6796V2.93586H8.39758C6.998 2.93586 5.80408 3.42999 4.81583 4.41824C3.82758 5.40649 3.33345 6.6004 3.33345 7.99999C3.33345 9.39957 3.82758 10.5935 4.81583 11.5817C5.80408 12.57 6.998 13.0641 8.39758 13.0641H14.6796V15.564ZM10.4168 9.24994V6.75003H22.9168V9.24994H10.4168ZM18.654 15.564V13.0641H24.936C26.3356 13.0641 27.5295 12.57 28.5177 11.5817C29.506 10.5935 30.0001 9.39957 30.0001 7.99999C30.0001 6.6004 29.506 5.40649 28.5177 4.41824C27.5295 3.42999 26.3356 2.93586 24.936 2.93586H18.654V0.435944H24.936C27.0287 0.435944 28.8126 1.17335 30.2876 2.64815C31.7626 4.12296 32.5001 5.9066 32.5001 7.99907C32.5001 10.0915 31.7626 11.8755 30.2876 13.3509C28.8126 14.8263 27.0287 15.564 24.936 15.564H18.654Z' fill='%231C1B1F'/%3E%3C/svg%3E%0A"); }
+        .icon-speaker { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2222.5%22%20height%3D%2225.5%22%20viewBox%3D%220%200%2022.5%2025.5%22%3E%3Cg%20transform%3D%22translate(-1553.25%20-840.25)%22%3E%3Cline%20y2%3D%2223%22%20transform%3D%22translate(1564.5%20841.5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-width%3D%222.5%22%2F%3E%3Cline%20y2%3D%2213%22%20transform%3D%22translate(1569.5%20846.5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-width%3D%222.5%22%2F%3E%3Cline%20y2%3D%2213%22%20transform%3D%22translate(1559.5%20846.5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-width%3D%222.5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"); }
+        .icon-cursor { mask-image: url("data:image/svg+xml,%0A%3Csvg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21.2594 35.7659C21.0495 35.8108 20.8395 35.8333 20.6296 35.8333H19.9998C17.8095 35.8333 15.7512 35.4177 13.8248 34.5866C11.8984 33.7555 10.2228 32.6276 8.79775 31.2029C7.37275 29.7781 6.24463 28.1027 5.41338 26.1766C4.58213 24.2506 4.1665 22.1927 4.1665 20.0028C4.1665 17.8129 4.58206 15.7545 5.41317 13.8276C6.24428 11.9007 7.3722 10.2246 8.79692 8.79919C10.2217 7.3738 11.8971 6.24537 13.8231 5.4139C15.7492 4.58242 17.8071 4.16669 19.997 4.16669C22.1869 4.16669 24.2453 4.58231 26.1722 5.41356C28.0991 6.24481 29.7752 7.37294 31.2006 8.79794C32.626 10.2229 33.7544 11.8986 34.5859 13.825C35.4174 15.7514 35.8331 17.8097 35.8331 20V20.6218C35.8331 20.829 35.8106 21.0363 35.7658 21.2436L33.3331 20.5V20C33.3331 16.2778 32.0415 13.125 29.4581 10.5416C26.8748 7.95831 23.722 6.66665 19.9998 6.66665C16.2776 6.66665 13.1248 7.95831 10.5415 10.5416C7.95813 13.125 6.66646 16.2778 6.66646 20C6.66646 23.7222 7.95813 26.875 10.5415 29.4583C13.1248 32.0416 16.2776 33.3333 19.9998 33.3333H20.4998L21.2594 35.7659ZM33.567 36.0736L26.0093 28.4999L24.1985 33.9741L19.9998 20L33.974 24.1986L28.4997 26.0095L36.0734 33.5672L33.567 36.0736Z' fill='%231C1B1F'/%3E%3C/svg%3E%0A"); }
+        .icon-animation-pause { mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IiMyMTIxMjEiIGQ9Ik05IDE2aDJWOEg5em00IDBoMlY4aC0yem0tMSA2cS0yLjA3NSAwLTMuOS0uNzg4dC0zLjE3NS0yLjEzN1QyLjc4OCAxNS45VDIgMTJ0Ljc4OC0zLjl0Mi4xMzctMy4xNzVUOC4xIDIuNzg4VDEyIDJ0My45Ljc4OHQzLjE3NSAyLjEzN1QyMS4yMTMgOC4xVDIyIDEydC0uNzg4IDMuOXQtMi4xMzcgMy4xNzV0LTMuMTc1IDIuMTM4VDEyIDIybTAtMnEzLjM1IDAgNS42NzUtMi4zMjVUMjAgMTJ0LTIuMzI1LTUuNjc1VDEyIDRUNi4zMjUgNi4zMjVUNCAxMnQyLjMyNSA1LjY3NVQxMiAyMG0wLTgiLz48L3N2Zz4="); }
+
+        /* Trigger Button */
+        .sbi-widget-custom-trigger { border: none; border-radius: 70px; bottom: 70px; cursor: pointer; height: 70px; padding: 18px; position: fixed; right: 0px; left: 35px; display: flex; overflow: hidden; align-items: center; width: auto; max-width: 70px; transition: all 400ms; color: var(--color-white); background-color: var(--color-dark-blue-1); text-align: left; z-index: 99999; box-shadow: 0px 13px 14px -6px rgba(0, 0, 0, 0.35); }
+        .sbi-widget-custom-trigger img { width: 25px; height: 25px; margin-left: 5px; margin-top: -10px; }
+        .sbi-widget-custom-trigger:hover span { opacity: 1; }
+        .sbi-widget-custom-trigger span { white-space: nowrap; padding-left: 5px; font-size: 15px; opacity: 0; transition: opacity 0.3s;}
+        
+        /* Widget Panel */
+        .sbiAcc { background: var(--color-white); max-width: 450px; height: 85vh; width: 100%; filter: drop-shadow(0 10px 20px rgb(2 2 2 / 20%)); position: fixed; z-index: 999999; bottom: 85px; display: none; overflow: hidden; border-radius: 8px; }
+        .sbiAcc-close { background: transparent; border: none; color: #fff; cursor: pointer; font-weight: bold; border: 2px solid white; padding: 2px 5px; border-radius: 4px; }
+        .second-panel { display: flex; align-items: center; padding: 14px 16px; justify-content: space-between; background-image: linear-gradient(263deg, #1BA8E0, #280071); cursor: move; }
+        .second-panel h2 { font-size: 16px; font-weight: 200; color: var(--color-white); margin: 0; }
+        .sbiAcc-body { background: #fff; position: relative; z-index: 1; padding: 18px; height: calc(100% - 130px); overflow-y: auto; }
+        
+        /* 3-Column Grid */
+        .sbiAcc-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding-bottom: 25px; }
+        .sbiAcc-features__item__i { position: relative; width: 100%; height: 95px; display: flex; flex-flow: column; align-items: center; justify-content: center; cursor: pointer; background: #00A9E008; border-radius: 12px; border: 2px solid transparent; transition: all .15s ease; outline: none; }
+        .sbiAcc-features__item__icon { height: 32px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+        .sbiAcc-features__item__name { font-size: 12px; font-weight: 600; color: #280977; text-align: center; }
+        .sbiAcc-features__item__i:hover { background-color: #ecd0ff6b; border-color: #280071; }
+        
+        /* Active States */
+        .sbi-accessibility-feature-active .sbiAcc-features__item__i { border: 2px solid var(--color-dark-blue-1); box-shadow: 0 0 0 5px rgba(0, 107, 230, 0.1); }
+        .sbi-accessibility-feature-active .sbiAcc-features__item__icon svg, .sbi-accessibility-feature-active .sbiAcc-features__item__name { color: var(--color-dark-blue-1); }
+        .sbi-accessibility-feature-active .sbi-icon { background-color: var(--color-dark-blue-1); }
+        
+        /* Progress Steps */
+        .sbiAcc-features__item__steps { display: flex; width: 75%; opacity: 0; visibility: hidden; position: absolute; bottom: 6px; }
+        .sbiAcc-features__item__steps.sbi-accessibility-featureSteps-visible { opacity: 1; visibility: visible; }
+        .sbiAcc-features__step { width: 100%; border-radius: 10px; display: block; height: 3px; position: relative; background: #1937B247; margin: 0 5px; }
+        .sbiAcc-features__step.sbi-accessibility-active { background: var(--color-dark-blue-1); }
+        
+        /* Hidden tick logic */
+        .tick-active { display: none; }
+
+        /* Reset Button footer */
+        .reset-panel { position: absolute; width: 100%; bottom: 0; background: #fff; padding: 15px 0; display: flex; justify-content: center; }
+        .copyrights-accessibility { width: 90%; }
+        .btn-reset-all { background-color: #280977; border: none; border-radius: 8px; cursor: pointer; padding: 12px; color: #fff; font-size: 14px; width: 100%; font-weight: bold; }
+
+        /* =========================================
+           APPLICATION CLASSES (Features logic)
+           ========================================= */
+        
+        /* Dyslexia Mode */
+        .sbi-accessibility-dyslexia-mode *:not(.sbiAcc *):not(.sbiAcc) { font-family: 'Open-Dyslexic', 'Comic Sans MS', sans-serif !important; }
+        
+        /* Dark Mode */
+        body.sbi-accessibility-dark-mode { background-color: var(--color-black3); color: var(--color-white); }
+        body.sbi-accessibility-dark-mode .demo-container { background-color: #212121; color: white; }
+        body.sbi-accessibility-dark-mode h1, body.sbi-accessibility-dark-mode p { color: white; }
+        body.sbi-accessibility-dark-mode a { color: yellow !important; }
+
+        /* Invert */
+        html.sbi-accessibility-invert-colors { filter: invert(1); background: var(--color-white); }
+        
+        /* Saturation */
+        html.sbi-accessibility-saturate-low { filter: saturate(0.5) !important; }
+        html.sbi-accessibility-saturate-high { filter: saturate(3) !important; }
+        html.sbi-accessibility-saturate-desaturate { filter: saturate(0) !important; }
+
+        /* Text Spacing & Line Height */
+        .sbi-text-spacing { letter-spacing: 0.12em !important; word-spacing: 0.16em !important; }
+        .sbi-line-height { line-height: 1.8 !important; }
+
+        /* Highlight Links */
+        .sbi-accessibility-highlight-links a { background: #444701 !important; color: yellow !important; text-decoration: underline !important; }
+
+        /* Pause Animation */
+        .sbi-accessibility-animation-pause * { animation: none !important; transition: none !important; }
+
+        /* Custom Cursor */
+        .sbi-accessibility-custom-cursor,
+.sbi-accessibility-custom-cursor * {
+  cursor: url('data:image/svg+xml,<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="29.188px" height="43.625px" viewBox="0 0 29.188 43.625" enable-background="new 0 0 29.188 43.625" xml:space="preserve"><g><polygon fill="%23FFFFFF" stroke="%23D9DAD9" stroke-width="1.1406" stroke-miterlimit="10" points="2.8,4.549 26.847,19.902 16.964,22.701 24.239,37.749 18.278,42.017 9.741,30.724 1.138,35.809 "/><g><g><g><path fill="%23212627" d="M29.175,21.155c0.071-0.613-0.165-1.253-0.635-1.573L2.165,0.258c-0.424-0.32-0.988-0.346-1.435-0.053C0.282,0.497,0,1.03,0,1.617v34.171c0,0.613,0.306,1.146,0.776,1.439c0.471,0.267,1.059,0.213,1.482-0.16l7.482-6.344l6.847,12.155c0.259,0.48,0.729,0.746,1.2,0.746c0.235,0,0.494-0.08,0.706-0.213l6.988-4.585c0.329-0.213,0.565-0.586,0.659-1.013c0.094-0.426,0.024-0.88-0.188-1.226l-6.376-11.382l8.611-2.745C28.705,22.274,29.105,21.768,29.175,21.155z M16.964,22.701c-0.424,0.133-0.776,0.506-0.941,0.96c-0.165,0.48-0.118,1.013,0.118,1.439l6.588,11.781l-4.541,2.985l-6.894-12.315c-0.212-0.373-0.541-0.64-0.941-0.72c-0.094-0.027-0.165-0.027-0.259-0.027c-0.306,0-0.588,0.107-0.847,0.32L2.8,32.59V4.549l21.599,15.806L16.964,22.701z"/></g></g></g></g></svg>') 10 10, auto !important;
+}
+
+
+        /* ADHD Reading Mask[cite: 2] */
+        .reading-mask-horizontal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            pointer-events: none; z-index: 9999999; mix-blend-mode: multiply;
+            display: none; /* hidden by default */
+            background-image: linear-gradient(to bottom,
+                rgba(0, 0, 0, 0.7) 0%,
+                rgba(0, 0, 0, 0.7) calc(var(--y, 50%) - 80px),
+                transparent calc(var(--y, 50%) - 80px),
+                transparent calc(var(--y, 50%) + 80px),
+                rgba(0, 0, 0, 0.7) calc(var(--y, 50%) + 80px),
+                rgba(0, 0, 0, 0.7) 100%);
+        }
+        .reading-mask-horizontal::before, .reading-mask-horizontal::after {
+            content: ''; position: absolute; left: 0; width: 100%; height: 6px; pointer-events: none;
+        }
+        .reading-mask-horizontal::before { top: calc(var(--y, 50%) - 80px); background-color: #6f339d; }
+        .reading-mask-horizontal::after { top: calc(var(--y, 50%) + 80px); background-color: #11298b; }
+        .mask-visible { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- ADHD Reading Mask Layer -->
+    <div id="readingMask" class="reading-mask-horizontal"></div>
+
+    <!-- Demo Content -->
+    <div class="demo-container">
+        <h1>SBI Accessibility Complete Grid</h1>
+        <p>This demo features the exact 13-button grid design requested, implementing features using jQuery without Bootstrap.</p>
+        <p>Toggle the <strong>ADHD Mode</strong> and move your mouse to see the horizontal reading mask in action! You can also toggle <strong>Dyslexia Friendly</strong>, <strong>Light-Dark</strong>, and <strong>Highlight Links</strong> below.</p>
+        <p><a href="#">Sample Link 1</a> | <a href="#">Sample Link 2</a></p>
+        <p>You can drag the widget panel around using its header.</p>
+    </div>
+
+    <!-- Trigger Button -->
+    <button id="sbi-widget-custom-trigger" class="sbi-widget-custom-trigger">
+        <img src="https://cdn-icons-png.flaticon.com/512/2082/2082875.png" alt="Accessibility">
+        <span>Accessibility</span>
+    </button>
+
+    <!-- Widget Panel -->
+    <div class="sbiAcc" id="sbi-main">
+        <div class="relative second-panel">
+            <h2 id="sbi-heading">Accessibility options</h2>
+            <button type="button" class="sbiAcc-close">Close</button>
+        </div>
+        <div class="sbiAcc-body">
+            <div class="sbiAcc-features">
+                
+                <!-- 1. Bigger Text -->
+                <div class="sbiAcc-features__item" id="featureItem">
+                    <button id="btn-s9" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-bigger-text"></span></span>
+                        <span class="sbiAcc-features__item__name">Bigger Text</span>
+                        <div class="sbiAcc-features__item__steps" id="featureSteps">
+                            <span class="sbiAcc-features__step"></span>
+                            <span class="sbiAcc-features__step"></span>
+                            <span class="sbiAcc-features__step"></span>
+                            <span class="sbiAcc-features__step"></span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- 2. Smaller Text -->
+                <div class="sbiAcc-features__item" id="featureItem-st">
+                    <button id="btn-s17" type="button" class="sbiAcc-features__item__i" disabled>
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-smaller-text"></span></span>
+                        <span class="sbiAcc-features__item__name">Smaller Text</span>
+                    </button>
+                </div>
+
+                <!-- 3. Text Spacing -->
+                <div class="sbiAcc-features__item" id="featureItem-ts">
+                    <button id="btn-s13" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-text-spacing"></span></span>
+                        <span class="sbiAcc-features__item__name">Text Spacing</span>
+                        <div class="sbiAcc-features__item__steps" id="featureSteps-ts">
+                            <span class="sbiAcc-features__step"></span>
+                            <span class="sbiAcc-features__step"></span>
+                            <span class="sbiAcc-features__step"></span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- 4. Line Height -->
+                <div class="sbiAcc-features__item" id="featureItem-lh">
+                    <button id="btn-s12" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-line-hight"></span></span>
+                        <span class="sbiAcc-features__item__name">Line Height</span>
+                        <div class="sbiAcc-features__item__steps" id="featureSteps-lh">
+                            <span class="sbiAcc-features__step"></span>
+                            <span class="sbiAcc-features__step"></span>
+                            <span class="sbiAcc-features__step"></span>
+                            <span class="sbiAcc-features__step"></span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- 5. Dyslexia Friendly -->
+                <div class="sbiAcc-features__item" id="featureItem-df">
+                    <button id="btn-df" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-dyslexia-font"></span></span>
+                        <span class="sbiAcc-features__item__name">Dyslexia Friendly</span>
+                    </button>
+                </div>
+
+                <!-- 6. ADHD Mode -->
+                <div class="sbiAcc-features__item" id="featureItem-adhd">
+                    <button id="btn-adhd" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-adhd-friendly"></span></span>
+                        <span class="sbiAcc-features__item__name">ADHD Mode</span>
+                    </button>
+                </div>
+
+                <!-- 7. Saturation -->
+                <div class="sbiAcc-features__item" id="featureItem-saturate">
+                    <button id="btn-saturate" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-saturate"></span></span>
+                        <span class="sbiAcc-features__item__name" id="sat-text">Saturation</span>
+                        <div class="sbiAcc-features__item__steps" id="featureStepsSaturate">
+                            <span class="sbiAcc-features__step"></span>
+                            <span class="sbiAcc-features__step"></span>
+                            <span class="sbiAcc-features__step"></span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- 8. Light-Dark -->
+                <div class="sbiAcc-features__item" id="featureItem-ht-dark">
+                    <button id="dark-btn" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-moon"></span></span>
+                        <span class="sbiAcc-features__item__name">Light-Dark</span>
+                    </button>
+                </div>
+
+                <!-- 9. Invert Colors -->
+                <div class="sbiAcc-features__item" id="featureItem-ic">
+                    <button id="btn-invert" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-invert"></span></span>
+                        <span class="sbiAcc-features__item__name">Invert Colors</span>
+                    </button>
+                </div>
+
+                <!-- 10. Highlight Links -->
+                <div class="sbiAcc-features__item" id="featureItem-ht">
+                    <button id="btn-s10" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-highlight-links"></span></span>
+                        <span class="sbiAcc-features__item__name">Highlight Links</span>
+                    </button>
+                </div>
+                
+                <!-- 11. Text To Speech -->
+                <div class="sbiAcc-features__item" id="featureItem_sp">
+                    <button id="speak" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-speaker"></span></span>
+                        <span class="sbiAcc-features__item__name">Text To Speech</span>
+                    </button>
+                </div>
+               
+                <!-- 12. Cursor -->
+                <div class="sbiAcc-features__item" id="featureItem-Cursor">
+                    <button id="btn-cursor" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-cursor"></span></span>
+                        <span class="sbiAcc-features__item__name">Cursor</span>
+                    </button>
+                </div>
+                
+                <!-- 13. Pause Animation -->
+                <div class="sbiAcc-features__item" id="featureItem-animate">
+                    <button id="btn-animation" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon"><span class="sbi-icon icon-animation-pause"></span></span>
+                        <span class="sbiAcc-features__item__name">Pause Animation</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        <div class="reset-panel">
+            <div class="copyrights-accessibility">
+                <button type="button" class="btn-reset-all" id="reset-all">Reset All Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const prefix = "sbi-accessibility-";
+            let fontSizeCount = 0;
+            let lineHeightCount = 0;
+            let textSpacingCount = 0;
+            let saturateCount = 0;
+            let adhdActive = false;
+            let screenReader = false;
+            const synth = window.speechSynthesis;
+
+            // 1. Draggable Panel
+            $('#sbi-main').draggable({ handle: ".second-panel", containment: "window" });
+
+            // 2. Open/Close Logic
+            $('#sbi-widget-custom-trigger').on('click', function() {
+                const widget = $('#sbi-main');
+                if (widget.is(':hidden')) {
+                    widget.css({ left: '0', top: 'auto', bottom: '85px' }); 
+                    widget.toggle('slide', { direction: 'left' }, 400);
+                } else {
+                    widget.toggle('slide', { direction: 'left' }, 400);
+                }
+            });
+
+            $('.sbiAcc-close').on('click', function() {
+                $('#sbi-main').toggle('slide', { direction: 'left' }, 400);
+            });
+
+            // =========================================
+            // 3. Feature Functions
+            // =========================================
+
+            // ADHD Mode (Mask tracks cursor)
+            $('#btn-adhd').on('click', function() {
+                adhdActive = !adhdActive;
+                $(this).toggleClass(prefix + 'feature-active', adhdActive);
+                if (adhdActive) {
+                    $('#readingMask').addClass('mask-visible');
+                } else {
+                    $('#readingMask').removeClass('mask-visible');
+                }
+            });
+
+            // Update Mask Y Position on Mouse Move
+            $(document).on('mousemove', function(e) {
+                if (adhdActive) {
+                    $('#readingMask').css('--y', e.clientY + 'px');
+                }
+            });
+
+            // Dyslexia Friendly
+            $('#btn-df').on('click', function() {
+                $(this).toggleClass(prefix + 'feature-active');
+                $('body').toggleClass(prefix + 'dyslexia-mode');
+            });
+
+            // Light-Dark
+            $('#dark-btn').on('click', function() {
+                $(this).toggleClass(prefix + 'feature-active');
+                $('body').toggleClass(prefix + 'dark-mode');
+            });
+
+            // Saturation Cycle (Normal -> Low -> High -> Desaturate)
+            $('#btn-saturate').on('click', function() {
+                saturateCount = (saturateCount + 1) % 4;
+                const $btn = $(this);
+                const $steps = $('#featureStepsSaturate');
+                
+                $('html').removeClass(prefix + 'saturate-low ' + prefix + 'saturate-high ' + prefix + 'saturate-desaturate');
+                
+                if (saturateCount === 0) {
+                    $btn.removeClass(prefix + 'feature-active');
+                    $steps.removeClass(prefix + 'featureSteps-visible');
+                    $('#sat-text').text('Saturation');
+                    $('#featureStepsSaturate span').removeClass(prefix + 'active');
+                } else {
+                    $btn.addClass(prefix + 'feature-active');
+                    $steps.addClass(prefix + 'featureSteps-visible');
+                    
+                    if (saturateCount === 1) { $('html').addClass(prefix + 'saturate-low'); $('#sat-text').text('Low Saturation'); }
+                    if (saturateCount === 2) { $('html').addClass(prefix + 'saturate-high'); $('#sat-text').text('High Saturation'); }
+                    if (saturateCount === 3) { $('html').addClass(prefix + 'saturate-desaturate'); $('#sat-text').text('Desaturate'); }
+
+                    $('#featureStepsSaturate span').removeClass(prefix + 'active').each(function(index) {
+                        if (index < saturateCount) $(this).addClass(prefix + 'active');
+                    });
+                }
+            });
+
+            // Highlight Links
+            $('#btn-s10').on('click', function() {
+                $(this).toggleClass(prefix + 'feature-active');
+                $('body').toggleClass(prefix + 'highlight-links');
+            });
+
+            // Text To Speech
+            $('#speak').on('click', function() {
+                screenReader = !screenReader;
+                $(this).toggleClass(prefix + 'feature-active', screenReader);
+                if (!screenReader) synth.cancel();
+            });
+
+            $(document).on('click', function(e) {
+                if (screenReader) {
+                    const text = $(e.target).text().trim() || $(e.target).attr('alt') || "Clickable element";
+                    if (text) {
+                        synth.cancel();
+                        synth.speak(new SpeechSynthesisUtterance(text));
+                    }
+                }
+            });
+
+            // Cursor
+            $('#btn-cursor').on('click', function() {
+                $(this).toggleClass(prefix + 'feature-active');
+                $('body').toggleClass(prefix + 'custom-cursor');
+            });
+
+            // Pause Animation
+            $('#btn-animation').on('click', function() {
+                $(this).toggleClass(prefix + 'feature-active');
+                $('body').toggleClass(prefix + 'animation-pause');
+            });
+
+            // Invert Colors
+            $('#btn-invert').on('click', function() {
+                $(this).toggleClass(prefix + 'feature-active');
+                $('html').toggleClass(prefix + 'invert-colors');
+            });
+
+            // Fonts, Scaling, and Spacing (Same as previous implementation)
+            function applyTextSettings() {
+                let zoomValue = (1 + (fontSizeCount * 0.1)).toFixed(2);
+                $('body > *').not('.sbiAcc, .sbi-widget-custom-trigger, .reading-mask-horizontal').css('zoom', zoomValue);
+            }
+
+            function adjustFontSize(direction) {
+                if (direction === '+1') fontSizeCount = (fontSizeCount + 1) % 5;
+                else fontSizeCount = Math.max(0, fontSizeCount - 1);
+
+                const $btn = $('#btn-s9').parent();
+                $('#btn-s17').prop('disabled', fontSizeCount === 0);
+                applyTextSettings();
+
+                if (fontSizeCount === 0) {
+                    $btn.children('button').removeClass(prefix + 'feature-active');
+                    $('#featureSteps').removeClass(prefix + 'featureSteps-visible');
+                    $('#featureSteps span').removeClass(prefix + 'active');
+                } else {
+                    $btn.children('button').addClass(prefix + 'feature-active');
+                    $('#featureSteps').addClass(prefix + 'featureSteps-visible');
+                    $('#featureSteps span').removeClass(prefix + 'active').each(function(index) {
+                        if (index < fontSizeCount) $(this).addClass(prefix + 'active');
+                    });
+                }
+            }
+
+            $('#btn-s9').on('click', function() { adjustFontSize('+1'); });
+            $('#btn-s17').on('click', function() { adjustFontSize('-1'); });
+
+            $('#btn-s12').on('click', function() {
+                lineHeightCount = (lineHeightCount + 1) % 5;
+                $('p, h1, h2, h3, div, span, li').not('.sbiAcc *, .sbiAcc').toggleClass('sbi-line-height', lineHeightCount > 0);
+                if (lineHeightCount === 0) {
+                    $(this).removeClass(prefix + 'feature-active');
+                    $('#featureSteps-lh').removeClass(prefix + 'featureSteps-visible');
+                    $('#featureSteps-lh span').removeClass(prefix + 'active');
+                } else {
+                    $(this).addClass(prefix + 'feature-active');
+                    $('#featureSteps-lh').addClass(prefix + 'featureSteps-visible');
+                    $('#featureSteps-lh span').removeClass(prefix + 'active').each(function(index) {
+                        if (index < lineHeightCount) $(this).addClass(prefix + 'active');
+                    });
+                }
+            });
+
+            $('#btn-s13').on('click', function() {
+                textSpacingCount = (textSpacingCount + 1) % 4;
+                $('body *').not('.sbiAcc *, .sbiAcc').toggleClass('sbi-text-spacing', textSpacingCount > 0);
+                if (textSpacingCount === 0) {
+                    $(this).removeClass(prefix + 'feature-active');
+                    $('#featureSteps-ts').removeClass(prefix + 'featureSteps-visible');
+                    $('#featureSteps-ts span').removeClass(prefix + 'active');
+                } else {
+                    $(this).addClass(prefix + 'feature-active');
+                    $('#featureSteps-ts').addClass(prefix + 'featureSteps-visible');
+                    $('#featureSteps-ts span').removeClass(prefix + 'active').each(function(index) {
+                        if (index < textSpacingCount) $(this).addClass(prefix + 'active');
+                    });
+                }
+            });
+
+            // Reset All Settings
+            $('#reset-all').on('click', function() {
+                fontSizeCount = 0; lineHeightCount = 0; textSpacingCount = 0; saturateCount = 0;
+                adhdActive = false; screenReader = false; synth.cancel();
+
+                $('html').removeClass(prefix + 'invert-colors ' + prefix + 'saturate-low ' + prefix + 'saturate-high ' + prefix + 'saturate-desaturate');
+                $('body').removeClass(prefix + 'dyslexia-mode ' + prefix + 'dark-mode ' + prefix + 'highlight-links ' + prefix + 'custom-cursor ' + prefix + 'animation-pause');
+                
+                $('body *').removeClass('sbi-line-height sbi-text-spacing');
+                $('body > *').css('zoom', '1');
+                $('#readingMask').removeClass('mask-visible');
+                $('#sat-text').text('Saturation');
+                
+                $('.sbiAcc-features__item__i').removeClass(prefix + 'feature-active');
+                $('.sbiAcc-features__item__steps').removeClass(prefix + 'featureSteps-visible');
+                $('.sbiAcc-features__step').removeClass(prefix + 'active');
+                $('#btn-s17').prop('disabled', true);
+            });
+        });
+    </script>
+</body>
+</html>

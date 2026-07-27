@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessibility Widget Demo</title>
+
+    <!-- jQuery and jQuery UI (No Bootstrap) -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <style>
+        /* =========================================
+           DEMO PAGE STYLES (For testing the widget)
+           ========================================= */
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; color: #333; }
+        .demo-container { max-width: 800px; margin: 50px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #280071; }
+        p { line-height: 1.6; margin-bottom: 15px; }
+        a { color: #12a8e0; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* =========================================
+           WIDGET CSS (From Source 1)
+           ========================================= */
+        :root {
+            --color-black: #000;
+            --color-black3: #161519;
+            --color-black4: #212121;
+            --color-white: #fff;
+            --color-dark-blue-1: #280071;
+        }
+        .relative { position: relative; }
+        .sbi-icon { background-color: #12a8e0; display: inline-block; width: 32px; height: 32px; mask-size: contain; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; mask-position: center; }
+        
+        /* Mask URLs from Source 1 */
+        .icon-bigger-text { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2243%22%20viewBox%3D%220%200%2032%2043%22%3E%3Ctext%20id%3D%22TT%22%20transform%3D%22translate(0%2034)%22%20fill%3D%22%2300a9e0%22%20font-size%3D%2221%22%20font-family%3D%22Roboto-Medium%2C%20Roboto%22%20font-weight%3D%22500%22%3E%3Ctspan%20x%3D%220%22%20y%3D%220%22%3ET%3C%2Ftspan%3E%3Ctspan%20y%3D%220%22%20font-size%3D%2232%22%20font-family%3D%22Roboto-Regular%2C%20Roboto%22%20font-weight%3D%22400%22%3ET%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E"); }
+        .icon-smaller-text { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2243%22%20viewBox%3D%220%200%2032%2043%22%3E%3Ctext%20id%3D%22TT%22%20transform%3D%22translate(32%209)%20rotate(180)%22%20fill%3D%22%2300a9e0%22%20font-size%3D%2221%22%20font-family%3D%22Roboto-Medium%2C%20Roboto%22%20font-weight%3D%22500%22%3E%3Ctspan%20x%3D%220%22%20y%3D%220%22%3ET%3C%2Ftspan%3E%3Ctspan%20y%3D%220%22%20font-size%3D%2232%22%20font-family%3D%22Roboto-Regular%2C%20Roboto%22%20font-weight%3D%22400%22%3ET%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E"); transform: rotate(-180deg); }
+        .icon-line-hight { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20id%3D%22height%22%20d%3D%22M20.273%2C29h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182ZM10.467%2C5h-.024a1.088%2C1.088%2C0%2C0%2C0-.5.128l-.014.008a1.075%2C1.075%2C0%2C0%2C0-.129.083L5.436%2C8.491a1.091%2C1.091%2C0%2C1%2C0%2C1.309%2C1.745L9.364%2C8.273V25.727L6.745%2C23.764a1.091%2C1.091%2C0%2C0%2C0-1.309%2C1.745L9.8%2C28.782a1.075%2C1.075%2C0%2C0%2C0%2C.129.083l.014.008a1.088%2C1.088%2C0%2C0%2C0%2C.5.128h.024a1.088%2C1.088%2C0%2C0%2C0%2C.5-.128l.014-.008a1.075%2C1.075%2C0%2C0%2C0%2C.129-.083l4.364-3.273a1.091%2C1.091%2C0%2C0%2C0-1.309-1.745l-2.618%2C1.964V8.273l2.618%2C1.964a1.091%2C1.091%2C0%2C1%2C0%2C1.309-1.745L11.109%2C5.218a1.076%2C1.076%2C0%2C0%2C0-.129-.083l-.014-.008a1.088%2C1.088%2C0%2C0%2C0-.5-.128Zm9.806%2C18.545h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Zm0-5.455h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Zm0-5.455h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Zm0-5.455h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Z%22%20transform%3D%22translate(-5%20-5)%22%20fill%3D%22%2300a9e0%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E"); }
+        .icon-text-spacing { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20id%3D%22character_horizontal_spacing%22%20width%3D%2236.911%22%20height%3D%2236.911%22%20viewBox%3D%220%200%2036.911%2036.911%22%3E%3Cg%20id%3D%22Group_57777%22%20data-name%3D%22Group%2057777%22%20transform%3D%22translate(5.767%205.767)%22%3E%3Cpath%20id%3D%22Path_78739%22%20data-name%3D%22Path%2078739%22%20d%3D%22M23.841%2C7.307V5H10V7.307%22%20transform%3D%22translate(-4.233%20-5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78740%22%20data-name%3D%22Path%2078740%22%20d%3D%22M16%2C21.148V5%22%20transform%3D%22translate(-3.312%20-5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78741%22%20data-name%3D%22Path%2078741%22%20d%3D%22M14%2C19h4.614%22%20transform%3D%22translate(-3.619%20-2.852)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78742%22%20data-name%3D%22Path%2078742%22%20d%3D%22M9.615%2C19%2C5%2C23.614l4.614%2C4.614%22%20transform%3D%22translate(-5%20-2.852)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78743%22%20data-name%3D%22Path%2078743%22%20d%3D%22M5%2C23H30.376%22%20transform%3D%22translate(-5%20-2.238)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78744%22%20data-name%3D%22Path%2078744%22%20d%3D%22M23%2C19l4.615%2C4.614L23%2C28.228%22%20transform%3D%22translate(-2.238%20-2.852)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3C%2Fg%3E%3Cpath%20id%3D%22Path_78745%22%20data-name%3D%22Path%2078745%22%20d%3D%22M0%2C0H36.911V36.911H0Z%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E"); }
+        .icon-invert { mask-image: url("data:image/svg+xml,%0A%3Csvg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask id='mask0_33_1073' style='mask-type:alpha' maskUnits='userSpaceOnUse' x='0' y='0' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23D9D9D9'/%3E%3C/mask%3E%3Cg mask='url(%23mask0_33_1073)'%3E%3Cpath d='M20 34.1666C16.5299 34.1666 13.5791 32.9674 11.1474 30.5689C8.71581 28.1704 7.5 25.2639 7.5 21.8494C7.5 20.1122 7.82853 18.5192 8.48558 17.0705C9.14264 15.6218 10.0342 14.3184 11.1602 13.1603L20 4.48724L28.8397 13.1603C29.9657 14.3184 30.8573 15.6298 31.5143 17.0946C32.1714 18.5593 32.4999 20.1442 32.4999 21.8494C32.4999 25.2639 31.2841 28.1704 28.8525 30.5689C26.4209 32.9674 23.47 34.1666 20 34.1666ZM20 31.6667V7.99999L12.9166 15C11.9444 15.9167 11.2152 16.9541 10.7291 18.1122C10.243 19.2703 9.99996 20.516 9.99996 21.8494C9.99996 24.5438 10.9722 26.8536 12.9166 28.7788C14.8611 30.7041 17.2222 31.6667 20 31.6667Z' fill='%231C1B1F'/%3E%3C/g%3E%3C/svg%3E%0A"); transform: scaleX(-1); }
+        
+        .sbi-widget-custom-trigger { border: none; border-radius: 70px; bottom: 70px; cursor: pointer; height: 70px; padding: 18px; position: fixed; right: 0px; left: 35px; display: flex; overflow: hidden; align-items: center; width: auto; max-width: 70px; transition: all 400ms; color: var(--color-white); background-color: var(--color-dark-blue-1); text-align: left; z-index: 99999; box-shadow: 0px 13px 14px -6px rgba(0, 0, 0, 0.35); }
+        .sbi-widget-custom-trigger img { width: 25px; height: 25px; margin-left: 5px; margin-top: -10px; }
+        .sbi-widget-custom-trigger:hover span { opacity: 1; }
+        .sbi-widget-custom-trigger span { white-space: nowrap; padding-left: 5px; font-size: 15px; opacity: 0; transition: opacity 0.3s;}
+        
+        .sbiAcc { border-top-right-radius: 0px; background: var(--color-white); max-width: 450px; min-height: 70%; width: 100%; filter: drop-shadow(0 10px 20px rgb(2 2 2 / 20%)); max-height: 530px; position: fixed; z-index: 999999; bottom: 85px; display: none; font-family: "Noto Sans", sans-serif !important; overflow: hidden; }
+        .sbiAcc-close { background: transparent; border: none; color: #fff; cursor: pointer; font-weight: bold; }
+        .second-panel { display: flex; align-items: center; padding: 14px 16px; gap: 20px; justify-content: space-between; background-image: linear-gradient(263deg, #1BA8E0, #280071); cursor: move; /* Drag cursor */ }
+        .second-panel h2 { font-size: 16px; font-weight: 200; color: var(--color-white); margin: 0; }
+        .sbiAcc-body { background: #fff; position: relative; z-index: 1; padding: 18px; margin-bottom: 15px; max-height: 400px; overflow-y: auto; }
+        .sbiAcc-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding-bottom: 15px; }
+        .sbiAcc-features__item__i { position: relative; width: 100%; height: 90px; display: flex; flex-flow: column; align-items: center; justify-content: center; cursor: pointer; background: #00A9E008; border-radius: 12px; border: 2px solid var(--color-white); padding: 5px; transition: border-color .15s ease; }
+        .sbiAcc-features__item__icon { height: 32px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+        .sbiAcc-features__item__name { font-size: 13px; font-weight: 500; color: #280977; }
+        .sbi-accessibility-feature-active .sbiAcc-features__item__i { border: 2px solid var(--color-dark-blue-1); box-shadow: 0 0 0 5px rgba(0, 107, 230, 0.1); }
+        .sbi-accessibility-feature-active .sbiAcc-features__item__icon svg, .sbi-accessibility-feature-active .sbiAcc-features__item__name { color: var(--color-dark-blue-1); }
+        .sbi-accessibility-feature-active .sbi-icon { background-color: var(--color-dark-blue-1); }
+        
+        /* Steps */
+        .sbiAcc-features__item__steps { display: flex; width: 75%; opacity: 0; visibility: hidden; position: absolute; bottom: 6px; }
+        .sbiAcc-features__item__steps.sbi-accessibility-featureSteps-visible { opacity: 1; visibility: visible; }
+        .sbiAcc-features__step { width: 100%; border-radius: 10px; display: block; height: 3px; position: relative; background: #1937B247; margin: 0 5px; }
+        .sbiAcc-features__step.sbi-accessibility-active { background: var(--color-dark-blue-1); }
+        
+        .tick-active { background-color: var(--color-dark-blue-1); width: 20px; height: 20px; border-radius: 50%; display: none; position: absolute; right: 10px; top: 10px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8' width='100%25' height='100%25'%3E%3Cpath fill='' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='m1.5 4.5 2 2 5-5'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: 12px; background-position: center; }
+        
+        .reset-panel { position: absolute; width: 100%; bottom: 10px; }
+        .copyrights-accessibility { background-color: var(--color-white); padding: 0 18px; display: flex; justify-content: center; align-items: center; }
+        .btn-reset-all { background-color: #280977; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 12px; color: #fff; font-size: 14px; width: 100%; font-weight: 500; }
+        
+        /* Application Classes */
+        html.sbi-accessibility-invert-colors { filter: invert(1); background: var(--color-white); }
+        .sbi-text-spacing { letter-spacing: 0.12em !important; word-spacing: 0.16em !important; }
+        .sbi-line-height { line-height: 1.8 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Demo Content to test accessibility features -->
+    <div class="demo-container">
+        <h1>SBI Accessibility Clone Demo</h1>
+        <p>This is a demonstration of the accessibility widget logic built strictly utilizing the <strong>jQuery</strong> and <strong>jQuery UI</strong> libraries, with no Bootstrap dependencies.</p>
+        <p>Try interacting with the widget floating on the bottom left of your screen. Features like <strong>Bigger Text</strong>, <strong>Line Height</strong>, and <strong>Invert Colors</strong> have been implemented.</p>
+        <p><a href="#">This is a sample link to demonstrate link highlighting.</a></p>
+        <p>You can also <strong>Drag</strong> the widget around the screen by clicking and holding the top header bar, utilizing jQuery UI's <code>.draggable()</code> function.</p>
+    </div>
+
+    <!-- The Trigger Button -->
+    <button id="sbi-widget-custom-trigger" class="sbi-widget-custom-trigger" aria-expanded="false">
+        <img src="https://cdn-icons-png.flaticon.com/512/2082/2082875.png" alt="Accessibility">
+        <span>Accessibility</span>
+    </button>
+
+    <!-- The Widget Panel (Initially hidden, using standard positioning from source 1) -->
+    <div class="sbiAcc sbi-light-theme gradient-head" id="sbi-main" role="dialog" aria-modal="true" aria-labelledby="sbi-heading">
+        <div class="relative second-panel">
+            <h2 id="sbi-heading">Accessibility options</h2>
+            <button type="button" aria-label="Close main navigation panel" class="sbiAcc-close">Close</button>
+        </div>
+        <div class="sbiAcc-body">
+            <div class="h-scroll">
+                <div class="sbiAcc-features">
+                    
+                    <!-- Bigger Text -->
+                    <div class="sbiAcc-features__item reset-feature" id="featureItem">
+                        <button aria-label="Bigger Text" id="btn-s9" type="button" class="sbiAcc-features__item__i">
+                            <span class="sbiAcc-features__item__icon">
+                                <span class="sbi-icon icon-bigger-text" role="img" aria-hidden="true"></span>
+                            </span>
+                            <span class="sbiAcc-features__item__name">Bigger Text</span>
+                            <div class="sbiAcc-features__item__steps reset-steps" id="featureSteps">
+                                <span class="step sbiAcc-features__step"></span>
+                                <span class="step sbiAcc-features__step"></span>
+                                <span class="step sbiAcc-features__step"></span>
+                                <span class="step sbiAcc-features__step"></span>
+                            </div>
+                            <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon"></span>
+                        </button>
+                    </div>
+
+                    <!-- Smaller Text -->
+                    <div class="sbiAcc-features__item reset-feature" id="featureItem-st">
+                        <button aria-label="Smaller Text" id="btn-s17" type="button" class="sbiAcc-features__item__i" disabled>
+                            <span class="sbiAcc-features__item__icon">
+                                <span class="sbi-icon icon-smaller-text" role="img" aria-hidden="true"></span>
+                            </span>
+                            <span class="sbiAcc-features__item__name">Smaller Text</span>
+                            <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIconSt"></span>
+                        </button>
+                    </div>
+
+                    <!-- Text Spacing -->
+                    <div class="sbiAcc-features__item reset-feature" id="featureItem-ts">
+                        <button aria-label="Text Spacing" id="btn-s13" type="button" class="sbiAcc-features__item__i">
+                            <span class="sbiAcc-features__item__icon">
+                                <span class="sbi-icon icon-text-spacing" role="img" aria-hidden="true"></span>
+                            </span>
+                            <span class="sbiAcc-features__item__name">Text Spacing</span>
+                            <div class="sbiAcc-features__item__steps reset-steps" id="featureSteps-ts">
+                                <span class="step sbiAcc-features__step"></span>
+                                <span class="step sbiAcc-features__step"></span>
+                                <span class="step sbiAcc-features__step"></span>
+                            </div>
+                            <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-ts"></span>
+                        </button>
+                    </div>
+
+                    <!-- Line Height -->
+                    <div class="sbiAcc-features__item reset-feature" id="featureItem-lh">
+                        <button aria-label="Line Height" id="btn-s12" type="button" class="sbiAcc-features__item__i">
+                            <span class="sbiAcc-features__item__icon">
+                                <span class="sbi-icon icon-line-hight" role="img" aria-hidden="true"></span>
+                            </span>
+                            <span class="sbiAcc-features__item__name">Line Height</span>
+                            <div class="sbiAcc-features__item__steps reset-steps" id="featureSteps-lh">
+                                <span class="step sbiAcc-features__step"></span>
+                                <span class="step sbiAcc-features__step"></span>
+                                <span class="step sbiAcc-features__step"></span>
+                                <span class="step sbiAcc-features__step"></span>
+                            </div>
+                            <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-lh"></span>
+                        </button>
+                    </div>
+
+                    <!-- Invert Colors -->
+                    <div class="sbiAcc-features__item reset-feature" id="featureItem-ic">
+                        <button aria-label="Invert Colors" type="button" id="btn-invert" class="sbiAcc-features__item__i">
+                            <span class="sbiAcc-features__item__icon">
+                                <span class="sbi-icon icon-invert" role="img" aria-hidden="true"></span>
+                            </span>
+                            <span class="sbiAcc-features__item__name">Invert Colors</span>
+                            <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-ic"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="reset-panel">
+            <div class="copyrights-accessibility">
+                <button aria-label="Reset All Settings" type="button" class="btn-reset-all" id="reset-all">
+                    Reset All Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts specifically leveraging jQuery and jQuery UI (No Vanilla JS DOM manipulation for sliding/toggling) -->
+    <script>
+        $(document).ready(function() {
+            const prefix = "sbi-accessibility-";
+            let fontSizeCount = 0;
+            let lineHeightCount = 0;
+            let textSpacingCount = 0;
+
+            // 1. Make the panel draggable using jQuery UI
+            $('#sbi-main').draggable({
+                handle: ".second-panel",
+                containment: "window"
+            });
+
+            // 2. Open/Close panel using jQuery UI Effects (Slide)
+            $('#sbi-widget-custom-trigger').on('click', function() {
+                const widget = $('#sbi-main');
+                if (widget.is(':hidden')) {
+                    // Start from original position when opening
+                    widget.css({ left: '0', top: 'auto', bottom: '85px' }); 
+                    widget.toggle('slide', { direction: 'left' }, 400);
+                    $(this).attr('aria-expanded', 'true');
+                } else {
+                    widget.toggle('slide', { direction: 'left' }, 400);
+                    $(this).attr('aria-expanded', 'false');
+                }
+            });
+
+            $('.sbiAcc-close').on('click', function() {
+                $('#sbi-main').toggle('slide', { direction: 'left' }, 400);
+                $('#sbi-widget-custom-trigger').attr('aria-expanded', 'false');
+            });
+
+            // Close on Escape Key (jQuery implementation)
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Escape' && $('#sbi-main').is(':visible')) {
+                    $('#sbi-main').toggle('slide', { direction: 'left' }, 400);
+                }
+            });
+
+            // 3. Accessibility Functions (Adapted to jQuery for DOM manipulation)
+            
+            // Text Sizing
+            function applyTextSettings() {
+                let zoomValue = (1 + (fontSizeCount * 0.1)).toFixed(2);
+                $('body > *').not('.sbiAcc, .sbi-widget-custom-trigger').css('zoom', zoomValue);
+            }
+
+            function adjustFontSize(direction) {
+                if (direction === '+1') {
+                    fontSizeCount = (fontSizeCount + 1) % 5;
+                } else {
+                    fontSizeCount = Math.max(0, fontSizeCount - 1);
+                }
+
+                const $btn = $('#featureItem');
+                const $tick = $('#tickIcon');
+                const $steps = $('#featureSteps');
+                
+                $('#btn-s17').prop('disabled', fontSizeCount === 0);
+                applyTextSettings();
+
+                if (fontSizeCount === 0) {
+                    $btn.removeClass(prefix + 'feature-active');
+                    $tick.hide();
+                    $steps.removeClass(prefix + 'featureSteps-visible');
+                    $('#featureSteps span').removeClass(prefix + 'active');
+                } else {
+                    $btn.addClass(prefix + 'feature-active');
+                    $tick.css('display', 'inline-flex');
+                    $steps.addClass(prefix + 'featureSteps-visible');
+                    
+                    $('#featureSteps span').removeClass(prefix + 'active').each(function(index) {
+                        if (index < fontSizeCount) {
+                            $(this).addClass(prefix + 'active');
+                        }
+                    });
+                }
+            }
+
+            $('#btn-s9').on('click', function() { adjustFontSize('+1'); });
+            $('#btn-s17').on('click', function() { adjustFontSize('-1'); });
+
+            // Line Height
+            $('#btn-s12').on('click', function() {
+                lineHeightCount = (lineHeightCount + 1) % 5;
+                const $btn = $('#featureItem-lh');
+                const $tick = $('#tickIcon-lh');
+                const $steps = $('#featureSteps-lh');
+
+                $('p, h1, h2, h3, h4, h5, h6, div, span, li').not('.sbiAcc *, .sbiAcc').toggleClass('sbi-line-height', lineHeightCount > 0);
+
+                if (lineHeightCount === 0) {
+                    $btn.removeClass(prefix + 'feature-active');
+                    $tick.hide();
+                    $steps.removeClass(prefix + 'featureSteps-visible');
+                    $('#featureSteps-lh span').removeClass(prefix + 'active');
+                } else {
+                    $btn.addClass(prefix + 'feature-active');
+                    $tick.css('display', 'inline-flex');
+                    $steps.addClass(prefix + 'featureSteps-visible');
+                    
+                    $('#featureSteps-lh span').removeClass(prefix + 'active').each(function(index) {
+                        if (index < lineHeightCount) {
+                            $(this).addClass(prefix + 'active');
+                        }
+                    });
+                }
+            });
+
+            // Text Spacing
+            $('#btn-s13').on('click', function() {
+                textSpacingCount = (textSpacingCount + 1) % 4;
+                const $btn = $('#featureItem-ts');
+                const $tick = $('#tickIcon-ts');
+                const $steps = $('#featureSteps-ts');
+
+                $('body *').not('.sbiAcc *, .sbiAcc').toggleClass('sbi-text-spacing', textSpacingCount > 0);
+
+                if (textSpacingCount === 0) {
+                    $btn.removeClass(prefix + 'feature-active');
+                    $tick.hide();
+                    $steps.removeClass(prefix + 'featureSteps-visible');
+                    $('#featureSteps-ts span').removeClass(prefix + 'active');
+                } else {
+                    $btn.addClass(prefix + 'feature-active');
+                    $tick.css('display', 'inline-flex');
+                    $steps.addClass(prefix + 'featureSteps-visible');
+                    
+                    $('#featureSteps-ts span').removeClass(prefix + 'active').each(function(index) {
+                        if (index < textSpacingCount) {
+                            $(this).addClass(prefix + 'active');
+                        }
+                    });
+                }
+            });
+
+            // Invert Colors
+            $('#btn-invert').on('click', function() {
+                $('#featureItem-ic').toggleClass(prefix + 'feature-active');
+                const isVisible = $('#tickIcon-ic').is(':visible');
+                $('#tickIcon-ic').css('display', isVisible ? 'none' : 'inline-flex');
+                $('html').toggleClass(prefix + 'invert-colors');
+            });
+
+            // Reset Button
+            $('#reset-all').on('click', function() {
+                fontSizeCount = 0;
+                lineHeightCount = 0;
+                textSpacingCount = 0;
+
+                $('html').removeClass(prefix + 'invert-colors');
+                $('body *').removeClass('sbi-line-height sbi-text-spacing');
+                $('body > *').css('zoom', '1');
+                
+                $('.sbi-accessibility-feature-active').removeClass(prefix + 'feature-active');
+                $('.sbi-accessibility-featureSteps-visible').removeClass(prefix + 'featureSteps-visible');
+                $('.sbi-accessibility-active').removeClass(prefix + 'active');
+                $('.tick-active').hide();
+                $('#btn-s17').prop('disabled', true);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2519 @@
+
+
+(function () {
+	
+	
+	
+    const SETTINGS_KEY = "accessibilitySettings";
+    const prefix = "sbi-accessibility-";
+
+    // Function to get cookie domain dynamically
+    function getCookieDomain() {
+        const hostname = location.hostname;
+
+        // For localhost or IP addresses, return empty string
+        if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+            return '';
+        }
+
+        // For regular domains, prepend with dot for cross-subdomain access
+        const parts = hostname.split('.');
+
+        if (parts.length > 1) {
+            return '.' + parts.slice(1).join('.'); // ".example.co.in"
+        }
+    }
+
+    const widgetHTML = `
+<div class="sbiAccessibility-loading">
+<div class="sbiAcc sbi-light-theme gradient-head sbiAcc-initial paid_widget" id="sbi-main" role="dialog" aria-modal="true" aria-labelledby="sbi-heading">
+    <div class="relative second-panel">
+        <h2 id="sbi-heading">Accessibility options</h2>
+        <button type="button" aria-label="Close main navigation panel" type="button" class="sbiAcc-close">Close</button>
+    </div>
+    <div class="sbiAcc-body">
+        <div class="h-scroll">
+            <div class="sbiAcc-features">
+            <div class="sbiAcc-features__item reset-feature" id="featureItem">
+                    <button aria-label="Bigger Text" id="btn-s9" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-bigger-text" role="img" aria-label="Bigger text icon" aria-hidden="true" aria-pressed="false"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">Bigger Text</span>
+                        <div class="sbiAcc-features__item__steps reset-steps" id="featureSteps">
+                            <span class="step sbiAcc-features__step"></span>
+                            <span class="step sbiAcc-features__step"></span>
+                            <span class="step sbiAcc-features__step"></span>
+                            <span class="step sbiAcc-features__step"></span>
+                        </div>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+                <div class="sbiAcc-features__item reset-feature" id="featureItem-st">
+                    <button aria-label="Smaller Text" id="btn-s17" type="button" class="sbiAcc-features__item__i" disabled>
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-smaller-text" role="img" aria-label="Smaller text icon" aria-hidden="true" aria-pressed="false"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">Smaller Text</span>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIconSt"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+
+                 <div class="sbiAcc-features__item reset-feature" id="featureItem-ts">
+                    <button aria-label="Text Spacing" id="btn-s13" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-text-spacing"  role="img" aria-label="Text spacing icon" aria-hidden="true" aria-pressed="false"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">Text Spacing</span>
+                        <div class="sbiAcc-features__item__steps reset-steps" id="featureSteps-ts">
+                            <span class="step sbiAcc-features__step"></span>
+                            <span class="step sbiAcc-features__step"></span>
+                            <span class="step sbiAcc-features__step"></span>
+                        </div>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-ts"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+
+                 <div class="sbiAcc-features__item reset-feature" id="featureItem-lh">
+                    <button aria-label="Line Height" id="btn-s12" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-line-hight" role="img" aria-label="Line height icon" aria-hidden="true" aria-pressed="false"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">Line Height</span>
+                        <div class="sbiAcc-features__item__steps reset-steps" id="featureSteps-lh">
+                            <span class="step sbiAcc-features__step"></span>
+                            <span class="step sbiAcc-features__step"></span>
+                            <span class="step sbiAcc-features__step"></span>
+                            <span class="step sbiAcc-features__step"></span>
+                        </div>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-lh"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+
+                 <div class="sbiAcc-features__item reset-feature" id="featureItem-df">
+                    <button aria-label="Dyslexia Friendly Font" aria-pressed="false" type="button" id="btn-df" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-dyslexia-font" role="img" aria-label="Dyslexia friendly font icon" aria-hidden="true"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">Dyslexia Friendly</span>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-df"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+                <div class="sbiAcc-features__item reset-feature" id="featureItem-adhd">                    
+                    <button aria-label="ADHD Mode" aria-pressed="false" type="button" id="btn-adhd" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-adhd-friendly" role="img" aria-label="Icon ADHD Friendly icon" aria-hidden="true"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">ADHD Mode</span>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-adhd" aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+                <!-- Saturate Widget -->
+                <div class="sbiAcc-features__item reset-feature" id="featureItem-saturate">
+                    <button aria-label="Saturate Colors" aria-pressed="false" type="button" id="btn-saturate" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-saturate" role="img" aria-label="Saturate icon" aria-hidden="true" id="saturate-text-0"></span>
+                            <span class="sbi-icon icon-lowsaturate" role="img" aria-label="Low Saturate icon" aria-hidden="true" id="saturate-text-1" style="display: none;"></span>
+                            <span class="sbi-icon icon-highsaturate" role="img" aria-label="High Saturate colors icon" aria-hidden="true" id="saturate-text-2" style="display: none;"></span>
+                            <span class="sbi-icon icon-desaturate" role="img" aria-label="Desaturate icon" aria-hidden="true" id="saturate-text-3" style="display: none;"></span>
+
+                        </span>
+                        <div id="feature-container">
+                            <span class="sbiAcc-features__item__name saturate-text" id="saturate-detail-text-0">Saturation</span>
+                            <span class="sbiAcc-features__item__name saturate-text" id="saturate-detail-text-1" style="display: none;">Low Saturation</span>
+                            <span class="sbiAcc-features__item__name saturate-text" id="saturate-detail-text-2" style="display: none;">High Saturation</span>
+                            <span class="sbiAcc-features__item__name saturate-text" id="saturate-detail-text-3" style="display: none;">Desaturate</span>
+                        </div>
+                        <div class="sbiAcc-features__item__steps reset-steps" id="featureStepsSaturate">
+                            <span class="step sbiAcc-features__step"></span>
+                            <span class="step sbiAcc-features__step"></span>
+                            <span class="step sbiAcc-features__step"></span>
+                        </div>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-saturate"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+<div class="sbiAcc-features__item reset-feature" id="featureItem-ht-dark">
+                    <button aria-label="Light Dark Theme" aria-pressed="false" type="button" id="dark-btn" class="sbiAcc-features__item__i">
+                        <div class="sbiAcc-features__item__name">
+                            <div class="light_dark_icon">
+                                <input type="checkbox" class="light_mode sbiAcc-featugres__item__i" id="checkbox"  aria-label="Toggle light and dark mode" role="switch"/>
+                                <label for="checkbox" class="checkbox-label">
+                                    <i class="fas fa-moon-stars">
+                                        <span class="sbi-icon icon-moon" role="img" aria-label="Dark mode icon" aria-hidden="true"></span>
+                                    </i>
+                                    <i class="fas fa-sun">
+                                        <span class="sbi-icon icon-sun" role="img" aria-label="Light mode icon" aria-hidden="true"></span>
+                                    </i>
+                                    <span class="ball"></span>
+                                </label>
+                            </div>
+                            <span class="sbiAcc-features__item__name">Light-Dark</span>
+                        </div>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-ht-dark"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+                <!-- Invert Colors Widget -->
+                <div class="sbiAcc-features__item reset-feature" id="featureItem-ic">
+                    <button aria-label="Invert Colors" aria-pressed="false" type="button" id="btn-invert" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-invert" role="img" aria-label="Invert colors icon" aria-hidden="true"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">Invert Colors</span>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-ic"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+    			<div class="sbiAcc-features__item reset-feature" id="featureItem-ht">
+                    <button aria-pressed="false" aria-label="Highlight Links" type="button" id="btn-s10" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-highlight-links" role="img" aria-label="Highlight links icon" aria-hidden="true"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">Highlight Links</span>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-ht"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+                
+                <div class="sbiAcc-features__item reset-feature" id="featureItem_sp">
+                    <button aria-label="Text To Speech" id="speak" type="button" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-speaker" role="img" aria-label="Text to speech icon" aria-hidden="true" aria-pressed="false"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">Text To Speech</span>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon_sp"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+               
+                <div class="sbiAcc-features__item reset-feature" id="featureItem-Cursor">
+                    <button aria-label="Cursor Bigger" aria-pressed="false" type="button" id="btn-cursor" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-cursor" role="img" aria-label="Cursor bigger icon" aria-hidden="true"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">Cursor</span>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-cursor"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+                
+                <div class="sbiAcc-features__item reset-feature" id="featureItem-animate">
+                    <button aria-label="Pause Animation" aria-pressed="false" type="button" id="btn-animation" class="sbiAcc-features__item__i">
+                        <span class="sbiAcc-features__item__icon">
+                            <span class="sbi-icon icon-animation-pause" role="img" aria-label="Pause Animation icon" aria-hidden="true"></span>
+                        </span>
+                        <span class="sbiAcc-features__item__name">Pause Animation</span>
+                        <span class="tick-active sbiAcc-features__item__enabled reset-tick" id="tickIcon-animate"  aria-live="polite" role="status"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reset Button -->
+    </div>
+    <div class="reset-panel">
+        <!-- copyright accessibility bar -->
+        <div class="copyrights-accessibility">
+            <button aria-label="Reset All Settings" type="button" class="btn-reset-all" id="reset-all">
+                <div class="reset-icon"></div>
+                <div class="reset-btn-text">Reset All Settings</div>
+            </button>
+           
+        </div>
+    </div>
+</div>
+<style>
+/* Accessbility css start */
+
+/*!
+* Copyright 2025 The sbi Authors(Ankit Sharma)
+*/
+@font-face {
+  font-family: 'Open-Dyslexic';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/webfiles/uploads/woff/open-dyslexic.woff') format('woff');
+}
+
+:root {
+  --color-black: #000;
+  --color-black3: #161519;
+  --color-black4: #212121;
+  --color-white: #fff;
+  --color-dark-blue-1: #280071;
+}
+
+.relative {
+  position: relative;
+}
+
+/* icon set */
+.sbi-icon {
+  background-color:#12a8e0;;
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.icon-speaker {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2222.5%22%20height%3D%2225.5%22%20viewBox%3D%220%200%2022.5%2025.5%22%3E%3Cg%20id%3D%22Group_57778%22%20data-name%3D%22Group%2057778%22%20transform%3D%22translate(-1553.25%20-840.25)%22%3E%3Cline%20id%3D%22Line_2049%22%20data-name%3D%22Line%202049%22%20y2%3D%2223%22%20transform%3D%22translate(1564.5%20841.5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-width%3D%222.5%22%2F%3E%3Cline%20id%3D%22Line_2050%22%20data-name%3D%22Line%202050%22%20y2%3D%2213%22%20transform%3D%22translate(1569.5%20846.5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-width%3D%222.5%22%2F%3E%3Cline%20id%3D%22Line_2053%22%20data-name%3D%22Line%202053%22%20y2%3D%2213%22%20transform%3D%22translate(1559.5%20846.5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-width%3D%222.5%22%2F%3E%3Cline%20id%3D%22Line_2051%22%20data-name%3D%22Line%202051%22%20y2%3D%2215%22%20transform%3D%22translate(1574.5%20845.711)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-width%3D%222.5%22%2F%3E%3Cline%20id%3D%22Line_2052%22%20data-name%3D%22Line%202052%22%20y2%3D%2215%22%20transform%3D%22translate(1554.5%20845.711)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-width%3D%222.5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+}
+
+.icon-bigger-text {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2243%22%20viewBox%3D%220%200%2032%2043%22%3E%3Ctext%20id%3D%22TT%22%20transform%3D%22translate(0%2034)%22%20fill%3D%22%2300a9e0%22%20font-size%3D%2221%22%20font-family%3D%22Roboto-Medium%2C%20Roboto%22%20font-weight%3D%22500%22%3E%3Ctspan%20x%3D%220%22%20y%3D%220%22%3ET%3C%2Ftspan%3E%3Ctspan%20y%3D%220%22%20font-size%3D%2232%22%20font-family%3D%22Roboto-Regular%2C%20Roboto%22%20font-weight%3D%22400%22%3ET%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+
+}
+
+.icon-smaller-text {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2243%22%20viewBox%3D%220%200%2032%2043%22%3E%3Ctext%20id%3D%22TT%22%20transform%3D%22translate(32%209)%20rotate(180)%22%20fill%3D%22%2300a9e0%22%20font-size%3D%2221%22%20font-family%3D%22Roboto-Medium%2C%20Roboto%22%20font-weight%3D%22500%22%3E%3Ctspan%20x%3D%220%22%20y%3D%220%22%3ET%3C%2Ftspan%3E%3Ctspan%20y%3D%220%22%20font-size%3D%2232%22%20font-family%3D%22Roboto-Regular%2C%20Roboto%22%20font-weight%3D%22400%22%3ET%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  transform: scaleX(-1);
+  transform: rotate(-180deg);
+}
+
+.icon-line-hight {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20id%3D%22height%22%20d%3D%22M20.273%2C29h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182ZM10.467%2C5h-.024a1.088%2C1.088%2C0%2C0%2C0-.5.128l-.014.008a1.075%2C1.075%2C0%2C0%2C0-.129.083L5.436%2C8.491a1.091%2C1.091%2C0%2C1%2C0%2C1.309%2C1.745L9.364%2C8.273V25.727L6.745%2C23.764a1.091%2C1.091%2C0%2C0%2C0-1.309%2C1.745L9.8%2C28.782a1.075%2C1.075%2C0%2C0%2C0%2C.129.083l.014.008a1.088%2C1.088%2C0%2C0%2C0%2C.5.128h.024a1.088%2C1.088%2C0%2C0%2C0%2C.5-.128l.014-.008a1.075%2C1.075%2C0%2C0%2C0%2C.129-.083l4.364-3.273a1.091%2C1.091%2C0%2C0%2C0-1.309-1.745l-2.618%2C1.964V8.273l2.618%2C1.964a1.091%2C1.091%2C0%2C1%2C0%2C1.309-1.745L11.109%2C5.218a1.076%2C1.076%2C0%2C0%2C0-.129-.083l-.014-.008a1.088%2C1.088%2C0%2C0%2C0-.5-.128Zm9.806%2C18.545h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Zm0-5.455h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Zm0-5.455h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Zm0-5.455h7.636a1.091%2C1.091%2C0%2C1%2C0%2C0-2.182H20.273a1.091%2C1.091%2C0%2C0%2C0%2C0%2C2.182Z%22%20transform%3D%22translate(-5%20-5)%22%20fill%3D%22%2300a9e0%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.icon-hide-images {
+  mask-image: url("data:image/svg+xml,%0A%3Csvg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask id='mask0_33_1057' style='mask-type:alpha' maskUnits='userSpaceOnUse' x='0' y='0' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23D9D9D9'/%3E%3C/mask%3E%3Cg mask='url(%23mask0_33_1057)'%3E%3Cpath d='M34.1665 29.4166L31.6665 26.9167V8.84623C31.6665 8.71801 31.6131 8.60047 31.5063 8.4936C31.3994 8.38677 31.2819 8.33335 31.1537 8.33335H13.0832L10.5832 5.83339H31.1537C31.9955 5.83339 32.7082 6.12506 33.2915 6.70839C33.8748 7.29173 34.1665 8.00434 34.1665 8.84623V29.4166ZM33.5768 37.0897L30.6537 34.1666H8.84607C8.00418 34.1666 7.29157 33.875 6.70824 33.2916C6.12491 32.7083 5.83324 31.9957 5.83324 31.1538V9.34615L2.91016 6.42306L4.66653 4.66669L35.3332 35.3334L33.5768 37.0897ZM11.2499 27.9166L15.3845 22.436L18.7178 26.6987L20.6698 24.2083L8.3332 11.8717V31.1538C8.3332 31.282 8.38661 31.3996 8.49345 31.5064C8.60031 31.6133 8.71785 31.6667 8.84607 31.6667H28.1282L24.3781 27.9166H11.2499Z' fill='%231C1B1F'/%3E%3C/g%3E%3C/svg%3E%0A");
+}
+
+.icon-adhd-friendly {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2228.708%22%20height%3D%2231.626%22%20viewBox%3D%220%200%2028.708%2031.626%22%3E%3Cg%20id%3D%22adhd%22%20transform%3D%22translate(-30.857%20-6.75)%22%3E%3Cg%20id%3D%22Group_57779%22%20data-name%3D%22Group%2057779%22%20transform%3D%22translate(31.612%207.5)%22%3E%3Cpath%20id%3D%22Path_78752%22%20data-name%3D%22Path%2078752%22%20d%3D%22M335.754%2C45.909V45m1.818%2C1.818v-.909%22%20transform%3D%22translate(-317.318%20-42.727)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-width%3D%221.5%22%20fill-rule%3D%22evenodd%22%2F%3E%3Cpath%20id%3D%22Path_78753%22%20data-name%3D%22Path%2078753%22%20d%3D%22M113.113%2C80.447c1.227%2C6.325%2C8.979%2C9.027%2C10.01%2C4.91.638-2.545-1.978-7.571-4.826-6.747-1.685.487-2.626%2C2.92-.657%2C5.508%2C1.558%2C2.048%2C4.62%2C3.64%2C6.831%2C3.536%2C4.911-.231%2C6.659-8.3-2.611-13.056-4.482-2.3-6.859.376-5.873%2C3.437%2C2.18%2C6.768%2C11.442%2C8.032%2C13.86%2C4.9%2C2.589-3.349-2.132-9.343-7.129-9.892-2.936-.323-3.472%2C3.333%2C1.229%2C5.969%2C4.88%2C2.737%2C7.5.865%2C8.63-.091%22%20transform%3D%22translate(-108.173%20-69.056)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-width%3D%221.5%22%20fill-rule%3D%22evenodd%22%2F%3E%3Cpath%20id%3D%22Path_78754%22%20data-name%3D%22Path%2078754%22%20d%3D%22M50.084%2C37.626h2.273V35.591a7.678%2C7.678%2C0%2C0%2C1%2C2.479-6.376%2C12.67%2C12.67%2C0%2C0%2C0%2C3.979-9.194C58.815%2C12.544%2C52.735%2C7.5%2C45.5%2C7.5a11.447%2C11.447%2C0%2C0%2C0-8.225%2C3.409m-.636.692a13.022%2C13.022%2C0%2C0%2C0-3.051%2C8.421l-1.922%2C7.015a.97.97%2C0%2C0%2C0%2C.926%2C1.35h2.323v5.189h5.491v4.051h8.766%22%20transform%3D%22translate(-31.612%20-7.5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-width%3D%221.5%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+}
+
+.icon-dyslexia-font {
+  width: 28px;
+  height: 28px;
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2226%22%20height%3D%2228%22%20viewBox%3D%220%200%2026%2028%22%3E%3Ctext%20id%3D%22DF%22%20transform%3D%22translate(0%2022)%22%20fill%3D%22%2300a9e0%22%20font-size%3D%2221%22%20font-family%3D%22Roboto-Medium%2C%20Roboto%22%20font-weight%3D%22500%22%3E%3Ctspan%20x%3D%220%22%20y%3D%220%22%3EDF%3C%2Ftspan%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+}
+
+.icon-cursor {
+  mask-image: url("data:image/svg+xml,%0A%3Csvg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask id='mask0_33_1062' style='mask-type:alpha' maskUnits='userSpaceOnUse' x='0' y='0' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23D9D9D9'/%3E%3C/mask%3E%3Cg mask='url(%23mask0_33_1062)'%3E%3Cpath d='M21.2594 35.7659C21.0495 35.8108 20.8395 35.8333 20.6296 35.8333H19.9998C17.8095 35.8333 15.7512 35.4177 13.8248 34.5866C11.8984 33.7555 10.2228 32.6276 8.79775 31.2029C7.37275 29.7781 6.24463 28.1027 5.41338 26.1766C4.58213 24.2506 4.1665 22.1927 4.1665 20.0028C4.1665 17.8129 4.58206 15.7545 5.41317 13.8276C6.24428 11.9007 7.3722 10.2246 8.79692 8.79919C10.2217 7.3738 11.8971 6.24537 13.8231 5.4139C15.7492 4.58242 17.8071 4.16669 19.997 4.16669C22.1869 4.16669 24.2453 4.58231 26.1722 5.41356C28.0991 6.24481 29.7752 7.37294 31.2006 8.79794C32.626 10.2229 33.7544 11.8986 34.5859 13.825C35.4174 15.7514 35.8331 17.8097 35.8331 20V20.6218C35.8331 20.829 35.8106 21.0363 35.7658 21.2436L33.3331 20.5V20C33.3331 16.2778 32.0415 13.125 29.4581 10.5416C26.8748 7.95831 23.722 6.66665 19.9998 6.66665C16.2776 6.66665 13.1248 7.95831 10.5415 10.5416C7.95813 13.125 6.66646 16.2778 6.66646 20C6.66646 23.7222 7.95813 26.875 10.5415 29.4583C13.1248 32.0416 16.2776 33.3333 19.9998 33.3333H20.4998L21.2594 35.7659ZM33.567 36.0736L26.0093 28.4999L24.1985 33.9741L19.9998 20L33.974 24.1986L28.4997 26.0095L36.0734 33.5672L33.567 36.0736Z' fill='%231C1B1F'/%3E%3C/g%3E%3C/svg%3E%0A");
+}
+
+.icon-highlight-links {
+  mask-image: url("data:image/svg+xml,%0A%3Csvg width='33' height='16' viewBox='0 0 33 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M14.6796 15.564H8.39758C6.30486 15.564 4.521 14.8266 3.046 13.3518C1.571 11.877 0.833496 10.0934 0.833496 8.0009C0.833496 5.90843 1.571 4.12449 3.046 2.64907C4.521 1.17365 6.30486 0.435944 8.39758 0.435944H14.6796V2.93586H8.39758C6.998 2.93586 5.80408 3.42999 4.81583 4.41824C3.82758 5.40649 3.33345 6.6004 3.33345 7.99999C3.33345 9.39957 3.82758 10.5935 4.81583 11.5817C5.80408 12.57 6.998 13.0641 8.39758 13.0641H14.6796V15.564ZM10.4168 9.24994V6.75003H22.9168V9.24994H10.4168ZM18.654 15.564V13.0641H24.936C26.3356 13.0641 27.5295 12.57 28.5177 11.5817C29.506 10.5935 30.0001 9.39957 30.0001 7.99999C30.0001 6.6004 29.506 5.40649 28.5177 4.41824C27.5295 3.42999 26.3356 2.93586 24.936 2.93586H18.654V0.435944H24.936C27.0287 0.435944 28.8126 1.17335 30.2876 2.64815C31.7626 4.12296 32.5001 5.9066 32.5001 7.99907C32.5001 10.0915 31.7626 11.8755 30.2876 13.3509C28.8126 14.8263 27.0287 15.564 24.936 15.564H18.654Z' fill='%231C1B1F'/%3E%3C/svg%3E%0A");
+}
+
+.icon-text-spacing {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20id%3D%22character_horizontal_spacing%22%20width%3D%2236.911%22%20height%3D%2236.911%22%20viewBox%3D%220%200%2036.911%2036.911%22%3E%3Cg%20id%3D%22Group_57777%22%20data-name%3D%22Group%2057777%22%20transform%3D%22translate(5.767%205.767)%22%3E%3Cpath%20id%3D%22Path_78739%22%20data-name%3D%22Path%2078739%22%20d%3D%22M23.841%2C7.307V5H10V7.307%22%20transform%3D%22translate(-4.233%20-5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78740%22%20data-name%3D%22Path%2078740%22%20d%3D%22M16%2C21.148V5%22%20transform%3D%22translate(-3.312%20-5)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78741%22%20data-name%3D%22Path%2078741%22%20d%3D%22M14%2C19h4.614%22%20transform%3D%22translate(-3.619%20-2.852)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78742%22%20data-name%3D%22Path%2078742%22%20d%3D%22M9.615%2C19%2C5%2C23.614l4.614%2C4.614%22%20transform%3D%22translate(-5%20-2.852)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78743%22%20data-name%3D%22Path%2078743%22%20d%3D%22M5%2C23H30.376%22%20transform%3D%22translate(-5%20-2.238)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20id%3D%22Path_78744%22%20data-name%3D%22Path%2078744%22%20d%3D%22M23%2C19l4.615%2C4.614L23%2C28.228%22%20transform%3D%22translate(-2.238%20-2.852)%22%20fill%3D%22none%22%20stroke%3D%22%2300a9e0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%2F%3E%3C%2Fg%3E%3Cpath%20id%3D%22Path_78745%22%20data-name%3D%22Path%2078745%22%20d%3D%22M0%2C0H36.911V36.911H0Z%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.icon-moon {
+  width: 32px;
+  height: 32px;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg fill='none' fill-rule='evenodd' transform='translate(-442 -200)'%3E%3Cg fill='currentColor' transform='translate(356 144)'%3E%3Cpath fill-rule='nonzero' d='M108.5 24C108.5 27.5902136 105.590214 30.5 102 30.5 98.4097864 30.5 95.5 27.5902136 95.5 24 95.5 20.4097864 98.4097864 17.5 102 17.5 105.590214 17.5 108.5 20.4097864 108.5 24zM107 24C107 21.2382136 104.761786 19 102 19 99.2382136 19 97 21.2382136 97 24 97 26.7617864 99.2382136 29 102 29 104.761786 29 107 26.7617864 107 24zM101 12.75L101 14.75C101 15.1642136 101.335786 15.5 101.75 15.5 102.164214 15.5 102.5 15.1642136 102.5 14.75L102.5 12.75C102.5 12.3357864 102.164214 12 101.75 12 101.335786 12 101 12.3357864 101 12.75zM95.7255165 14.6323616L96.7485165 16.4038616C96.9556573 16.7625614 97.4143618 16.8854243 97.7730616 16.6782835 98.1317614 16.4711427 98.2546243 16.0124382 98.0474835 15.6537384L97.0244835 13.8822384C96.8173427 13.5235386 96.3586382 13.4006757 95.9999384 13.6078165 95.6412386 13.8149573 95.5183757 14.2736618 95.7255165 14.6323616zM91.8822384 19.0244835L93.6537384 20.0474835C94.0124382 20.2546243 94.4711427 20.1317614 94.6782835 19.7730616 94.8854243 19.4143618 94.7625614 18.9556573 94.4038616 18.7485165L92.6323616 17.7255165C92.2736618 17.5183757 91.8149573 17.6412386 91.6078165 17.9999384 91.4006757 18.3586382 91.5235386 18.8173427 91.8822384 19.0244835zM90.75 25L92.75 25C93.1642136 25 93.5 24.6642136 93.5 24.25 93.5 23.8357864 93.1642136 23.5 92.75 23.5L90.75 23.5C90.3357864 23.5 90 23.8357864 90 24.25 90 24.6642136 90.3357864 25 90.75 25zM92.6323616 30.2744835L94.4038616 29.2514835C94.7625614 29.0443427 94.8854243 28.5856382 94.6782835 28.2269384 94.4711427 27.8682386 94.0124382 27.7453757 93.6537384 27.9525165L91.8822384 28.9755165C91.5235386 29.1826573 91.4006757 29.6413618 91.6078165 30.0000616 91.8149573 30.3587614 92.2736618 30.4816243 92.6323616 30.2744835zM97.0244835 34.1177616L98.0474835 32.3462616C98.2546243 31.9875618 98.1317614 31.5288573 97.7730616 31.3217165 97.4143618 31.1145757 96.9556573 31.2374386 96.7485165 31.5961384L95.7255165 33.3676384C95.5183757 33.7263382 95.6412386 34.1850427 95.9999384 34.3921835 96.3586382 34.5993243 96.8173427 34.4764614 97.0244835 34.1177616zM103 35.25L103 33.25C103 32.8357864 102.664214 32.5 102.25 32.5 101.835786 32.5 101.5 32.8357864 101.5 33.25L101.5 35.25C101.5 35.6642136 101.835786 36 102.25 36 102.664214 36 103 35.6642136 103 35.25zM108.274483 33.3676384L107.251483 31.5961384C107.044343 31.2374386 106.585638 31.1145757 106.226938 31.3217165 105.868239 31.5288573 105.745376 31.9875618 105.952517 32.3462616L106.975517 34.1177616C107.182657 34.4764614 107.641362 34.5993243 108.000062 34.3921835 108.358761 34.1850427 108.481624 33.7263382 108.274483 33.3676384zM112.117762 28.9755165L110.346262 27.9525165C109.987562 27.7453757 109.528857 27.8682386 109.321717 28.2269384 109.114576 28.5856382 109.237439 29.0443427 109.596138 29.2514835L111.367638 30.2744835C111.726338 30.4816243 112.185043 30.3587614 112.392183 30.0000616 112.599324 29.6413618 112.476461 29.1826573 112.117762 28.9755165zM113.25 23L111.25 23C110.835786 23 110.5 23.3357864 110.5 23.75 110.5 24.1642136 110.835786 24.5 111.25 24.5L113.25 24.5C113.664214 24.5 114 24.1642136 114 23.75 114 23.3357864 113.664214 23 113.25 23zM111.367638 17.7255165L109.596138 18.7485165C109.237439 18.9556573 109.114576 19.4143618 109.321717 19.7730616 109.528857 20.1317614 109.987562 20.2546243 110.346262 20.0474835L112.117762 19.0244835C112.476461 18.8173427 112.599324 18.3586382 112.392183 17.9999384 112.185043 17.6412386 111.726338 17.5183757 111.367638 17.7255165zM106.975517 13.8822384L105.952517 15.6537384C105.745376 16.0124382 105.868239 16.4711427 106.226938 16.6782835 106.585638 16.8854243 107.044343 16.7625614 107.251483 16.4038616L108.274483 14.6323616C108.481624 14.2736618 108.358761 13.8149573 108.000062 13.6078165 107.641362 13.4006757 107.182657 13.5235386 106.975517 13.8822384z' transform='translate(0 48)' stroke='currentColor' stroke-width='0.25'%3E%3C/path%3E%3Cpath d='M98.6123,60.1372 C98.6123,59.3552 98.8753,58.6427 99.3368,58.0942 C99.5293,57.8657 99.3933,57.5092 99.0943,57.5017 C99.0793,57.5012 99.0633,57.5007 99.0483,57.5007 C97.1578,57.4747 95.5418,59.0312 95.5008,60.9217 C95.4578,62.8907 97.0408,64.5002 98.9998,64.5002 C99.7793,64.5002 100.4983,64.2452 101.0798,63.8142 C101.3183,63.6372 101.2358,63.2627 100.9478,63.1897 C99.5923,62.8457 98.6123,61.6072 98.6123,60.1372' transform='translate(3 11)'%3E%3C/path%3E%3C/g%3E%3Cpolygon points='444 228 468 228 468 204 444 204'%3E%3C/polygon%3E%3C/g%3E%3C/svg%3E");
+}
+
+.icon-sun {
+  width: 32px;
+  height: 32px;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg fill='none' fill-rule='evenodd' transform='translate(-440 -200)'%3E%3Cpath fill='currentColor' fill-rule='nonzero' stroke='currentColor' stroke-width='0.5' d='M102,21 C102,18.1017141 103.307179,15.4198295 105.51735,13.6246624 C106.001939,13.2310647 105.821611,12.4522936 105.21334,12.3117518 C104.322006,12.1058078 103.414758,12 102.5,12 C95.8722864,12 90.5,17.3722864 90.5,24 C90.5,30.6277136 95.8722864,36 102.5,36 C106.090868,36 109.423902,34.4109093 111.690274,31.7128995 C112.091837,31.2348572 111.767653,30.5041211 111.143759,30.4810139 C106.047479,30.2922628 102,26.1097349 102,21 Z M102.5,34.5 C96.7007136,34.5 92,29.7992864 92,24 C92,18.2007136 96.7007136,13.5 102.5,13.5 C102.807386,13.5 103.113925,13.5136793 103.419249,13.5407785 C101.566047,15.5446378 100.5,18.185162 100.5,21 C100.5,26.3198526 104.287549,30.7714322 109.339814,31.7756638 L109.516565,31.8092927 C107.615276,33.5209452 105.138081,34.5 102.5,34.5 Z' transform='translate(354.5 192)'%3E%3C/path%3E%3Cpolygon points='444 228 468 228 468 204 444 204'%3E%3C/polygon%3E%3C/g%3E%3C/svg%3E");
+}
+
+.icon-invert {
+  mask-image: url("data:image/svg+xml,%0A%3Csvg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask id='mask0_33_1073' style='mask-type:alpha' maskUnits='userSpaceOnUse' x='0' y='0' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23D9D9D9'/%3E%3C/mask%3E%3Cg mask='url(%23mask0_33_1073)'%3E%3Cpath d='M20 34.1666C16.5299 34.1666 13.5791 32.9674 11.1474 30.5689C8.71581 28.1704 7.5 25.2639 7.5 21.8494C7.5 20.1122 7.82853 18.5192 8.48558 17.0705C9.14264 15.6218 10.0342 14.3184 11.1602 13.1603L20 4.48724L28.8397 13.1603C29.9657 14.3184 30.8573 15.6298 31.5143 17.0946C32.1714 18.5593 32.4999 20.1442 32.4999 21.8494C32.4999 25.2639 31.2841 28.1704 28.8525 30.5689C26.4209 32.9674 23.47 34.1666 20 34.1666ZM20 31.6667V7.99999L12.9166 15C11.9444 15.9167 11.2152 16.9541 10.7291 18.1122C10.243 19.2703 9.99996 20.516 9.99996 21.8494C9.99996 24.5438 10.9722 26.8536 12.9166 28.7788C14.8611 30.7041 17.2222 31.6667 20 31.6667Z' fill='%231C1B1F'/%3E%3C/g%3E%3C/svg%3E%0A");
+  transform: scaleX(-1);
+}
+
+.icon-saturate {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2221.316%22%20height%3D%2229.235%22%20fill%3D%22none%22%20viewBox%3D%220%200%2021.316%2029.235%22%3E%3Cg%20id%3D%22Layer_77%22%20data-name%3D%22Layer%2077%22%20transform%3D%22translate(-10.5%20-2.527)%22%3E%3Cpath%20id%3D%22Path_78746%22%20data-name%3D%22Path%2078746%22%20d%3D%22M21.738%2C2.791a.768.768%2C0%2C0%2C0-1.16%2C0C20.167%2C3.307%2C10.5%2C15.432%2C10.5%2C21.1a10.658%2C10.658%2C0%2C1%2C0%2C21.316%2C0c0-5.671-9.667-17.8-10.078-18.312ZM11.987%2C21.1c0-3.966%2C5.76-12.111%2C8.427-15.66V30.23A9.176%2C9.176%2C0%2C0%2C1%2C11.987%2C21.1Z%22%20fill%3D%22%2300a9e0%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  width: 28px;
+  height: 28px;
+}
+
+.icon-lowsaturate {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2221.316%22%20height%3D%2229.235%22%20fill%3D%22none%22%20viewBox%3D%220%200%2021.316%2029.235%22%3E%3Cg%20id%3D%22Layer_77%22%20data-name%3D%22Layer%2077%22%20transform%3D%22translate(-10.5%20-2.527)%22%3E%3Cpath%20id%3D%22Path_78746%22%20data-name%3D%22Path%2078746%22%20d%3D%22M21.738%2C2.791a.768.768%2C0%2C0%2C0-1.16%2C0C20.167%2C3.307%2C10.5%2C15.432%2C10.5%2C21.1a10.658%2C10.658%2C0%2C1%2C0%2C21.316%2C0c0-5.671-9.667-17.8-10.078-18.312ZM11.987%2C21.1c0-3.966%2C5.76-12.111%2C8.427-15.66V30.23A9.176%2C9.176%2C0%2C0%2C1%2C11.987%2C21.1Z%22%20fill%3D%22%2300a9e0%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  width: 28px;
+  height: 28px;
+}
+
+.icon-highsaturate {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2221.316%22%20height%3D%2229.235%22%20fill%3D%22none%22%20viewBox%3D%220%200%2021.316%2029.235%22%3E%3Cg%20id%3D%22Layer_77%22%20data-name%3D%22Layer%2077%22%20transform%3D%22translate(-10.5%20-2.527)%22%3E%3Cpath%20id%3D%22Path_78746%22%20data-name%3D%22Path%2078746%22%20d%3D%22M21.738%2C2.791a.768.768%2C0%2C0%2C0-1.16%2C0C20.167%2C3.307%2C10.5%2C15.432%2C10.5%2C21.1a10.658%2C10.658%2C0%2C1%2C0%2C21.316%2C0c0-5.671-9.667-17.8-10.078-18.312ZM11.987%2C21.1c0-3.966%2C5.76-12.111%2C8.427-15.66V30.23A9.176%2C9.176%2C0%2C0%2C1%2C11.987%2C21.1Z%22%20fill%3D%22%2300a9e0%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  width: 28px;
+  height: 28px;
+}
+
+.icon-desaturate {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2221.316%22%20height%3D%2229.235%22%20fill%3D%22none%22%20viewBox%3D%220%200%2021.316%2029.235%22%3E%3Cg%20id%3D%22Layer_77%22%20data-name%3D%22Layer%2077%22%20transform%3D%22translate(-10.5%20-2.527)%22%3E%3Cpath%20id%3D%22Path_78746%22%20data-name%3D%22Path%2078746%22%20d%3D%22M21.738%2C2.791a.768.768%2C0%2C0%2C0-1.16%2C0C20.167%2C3.307%2C10.5%2C15.432%2C10.5%2C21.1a10.658%2C10.658%2C0%2C1%2C0%2C21.316%2C0c0-5.671-9.667-17.8-10.078-18.312ZM11.987%2C21.1c0-3.966%2C5.76-12.111%2C8.427-15.66V30.23A9.176%2C9.176%2C0%2C0%2C1%2C11.987%2C21.1Z%22%20fill%3D%22%2300a9e0%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  width: 28px;
+  height: 28px;
+}
+
+.icon-animation-pause {
+  mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IiMyMTIxMjEiIGQ9Ik05IDE2aDJWOEg5em00IDBoMlY4aC0yem0tMSA2cS0yLjA3NSAwLTMuOS0uNzg4dC0zLjE3NS0yLjEzN1QyLjc4OCAxNS45VDIgMTJ0Ljc4OC0zLjl0Mi4xMzctMy4xNzVUOC4xIDIuNzg4VDEyIDJ0My45Ljc4OHQzLjE3NSAyLjEzN1QyMS4yMTMgOC4xVDIyIDEydC0uNzg4IDMuOXQtMi4xMzcgMy4xNzV0LTMuMTc1IDIuMTM4VDEyIDIybTAtMnEzLjM1IDAgNS42NzUtMi4zMjVUMjAgMTJ0LTIuMzI1LTUuNjc1VDEyIDRUNi4zMjUgNi4zMjVUNCAxMnQyLjMyNSA1LjY3NVQxMiAyMG0wLTgiLz48L3N2Zz4=")
+}
+
+/* icon set end */
+.sbi-bg-white {
+  background: var(--color-white) !important;
+  filter: none !important;
+}
+
+#sbi-main {
+  left: -530px;
+}
+
+.sbi-bg-white #sbi-main {
+  filter: invert(1) !important;
+  box-shadow: 0 15px 30px rgb(2 2 2 / 36%) !important;
+}
+
+#accessibilityButtons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  /* Adjust as needed */
+}
+
+.adjust-button {
+  cursor: pointer;
+  padding: 5px;
+  background-color: #ddd;
+}
+
+.text-button {
+  font-weight: bold;
+  padding: 5px;
+}
+
+.sbi-widget-custom-trigger {
+  border: none;
+  border-radius: 70px;
+  bottom: 70px;
+  cursor: pointer;
+  height: 70px;
+  padding: 18px;
+  position: fixed;
+  right: 0px;
+  left: 35px;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  width: auto;
+  max-width: 70px;
+  transition: all 400ms;
+  color: var(--color-white);
+  background-color: var(--color-dark-blue-1);
+  text-align: left;
+  z-index: 99999;
+  cursor: pointer;
+  box-shadow: 0px 13px 14px -6px rgba(0, 0, 0, 0.35);
+}
+
+.sbi-widget-custom-trigger img {
+  width: 25px;
+  height: 25px;
+  margin-left: 5px;
+  margin-top: -10px;
+}
+
+.sbi-widget-custom-trigger:hover span {
+  opacity: 1;
+}
+
+.sbi-widget-custom-trigger span {
+  white-space: nowrap;
+  padding-left: 5px;
+  font-size: 15px;
+  font-family: 'Roboto', sans-serif;
+  opacity: 0;
+}
+
+.sbiAcc-close {
+  background-repeat: no-repeat;
+  background-position: center;
+  padding: 0;
+  color:#fff
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 1s;
+  overflow: hidden;
+  background-color: transparent;
+  outline: 2px solid transparent;
+  border: 0;
+  color:#fff;
+}
+
+button.sbiAcc-close:hover,
+button.sbiAcc-close:focus {
+  background-color: transparent !important;
+}
+
+button.sbiAcc-close:focus {
+  outline-color: var(--color-white) !important;
+}
+
+
+//.sbiAcc-close svg {
+//  width: 13px;
+//  height: 13px;
+//}
+
+.sbiAcc-close:hover i {
+
+  color: var(--color-white);
+}
+
+.sbiAcc {
+    border-top-right-radius: 0px;
+    background: var(--color-white);
+    max-width: 450px;
+    min-height: 70%;
+    width: 100%;
+    /* box-shadow: 0 22px 110px rgba(180, 191, 208, .56); */
+    filter: drop-shadow(0 10px 20px rgb(2 2 2 / 20%));
+    max-height: 530px;
+    /* right: -530px; */
+    right: 0;
+    position: fixed;
+    z-index: 999999;
+    bottom: 85px;
+    transition: all 0.3s;
+    font-family: "Noto Sans", sans-serif !important;
+    overflow: hidden;
+}
+
+
+.h-scroll::-webkit-scrollbar {
+  width: 6px;
+  transition: all 0.3s;
+}
+
+.h-scroll::-webkit-scrollbar-track,
+.h-scroll::-webkit-scrollbar,
+.h-scroll::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  transition: all 0.3s;;
+}
+
+.h-scroll::-webkit-scrollbar-thumb {  
+  border-radius: 10px;
+  
+}
+/* hover */
+.h-scroll:hover::-webkit-scrollbar {
+  background-color: var(--color-black);
+  width: 6px;
+}
+
+.h-scroll:hover::-webkit-scrollbar-track {
+  background-color: #a7a7a7;
+}
+
+.h-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: var(--color-dark-blue-1);
+  border-radius: 10px;
+}
+
+.sbiAcc-body {
+  background: #fff;
+  position: relative;
+  z-index: 1;
+  padding: 18px;
+  margin-bottom: 15px;
+  max-height: 520px;
+  /*max-height: 550px;*/
+}
+
+.reset-panel {
+  position: absolute;
+  width: 100%;
+  bottom: 10px;
+}
+
+.h-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 10px;
+  margin-right: -16px;
+}
+
+.second-panel {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  gap: 20px;
+  justify-content: space-between;
+  background-image: linear-gradient(263deg, #1BA8E0, #280071);
+}
+
+.second-panel h2 {
+  font-size: 16px;
+  font-weight: 200;
+  color: var(--color-white);
+  margin: 0;
+}
+
+.sbiAcc-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  padding-bottom: 15px;
+}
+
+.sbiAcc-features__item__i {
+  position: relative;
+  width: 100%;
+  height: 90px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #00A9E008;
+  border-radius: 12px;
+  border: 2px solid var(--color-white);
+  padding: 5px;
+  transition: border-color .15s ease;
+}
+
+.sbiAcc-features__item__icon {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  /* margin-top: 17px; */
+}
+
+.sbiAcc-features__item__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #280977;
+}
+
+.sbi-accessibility-feature-active {
+  /* Add styles for the active state of the parent div */
+  position: relative;
+}
+
+/* active icon */
+.sbi-accessibility-feature-active .sbiAcc-features__item__icon svg,
+.sbi-accessibility-feature-active .sbiAcc-features__item__name,
+.sbi-accessibility-feature-active .light_dark_icon i {
+  color: var(--color-dark-blue-1);
+}
+
+.sbi-accessibility-feature-active .icon-bigger-text,
+.sbi-accessibility-feature-active .icon-small-text,
+.sbi-accessibility-feature-active .icon-line-hight,
+.sbi-accessibility-feature-active .icon-sbi-accessibility-hide-images,
+.sbi-accessibility-feature-active .icon-dyslexia-font,
+.sbi-accessibility-feature-active .icon-cursor,
+.sbi-accessibility-feature-active .icon-sbi-accessibility-highlight-links,
+.sbi-accessibility-feature-active .icon-text-spacing,
+.sbi-accessibility-feature-active .icon-moon,
+.sbi-accessibility-feature-active .icon-sun,
+.sbi-accessibility-feature-active .icon-invert,
+.sbi-accessibility-feature-active .icon-speaker,
+.sbi-accessibility-feature-active .icon-adhd-friendly,
+.sbi-accessibility-feature-active .icon-lowsaturate,
+.sbi-accessibility-feature-active .icon-highsaturate,
+.sbi-accessibility-feature-active .icon-desaturate,
+.sbi-accessibility-feature-active .icon-hide-images,
+.sbi-accessibility-feature-active .icon-highlight-links,
+.sbi-accessibility-feature-active .icon-animation-pause {
+  background-color: var(--color-dark-blue-1);
+}
+
+/* disabled btn */
+#btn-small-text:disabled .icon-small-text,
+#btn-s9:disabled .icon-bigger-text {
+  background-color: rgba(16, 16, 16, 0.3);
+}
+
+.sbiAcc #btn-small-text:disabled,
+.sbiAcc #btn-s9:disabled {
+  border: transparent;
+}
+
+.sbi-accessibility-feature-active .sbiAcc-features__item__i {
+  border: 2px solid var(--color-dark-blue-1);
+  box-shadow: 0 0 0 5px rgba(0, 107, 230, 0.1);
+
+}
+
+.sbiAcc-features__item__steps span {
+  /* Add styles for the step span tags */
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.tick-active {
+  background-color: var(--color-dark-blue-1);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.tick-active svg {
+  font-size: 12px;
+  width: 12px;
+}
+
+.sbiAcc-features__item__enabled {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8' width='100%25' height='100%25'%3E%3Cpath fill='' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='m1.5 4.5 2 2 5-5'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 12px;
+  background-position: center;
+
+}
+
+.sbiAcc-features__item__steps {
+  display: flex;
+  width: 75%;
+  opacity: 0;
+  transition: opacity .15s ease, visibility .15s ease;
+  visibility: hidden;
+  position: absolute;
+  bottom: 6px;
+}
+
+.sbiAcc-features__item__steps.sbi-accessibility-featureSteps-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sbiAcc-features__step {
+  width: 100%;
+  border-radius: 10px;
+  display: block;
+  height: 3px;
+  position: relative;
+  background: #1937B247;
+}
+
+.sbiAcc-features__step.sbi-accessibility-active {
+  background: var(--color-dark-blue-1);
+
+}
+
+/* er */
+.text-center {
+  text-align: center;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.d-column {
+  flex-direction: column;
+}
+
+/* Full-width textarea */
+/* Set a style for the submit/send button */
+.sbiAcc-features__item__name .btn,
+.chat-container .btn {
+  background-color: #e1e1e1;
+  color: white;
+  font-size: 22px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+  margin-bottom: 10px;
+  float: right;
+}
+
+/* Add a red background color to the cancel button */
+.chat-container .cancel {
+  background-color: #a066cc;
+  position: absolute;
+  top: -15px;
+  right: -9px;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  font-size: 12px;
+  border: solid 3px
+}
+
+.chat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.chat-grid .chat-card {
+  border-radius: 10px;
+  background: var(--color-white);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: solid 2px var(--color-white);
+  box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075) !important;
+}
+
+.chat-grid .chat-card:focus {
+  border-color: #eea40cc4;
+}
+
+/* text speech */
+#readSelectedText {
+  position: absolute;
+  display: none;
+  margin-top: -20px;
+}
+
+/* hide image */
+
+.sbiAcc-features__item__name button,
+.chat-grid button {
+  width: 100%;
+  height: 100%;
+  background: var(--color-white);
+  border-radius: 10px;
+  border-color: transparent;
+  cursor: pointer;
+  transition: all 1s;
+  outline: none;
+  font-weight: bold;
+}
+
+.sbiAcc button:hover {
+  border-color: var(--color-dark-blue-1);
+  outline-color: var(--color-dark-blue-1);
+  transition: all 1s;
+  background-color: #ecd0ff6b;
+   color: #280977;
+}
+
+/* light mode */
+.light_mode {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  font-size: 28px;
+  position: relative;
+  padding: 5px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.light_dark_icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+}
+
+body.sbi-accessibility-dark-mode .light_dark_icon .fa-moon-stars {
+  display: block;
+}
+
+.light_dark_icon i {
+  font-size: 0;
+}
+
+.light_dark_icon .fa-moon-stars {
+  color: var(--color-black);
+  display: none;
+}
+
+body.sbi-accessibility-dark-mode .light_dark_icon .fa-sun {
+  display: none;
+}
+
+.light_dark_icon .fa-sun {
+  color: var(--color-black);
+}
+
+/* all theme update in dark mode  */
+body.sbi-accessibility-dark-mode *:not(.sbiAcc, .carousel-indicators *, .sbiAcc *, .sbi-widget-custom-trigger, .sbi-widget-custom-trigger img, .sbi-widget-custom-trigger span, .reading-mask-horizontal, .modal, .sbi-widget-custom-trigger .short-key) {
+  color: var(--color-white) !important;
+  background-color: var(--color-black3) !important;
+}
+
+body.sbi-accessibility-dark-mode .carousel-indicators{
+  color: var(--color-white) !important;
+  background-color: transparent !important;
+}
+
+.copyrights-accessibility {
+  background-color: var(--color-white);
+  padding: 0 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.copyrights-accessibility a {
+  width: 100%;
+  padding: 5px 0;
+  text-decoration: none;
+  color: var(--color-black);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.copyrights-accessibility a span {
+  font-size: 12px;
+}
+
+.copyrights-accessibility a span.sbi-logo {
+background-image: url("data:image/svg+xml,%0A%3Csvg width='93' height='25' viewBox='0 0 93 25' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M14.2727 0.727272H20.5909V15.6364C20.5909 17.4091 20.1667 18.9432 19.3182 20.2386C18.4773 21.5265 17.303 22.5227 15.7955 23.2273C14.2879 23.9242 12.5379 24.2727 10.5455 24.2727C8.53788 24.2727 6.7803 23.9242 5.27273 23.2273C3.76515 22.5227 2.59091 21.5265 1.75 20.2386C0.916667 18.9432 0.5 17.4091 0.5 15.6364V0.727272H6.81818V15.0909C6.81818 15.8106 6.97727 16.4545 7.29545 17.0227C7.61364 17.5833 8.05303 18.0227 8.61364 18.3409C9.18182 18.6591 9.82576 18.8182 10.5455 18.8182C11.2727 18.8182 11.9167 18.6591 12.4773 18.3409C13.0379 18.0227 13.4773 17.5833 13.7955 17.0227C14.1136 16.4545 14.2727 15.8106 14.2727 15.0909V0.727272ZM30.3665 0.727272L34.1847 7.5H34.3665L38.2301 0.727272H45.2756L38.321 12.3636L45.5483 24H38.321L34.3665 17.0909H34.1847L30.2301 24H23.0483L30.1847 12.3636L23.2756 0.727272H30.3665Z' fill='%231937B2'/%3E%3Cpath d='M47.8182 20.3636V15.4545L57.1818 0.727272H61.6364V7.27273H59.0909L54.0455 15.2727V15.4545H67.8636V20.3636H47.8182ZM59.1364 24V18.8636L59.2727 16.7273V0.727272H65.1818V24H59.1364ZM85.5824 8.40909C85.4839 8.00758 85.3286 7.6553 85.1165 7.35227C84.9044 7.04167 84.6392 6.7803 84.321 6.56818C84.0104 6.34848 83.6468 6.18561 83.2301 6.07954C82.821 5.96591 82.3703 5.90909 81.8778 5.90909C80.8172 5.90909 79.9119 6.16288 79.1619 6.67045C78.4195 7.17803 77.8513 7.90909 77.4574 8.86364C77.071 9.81818 76.8778 10.9697 76.8778 12.3182C76.8778 13.6818 77.0634 14.8485 77.4347 15.8182C77.8059 16.7879 78.3589 17.5303 79.0938 18.0455C79.8286 18.5606 80.7415 18.8182 81.8324 18.8182C82.7945 18.8182 83.5938 18.678 84.2301 18.3977C84.8741 18.1174 85.3551 17.7197 85.6733 17.2045C85.9915 16.6894 86.1506 16.0833 86.1506 15.3864L87.2415 15.5H81.9233V11H92.2415V14.2273C92.2415 16.3485 91.7907 18.1629 90.8892 19.6705C89.9953 21.1705 88.7604 22.322 87.1847 23.125C85.6165 23.9205 83.8172 24.3182 81.7869 24.3182C79.5218 24.3182 77.5331 23.8371 75.821 22.875C74.1089 21.9129 72.7718 20.5417 71.8097 18.7614C70.8551 16.9811 70.3778 14.8636 70.3778 12.4091C70.3778 10.4848 70.6695 8.7803 71.2528 7.29545C71.8438 5.81061 72.6619 4.55682 73.7074 3.53409C74.7528 2.50379 75.9612 1.72727 77.3324 1.20454C78.7036 0.674241 80.1733 0.40909 81.7415 0.40909C83.1203 0.40909 84.4006 0.60606 85.5824 1C86.7718 1.38636 87.821 1.93939 88.7301 2.65909C89.6468 3.37121 90.3854 4.21591 90.946 5.19318C91.5066 6.17045 91.8475 7.24242 91.9688 8.40909H85.5824Z' fill='%23A066CC'/%3E%3C/svg%3E%0A");
+width: 50px;
+height: 13px;
+background-repeat: no-repeat;
+background-size: 46px;
+background-position: center center;
+}
+
+/* add class in html tag */
+.sbi-bg-cursor * {
+  cursor: url('data:image/svg+xml,<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="29.188px" height="43.625px" viewBox="0 0 29.188 43.625" enable-background="new 0 0 29.188 43.625" xml:space="preserve"><g><polygon fill="%23FFFFFF" stroke="%23D9DAD9" stroke-width="1.1406" stroke-miterlimit="10" points="2.8,4.549 26.847,19.902 16.964,22.701 24.239,37.749 18.278,42.017 9.741,30.724 1.138,35.809 "/><g><g><g><path fill="%23212627" d="M29.175,21.155c0.071-0.613-0.165-1.253-0.635-1.573L2.165,0.258c-0.424-0.32-0.988-0.346-1.435-0.053C0.282,0.497,0,1.03,0,1.617v34.171c0,0.613,0.306,1.146,0.776,1.439c0.471,0.267,1.059,0.213,1.482-0.16l7.482-6.344l6.847,12.155c0.259,0.48,0.729,0.746,1.2,0.746c0.235,0,0.494-0.08,0.706-0.213l6.988-4.585c0.329-0.213,0.565-0.586,0.659-1.013c0.094-0.426,0.024-0.88-0.188-1.226l-6.376-11.382l8.611-2.745C28.705,22.274,29.105,21.768,29.175,21.155z M16.964,22.701c-0.424,0.133-0.776,0.506-0.941,0.96c-0.165,0.48-0.118,1.013,0.118,1.439l6.588,11.781l-4.541,2.985l-6.894-12.315c-0.212-0.373-0.541-0.64-0.941-0.72c-0.094-0.027-0.165-0.027-0.259-0.027c-0.306,0-0.588,0.107-0.847,0.32L2.8,32.59V4.549l21.599,15.806L16.964,22.701z"/></g></g></g></g></svg>'), auto !important;
+
+}
+
+.sbi-font-df *:not(.fal, .fa, .fas) {
+  font-family: 'Open-Dyslexic', sans-serif !important;
+}
+
+
+/* btn-reset-all */
+.btn-reset-all {
+  background-color: #280977;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  color: #fff;
+  font-size: 14px;
+  transition: all 300ms;
+  width: 100%;
+  font-weight: 500;
+}
+
+.btn-reset-all img {
+  height: 30px;
+  filter: brightness(0) invert(1);
+
+}
+
+.reset-icon {
+  background-color: #280977;
+  mask-image: url("data:image/svg+xml,%0A%3Csvg width='16' height='19' viewBox='0 0 16 19' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 18.95C4.98333 18.7 3.3125 17.8208 1.9875 16.3125C0.6625 14.8042 0 13.0333 0 11C0 9.9 0.216667 8.84583 0.65 7.8375C1.08333 6.82917 1.7 5.95 2.5 5.2L3.925 6.625C3.29167 7.19167 2.8125 7.85 2.4875 8.6C2.1625 9.35 2 10.15 2 11C2 12.4667 2.46667 13.7625 3.4 14.8875C4.33333 16.0125 5.53333 16.7 7 16.95V18.95ZM9 18.95V16.95C10.45 16.6833 11.6458 15.9917 12.5875 14.875C13.5292 13.7583 14 12.4667 14 11C14 9.33333 13.4167 7.91667 12.25 6.75C11.0833 5.58333 9.66667 5 8 5H7.925L9.025 6.1L7.625 7.5L4.125 4L7.625 0.5L9.025 1.9L7.925 3H8C10.2333 3 12.125 3.775 13.675 5.325C15.225 6.875 16 8.76667 16 11C16 13.0167 15.3375 14.7792 14.0125 16.2875C12.6875 17.7958 11.0167 18.6833 9 18.95Z' fill='%231937B2'/%3E%3C/svg%3E%0A");
+  mask-repeat: no-repeat;
+  background-size: cover;
+  width: 27px;
+  height: 19px;
+  transform: scaleX(-1);
+}
+
+
+.sbi-copyright {
+  letter-spacing: 0 !important;
+}
+
+#imageHideBg.image-hide *:not(.sbiAcc-features__item__enabled, .sbiAcc-close, .sbi-widget-custom-trigger, .lang i, .language_drop select) {
+  background-image: none !important;
+}
+
+/* lang */
+.lang {
+  padding: 12px;
+  border-radius: 16px;
+  background-color: var(--color-white);
+  margin-bottom: 18px;
+}
+
+.lang_head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-black);
+}
+
+.lang {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lang i {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background-color: var(--color-dark-blue-1);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 30px;
+  background-image: url("data:image/svg+xml,%0A%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21.056 12H19.056C18.7907 12 18.5364 12.1054 18.3489 12.2929C18.1613 12.4804 18.056 12.7348 18.056 13C18.056 13.2652 18.1613 13.5196 18.3489 13.7071C18.5364 13.8946 18.7907 14 19.056 14V16H17.87C17.9888 15.6798 18.0513 15.3415 18.055 15C18.0549 14.3396 17.837 13.6977 17.435 13.1738C17.033 12.6499 16.4693 12.2733 15.8314 12.1024C15.1935 11.9314 14.5171 11.9758 13.907 12.2285C13.2969 12.4812 12.7872 12.9281 12.457 13.5C12.3903 13.6138 12.3467 13.7396 12.3289 13.8703C12.311 14.0009 12.3192 14.1339 12.3529 14.2614C12.3866 14.3889 12.4452 14.5084 12.5253 14.6132C12.6054 14.7179 12.7054 14.8058 12.8196 14.8718C12.9338 14.9377 13.06 14.9804 13.1907 14.9974C13.3215 15.0144 13.4544 15.0054 13.5817 14.9708C13.7089 14.9363 13.8281 14.8769 13.9323 14.7961C14.0366 14.7153 14.1238 14.6147 14.189 14.5C14.2767 14.348 14.403 14.2218 14.555 14.134C14.707 14.0462 14.8794 14 15.055 14C15.3202 14 15.5745 14.1054 15.7621 14.2929C15.9496 14.4804 16.055 14.7348 16.055 15C16.055 15.2652 15.9496 15.5196 15.7621 15.7071C15.5745 15.8946 15.3202 16 15.055 16C14.7897 16 14.5354 16.1054 14.3479 16.2929C14.1603 16.4804 14.055 16.7348 14.055 17C14.055 17.2652 14.1603 17.5196 14.3479 17.7071C14.5354 17.8946 14.7897 18 15.055 18C15.3202 18 15.5745 18.1054 15.7621 18.2929C15.9496 18.4804 16.055 18.7348 16.055 19C16.055 19.2652 15.9496 19.5196 15.7621 19.7071C15.5745 19.8946 15.3202 20 15.055 20C14.8794 20 14.707 19.9538 14.555 19.866C14.403 19.7783 14.2767 19.652 14.189 19.5C14.1238 19.3854 14.0366 19.2847 13.9323 19.2039C13.8281 19.1231 13.7089 19.0637 13.5817 19.0292C13.4544 18.9946 13.3215 18.9856 13.1907 19.0026C13.06 19.0196 12.9338 19.0623 12.8196 19.1282C12.7054 19.1942 12.6054 19.2821 12.5253 19.3868C12.4452 19.4916 12.3866 19.6112 12.3529 19.7387C12.3192 19.8662 12.311 19.9991 12.3289 20.1297C12.3467 20.2604 12.3903 20.3862 12.457 20.5C12.7872 21.0719 13.2969 21.5188 13.907 21.7715C14.5171 22.0242 15.1935 22.0686 15.8314 21.8976C16.4693 21.7267 17.033 21.3501 17.435 20.8262C17.837 20.3023 18.0549 19.6604 18.055 19C18.0513 18.6585 17.9888 18.3202 17.87 18H19.055V21C19.055 21.2652 19.1603 21.5196 19.3479 21.7071C19.5354 21.8946 19.7897 22 20.055 22C20.3202 22 20.5745 21.8946 20.7621 21.7071C20.9496 21.5196 21.055 21.2652 21.055 21V14C21.3202 14 21.5745 13.8946 21.7621 13.7071C21.9496 13.5196 22.055 13.2652 22.055 13C22.055 12.7348 21.9496 12.4804 21.7621 12.2929C21.5745 12.1054 21.3212 12 21.056 12ZM9.08496 11.243C9.1161 11.3712 9.1723 11.492 9.25032 11.5983C9.32834 11.7047 9.42664 11.7946 9.53955 11.8628C9.65247 11.9311 9.77776 11.9763 9.90822 11.9958C10.0387 12.0154 10.1717 12.009 10.2997 11.977C10.4277 11.9449 10.548 11.8878 10.6538 11.8091C10.7597 11.7303 10.8489 11.6313 10.9163 11.5179C10.9837 11.4045 11.028 11.2789 11.0466 11.1483C11.0653 11.0177 11.0579 10.8847 11.025 10.757L9.26796 3.727C9.14505 3.23319 8.86047 2.79468 8.45953 2.4813C8.05859 2.16792 7.56434 1.99768 7.05546 1.99768C6.54658 1.99768 6.05232 2.16792 5.65138 2.4813C5.25044 2.79468 4.96587 3.23319 4.84296 3.727L3.08496 10.757C3.05199 10.8847 3.04462 11.0177 3.06327 11.1483C3.08193 11.2789 3.12624 11.4045 3.19365 11.5179C3.26106 11.6313 3.35025 11.7303 3.45607 11.8091C3.56189 11.8878 3.68225 11.9449 3.81022 11.977C3.93818 12.009 4.07123 12.0154 4.20169 11.9958C4.33215 11.9763 4.45745 11.9311 4.57036 11.8628C4.68328 11.7946 4.78157 11.7047 4.85959 11.5983C4.93761 11.492 4.99381 11.3712 5.02496 11.243L5.58496 9H8.52496L9.08496 11.243ZM6.08596 7L6.78296 4.213C6.80398 4.15762 6.84135 4.10993 6.89011 4.07628C6.93887 4.04264 6.99671 4.02461 7.05596 4.02461C7.1152 4.02461 7.17304 4.04264 7.2218 4.07628C7.27056 4.10993 7.30794 4.15762 7.32896 4.213L8.02596 7H6.08596ZM14.056 7H15.056C15.3211 7.00027 15.5753 7.10571 15.7628 7.29319C15.9503 7.48067 16.0557 7.73487 16.056 8V9C16.056 9.26522 16.1613 9.51958 16.3489 9.70711C16.5364 9.89465 16.7907 10 17.056 10C17.3212 10 17.5755 9.89465 17.7631 9.70711C17.9506 9.51958 18.056 9.26522 18.056 9V8C18.0552 7.2046 17.7388 6.442 17.1764 5.87956C16.614 5.31712 15.8514 5.0008 15.056 5H14.056C13.7907 5 13.5364 5.10536 13.3489 5.2929C13.1613 5.48043 13.056 5.73479 13.056 6C13.056 6.26522 13.1613 6.51958 13.3489 6.70711C13.5364 6.89465 13.7907 7 14.056 7ZM10.056 16H9.05596C8.79082 15.9997 8.53662 15.8943 8.34914 15.7068C8.16166 15.5193 8.05622 15.2651 8.05596 15V14C8.05596 13.7348 7.9506 13.4804 7.76306 13.2929C7.57553 13.1054 7.32117 13 7.05596 13C6.79074 13 6.53639 13.1054 6.34885 13.2929C6.16131 13.4804 6.05596 13.7348 6.05596 14V15C6.05675 15.7954 6.37308 16.558 6.93551 17.1204C7.49795 17.6829 8.26055 17.9992 9.05596 18H10.056C10.3212 18 10.5755 17.8946 10.7631 17.7071C10.9506 17.5196 11.056 17.2652 11.056 17C11.056 16.7348 10.9506 16.4804 10.7631 16.2929C10.5755 16.1054 10.3212 16 10.056 16Z' fill='white'/%3E%3C/svg%3E%0A");
+}
+
+body[data-gr-ext-installed] {
+  top: 0 !important;
+}
+
+.language_drop select {
+  border: 0;
+  font-size: 16px;
+  color: #1A73E9 !important;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%0A%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cmask id='mask0_33_1013' style='mask-type:alpha' maskUnits='userSpaceOnUse' x='0' y='0' width='32' height='32'%3E%3Crect width='32' height='32' fill='%23D9D9D9'/%3E%3C/mask%3E%3Cg mask='url(%23mask0_33_1013)'%3E%3Cpath d='M16.0002 20L9.3335 13.3333H22.6668L16.0002 20Z' fill='%231C1B1F'/%3E%3C/g%3E%3C/svg%3E%0A");
+  background-repeat: no-repeat;
+  background-position: right center;
+  padding: 10px 40px 10px 10px;
+  cursor: pointer;
+  width: 170px;
+}
+
+.language_drop select:is(:focus, :hover) {
+  outline: none;
+  border: none;
+}
+
+/* scroll */
+
+.language_drop select::-webkit-scrollbar-thumb {
+  background-color: var(--color-dark-blue-1);
+  border-radius: 5px;
+}
+
+.language_drop select::-webkit-scrollbar {
+  background-color: var(--color-white);
+  width: 5px;
+}
+
+
+.language_drop select::-webkit-scrollbar-track {
+  background-color: #a7a7a7;
+}
+
+.language_drop select::-webkit-scrollbar-track:hover {
+  background-color: #a7a7a7;
+}
+
+
+/* scroll end*/
+.language_drop select option {
+  color: var(--color-black);
+}
+
+
+.VIpgJd-ZVi9od-ORHb-OEVmcd {
+  display: none;
+}
+
+.skiptranslate span {
+  display: none;
+}
+
+.skiptranslate:not(.goog-te-combo) {
+  font-size: 0;
+}
+
+
+@media (max-width: 767px) {
+  .sbiAcc-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sbiAcc {
+    width: 100%;
+  }
+
+  .second-panel h3 {
+    font-size: 24px;
+  }
+
+  .copyrights-accessibility a span {
+    font-size: 16px;
+  }
+  .sbiAcc-close{
+  height: 20px;
+  width: 20px;
+}
+.inner-short-key{
+  display: none;
+}
+.sbi-widget-custom-trigger img {
+    width: 30px;
+    height: 30px;
+    margin-left: 2px;
+    margin-top: 0 !important;
+  }
+  .sbi-widget-custom-trigger .short-key,
+  .inner-short-key{
+    display: none !important;
+  }
+}
+
+.sbi-accessibility-highlight-links a:not(#sbi-main a),
+.sbi-accessibility-highlight-links button:not(#sbi-main button) {
+  background: #444701 !important;
+  color: yellow !important;
+}
+
+.sbi-accessibility-highlight-links a span:not(#sbi-main a span) {
+  color: yellow !important;
+}
+
+.sbi-accessibility-highlight-links a img:not(#sbi-main a img) {
+  text-decoration: underline !important;
+  transition: box-shadow 0.3s;
+  color: rgb(255, 255, 0) !important;
+  background-color: #444701 !important;
+}
+
+.sbi-accessibility-dyslexia-mode *:not(#sbi-main *):not(#sbi-main):not(.sbi-widget-custom-trigger span) {
+  font-family: 'Open-Dyslexic', sans-serif !important;
+}
+
+.sbi-accessibility-hide-images img:not(#sbi-main img):not(#sbi-widget-custom-trigger img) {
+  visibility: hidden !important;
+}
+
+.sbi-accessibility-span-visible {
+  visibility: visible;
+  padding-top: 10px;
+  position: relative;
+  transform: translateX(0px);
+}
+
+/* .form-check {
+    padding-left: 0px !important;
+  } */
+
+/* .sbi-accessibility-hide-images *:not(#sbi-main *):not(#sbi-main):not(.reading-mask-horizontal) {
+  background-image: none !important;
+} */
+
+/* Apply custom cursor to everything except #sbi-main */
+.sbi-accessibility-custom-cursor,
+.sbi-accessibility-custom-cursor * {
+  cursor: url('data:image/svg+xml,<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="29.188px" height="43.625px" viewBox="0 0 29.188 43.625" enable-background="new 0 0 29.188 43.625" xml:space="preserve"><g><polygon fill="%23FFFFFF" stroke="%23D9DAD9" stroke-width="1.1406" stroke-miterlimit="10" points="2.8,4.549 26.847,19.902 16.964,22.701 24.239,37.749 18.278,42.017 9.741,30.724 1.138,35.809 "/><g><g><g><path fill="%23212627" d="M29.175,21.155c0.071-0.613-0.165-1.253-0.635-1.573L2.165,0.258c-0.424-0.32-0.988-0.346-1.435-0.053C0.282,0.497,0,1.03,0,1.617v34.171c0,0.613,0.306,1.146,0.776,1.439c0.471,0.267,1.059,0.213,1.482-0.16l7.482-6.344l6.847,12.155c0.259,0.48,0.729,0.746,1.2,0.746c0.235,0,0.494-0.08,0.706-0.213l6.988-4.585c0.329-0.213,0.565-0.586,0.659-1.013c0.094-0.426,0.024-0.88-0.188-1.226l-6.376-11.382l8.611-2.745C28.705,22.274,29.105,21.768,29.175,21.155z M16.964,22.701c-0.424,0.133-0.776,0.506-0.941,0.96c-0.165,0.48-0.118,1.013,0.118,1.439l6.588,11.781l-4.541,2.985l-6.894-12.315c-0.212-0.373-0.541-0.64-0.941-0.72c-0.094-0.027-0.165-0.027-0.259-0.027c-0.306,0-0.588,0.107-0.847,0.32L2.8,32.59V4.549l21.599,15.806L16.964,22.701z"/></g></g></g></g></svg>') 10 10, auto !important;
+}
+
+.span-visible {
+  visibility: visible !important;
+}
+
+.span-invisible {
+  visibility: hidden;
+}
+
+.sbi-accessibility-highlight-links a::selection,
+.sbi-accessibility-dark-mode::selection {
+  background: yellow;
+  color: black;
+}
+
+/* Apply dark mode background and text color */
+
+body.sbi-accessibility-dark-mode {
+  color: var(--color-white);
+  background-color: var(--color-black3);
+  border-color: rgb(255, 255, 255) !important;
+}
+
+/* Prevent dark mode changes for images */
+body.sbi-accessibility-dark-mode img:not(#sbi-main *):not(#sbi-main):not(#sbi-widget-custom-trigger *):not(#sbi-widget-custom-trigger) {
+  filter: none;
+}
+
+/* Prevent dark mode on elements with a background image */
+body.sbi-accessibility-dark-mode div *:has([style*="background"], [style*="background-image"], img) {
+  filter: none !important;
+  background-color: inherit;
+}
+
+/* Ã°Å¸â€Â¥ Fix: Ensure black text becomes white */
+body.sbi-accessibility-dark-mode * :not(#sbi-main *):not(#sbi-main):not(#sbi-widget-custom-trigger *):not(#sbi-widget-custom-trigger) {
+  color: var(--color-white) !important;
+}
+
+/* Ã°Å¸â€Â¥ If an element's text was already black, change it to white */
+body.sbi-accessibility-dark-mode *[style*="color: black"] {
+  color: var(--color-white) !important;
+}
+
+/* Ensure links and buttons don't become invisible */
+body.sbi-accessibility-dark-mode a:not(#sbi-main *):not(#sbi-main):not(#sbi-widget-custom-trigger *):not(#sbi-widget-custom-trigger),
+/* body.sbi-accessibility-dark-mode button:not(#sbi-main *):not(#sbi-main):not(#sbi-widget-custom-trigger *):not(#sbi-widget-custom-trigger), */
+body.sbi-accessibility-dark-mode a *:not(#sbi-main *):not(#sbi-main):not(#sbi-widget-custom-trigger *):not(#sbi-widget-custom-trigger) {
+  color: rgb(255, 255, 0) !important;
+  /* Yellow color */
+}
+
+/* body.sbi-accessibility-dark-mode *:not(#sbi-main *):not(#sbi-widget-custom-trigger *):not([style*="color:"]) {
+    color: var(--color-white) !important;
+  } */
+
+body.sbi-accessibility-dark-mode span[style*="color:"],
+body.sbi-accessibility-dark-mode p[style*="color:"],
+body.sbi-accessibility-dark-mode div[style*="color:"] {
+  color: var(--color-white) !important;
+  /* Keep user-defined colors */
+}
+
+body.sbi-accessibility-dark-mode *[style*="color:"] {
+  color: var(--color-white) !important;
+}
+
+body.sbi-accessibility-dark-mode *[style*="background"],
+body.sbi-accessibility-dark-mode *[style*="background-image"] {
+  background-color: inherit !important;
+  filter: none !important;
+  color: inherit !important;
+}
+
+/* Apply invert to the whole page */
+html.sbi-accessibility-invert-colors {
+  filter: invert(1);
+  background: var(--color-white);
+  -webkit-filter: invert(100%);
+}
+
+html.sbi-accessibility-saturate-low {
+  filter: saturate(0.5) !important;
+}
+
+html.sbi-accessibility-saturate-high {
+  filter: saturate(3) !important;
+}
+
+html.sbi-accessibility-saturate-desaturate {
+  filter: saturate(0) !important;
+}
+
+.sbi-widget-custom-trigger .short-key {
+  position: absolute;
+  bottom: 12px;
+  color: #ffffff;
+  writing-mode: lr;
+  right: 15px;
+  font-size: 11px;
+  left: 17px;
+  cursor: pointer;
+}
+
+.inner-short-key {
+  background-color: #ECD0FF;
+  padding: 8px 18px;
+  border-radius: 50px;
+  color: #212121;
+  font-size: 12px;
+  margin-left: 10px;
+  display: inline-block;
+  font-weight: 700;
+}
+
+/* Animation Pause Styles */
+.sbi-accessibility-animation-pause *:not(.sbiAcc *):not(.sbiAcc),
+.sbi-accessibility-animation-pause *:not(.sbiAcc *)::before,
+.sbi-accessibility-animation-pause *:not(.sbiAcc *)::after {
+  /* Pause all CSS animations */
+  animation-play-state: paused !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+
+  /* Pause all CSS transitions */
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+
+  /* Webkit prefixes for older browsers */
+  -webkit-animation-play-state: paused !important;
+  -webkit-animation-duration: 0s !important;
+  -webkit-animation-delay: 0s !important;
+  -webkit-transition-duration: 0s !important;
+  -webkit-transition-delay: 0s !important;
+
+  /* Mozilla prefixes */
+  -moz-animation-play-state: paused !important;
+  -moz-animation-duration: 0s !important;
+  -moz-animation-delay: 0s !important;
+  -moz-transition-duration: 0s !important;
+  -moz-transition-delay: 0s !important;
+}
+
+/* Pause CSS transforms that might be animated */
+/* .sbi-accessibility-animation-pause *:not(.sbiAcc *):not(.sbiAcc) {
+  transform: none !important;
+  -webkit-transform: none !important;
+  -moz-transform: none !important;
+  -ms-transform: none !important;
+  -o-transform: none !important;
+} */
+
+/* Pause marquee elements */
+.sbi-accessibility-animation-pause marquee:not(.sbiAcc marquee):not(.sbiAcc) {
+  -webkit-marquee-play-count: 0 !important;
+  -webkit-marquee-style: none !important;
+  behavior: none !important;
+}
+
+/* Pause GIF animations (limited browser support) */
+.sbi-accessibility-animation-pause img[src*=".gif"]:not(.sbiAcc img):not(.sbiAcc) {
+  animation-play-state: paused !important;
+}
+
+/* Pause CSS keyframe animations specifically */
+.sbi-accessibility-animation-pause *:not(.sbiAcc *):not(.sbiAcc) {
+  animation-iteration-count: 0 !important;
+  -webkit-animation-iteration-count: 0 !important;
+  -moz-animation-iteration-count: 0 !important;
+}
+
+/* Prevent hover effects that might trigger animations */
+.sbi-accessibility-animation-pause *:not(.sbiAcc *):not(.sbiAcc):hover {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Pause common CSS animation properties */
+/* .sbi-accessibility-animation-pause *:not(.sbiAcc *):not(.sbiAcc) {
+  opacity: initial !important;
+  visibility: visible !important;
+  scale: 1 !important;
+  rotate: 0deg !important;
+  translate: 0 0 !important;
+} */
+
+/* disabled */
+.sbiAcc-features__item__i:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* reading mask text css */
+.reading-mask-horizontal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999999;
+  mix-blend-mode: multiply;
+  transition: background-position 0.05s;
+  display: none;
+  background-image: linear-gradient(to bottom,
+      hsla(0, 0%, 0%, 0.7) 0%,
+      rgba(0, 0, 0, 0.7) calc(var(--y, 50%) - 80px),
+      transparent calc(var(--y, 50%) - 80px),
+      transparent calc(var(--y, 50%) + 80px),
+      rgba(0, 0, 0, 0.7) calc(var(--y, 50%) + 80px),
+      rgba(0, 0, 0, 0.7) 100%);
+  filter: saturate(0.5) !important;
+
+}
+.mask-hidden {
+    display: none;
+}
+
+.mask-visible {
+    display: block; /* Or flex/grid depending on your layout needs */
+}
+
+
+.reading-mask-horizontal::before,
+.reading-mask-horizontal::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.reading-mask-horizontal::before {
+  top: calc(var(--y, 50%) - 80px);
+  background-color: #6f339d;
+}
+
+.reading-mask-horizontal::after {
+  top: calc(var(--y, 50%) + 80px);
+  background-color: #11298b;
+}
+
+body.sbi-accessibility-adhd-saturate *:not(.reading-mask-horizontal, .sbiAcc, .sbiAcc *) {
+  transition: filter 0.5s ease;
+}
+.sbi-widget-custom-trigger.sbi-text-spacing :not(.sbi-widget-custom-trigge){
+  letter-spacing: 0em !important;
+    word-spacing: 0em !important;
+}
+
+/* page loading showing code issue fixed */
+ body.sbiAccessibility-loading {
+    visibility: hidden;
+  }
+
+  @media(max-width:400px){
+    .btn-reset-all {
+    gap: 5px;
+    padding: 10px 8px;    
+}
+.reset-icon{
+  width:20px;
+  transform: scaleX(1);
+}
+.h-scroll {
+    height: calc(100vh - 170px) !important;
+}
+}
+
+/*End Accessbility css  */
+</style>`;
+   (function () {
+
+/* ================================
+   CONFIG
+================================= */
+const WIDGET_WIDTH = 530;
+const WIDGET_ID = 'sbi-main';
+const TRIGGER_ID = 'sbi-widget-custom-trigger';
+const mobile_trigger_ID ='sbi-widget-custom-triggermobile';
+
+/* ================================
+   INJECT WIDGET (ONCE)
+================================= */
+if (!document.getElementById(WIDGET_ID)) {
+    document.body.insertAdjacentHTML('beforeend', widgetHTML);
+}
+
+
+
+/* ================================
+OPEN / CLOSE FUNCTIONS
+================================= */
+function openWidget() {
+	
+ const widget = document.getElementById(WIDGET_ID);
+
+		 const trigger = document.getElementById(TRIGGER_ID);
+		 if (!widget) return;
+
+		 widget.style.left = '0';
+		 widget.setAttribute('aria-hidden', 'false');
+		 trigger?.setAttribute('aria-expanded', 'true');
+
+		 const firstFocusable = widget.querySelector(
+		     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+		 );
+		 firstFocusable?.focus();
+		 
+ 
+}
+
+function closeWidget() {
+
+ const widget = document.getElementById(WIDGET_ID);
+ const trigger = document.getElementById(TRIGGER_ID);
+ if (!widget) return;
+
+ widget.style.left = `-${WIDGET_WIDTH}px`;
+ widget.setAttribute('aria-hidden', 'true');
+ trigger?.setAttribute('aria-expanded', 'false');
+ trigger?.focus();
+}
+
+
+function widgetEventListner(){
+	
+	 const widget = document.getElementById(WIDGET_ID);
+	 
+	 
+	 if(widget.getAttribute('aria-hidden') == "false"){
+		 closeWidget(); 
+	 }
+	 else if(widget.getAttribute('aria-hidden') == undefined || widget.getAttribute('aria-hidden')){
+		 openWidget();
+	 }
+	
+	
+}
+
+
+/* ================================
+HEADER BUTTON (BETWEEN LINKS)
+================================= */
+const triggerBtn = document.getElementById(TRIGGER_ID);
+if (triggerBtn) {
+	triggerBtn.addEventListener('click', widgetEventListner);
+}
+
+const triggerBtnmob = document.getElementById(mobile_trigger_ID);
+if (triggerBtnmob) {
+	triggerBtnmob.addEventListener('click', widgetEventListner);
+	console.log("mob-clicked")
+}
+
+
+
+/* ================================
+   CLOSE BUTTON INSIDE WIDGET
+================================= */
+document.querySelectorAll('.sbiAcc-close')
+    .forEach(btn => btn.addEventListener('click', closeWidget));
+
+/* ================================
+   ESC KEY SUPPORT
+================================= */
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeWidget();
+    }
+});
+
+/* ================================
+   CTRL + F2 TOGGLE
+================================= */
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'F2') {
+        e.preventDefault();
+        const widget = document.getElementById(WIDGET_ID);
+        if (!widget) return;
+
+        const isOpen = window.getComputedStyle(widget).left === '0px';
+        isOpen ? closeWidget() : openWidget();
+    }
+});
+})();
+    let fontSizeCount = 0;
+    let lineHeightCount = 0;
+    let textSpacingCount = 0;
+    let saturateCount = 0;
+    let lastPath = window.location.pathname;
+    let screenReader = !1;
+    const fontSizeSpans = document.querySelectorAll('#featureSteps span');
+    const lineHeightSpans = document.querySelectorAll('#featureSteps-lh span');
+    const textSpacingSpans = document.querySelectorAll('#featureSteps-ts span');
+    const saturateSpans = document.querySelectorAll('#featureStepsSaturate span');
+    let speechSynthesisInstance = window.speechSynthesis;
+    let tabPressCount = 0;
+    let adhdActive = false;
+
+    // Create the reading mask
+    const readingMask = document.createElement('div');
+    readingMask.className = 'reading-mask-horizontal';
+
+    document.body.appendChild(readingMask);
+
+    // Track cursor Y position
+    let cursorPositionY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+        cursorPositionY = e.clientY;
+        updateHighlightBarPosition();
+        readingMask.style.setProperty('--y', `${e.clientY}px`);
+    });
+
+    window.addEventListener('wheel', () => {
+        updateHighlightBarPosition();
+    });
+
+    function updateHighlightBarPosition() {
+        if (adhdActive) {
+            readingMask.style.top = '0';
+        }
+    }
+
+    function speakText(text) {
+        if (!text.trim()) return;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-US";
+        utterance.rate = 1;
+        speechSynthesisInstance.cancel();
+        speechSynthesisInstance.speak(utterance)
+    }
+
+    document.addEventListener("click", (event) => {
+        tabPressCount = 0;
+        let element = event.target;
+        let clickedText = "";
+        if (element.tagName === "IMG") {
+            clickedText = element.getAttribute("alt") || element.getAttribute("aria-label") || element.getAttribute("title") || "Clickable image"
+        } else {
+            clickedText = element.innerText.trim()
+        }
+        if (clickedText && screenReader) {
+            speakText(clickedText)
+        }
+    });
+    document.addEventListener("mouseup", () => {
+        let selectedText = window.getSelection().toString();
+        if (selectedText && screenReader) {
+            speakText(selectedText)
+        }
+    });
+    document.addEventListener("mouseover", (event) => {
+        let element = event.target;
+        let textToSpeak = "";
+        if (element.tagName === "IMG" && element.closest("A, BUTTON")) {
+            textToSpeak = element.getAttribute("alt") || element.getAttribute("aria-label") || element.getAttribute("title") || "Clickable image"
+        } else if (element.tagName === "A" || element.tagName === "BUTTON" || element.tagName === "INPUT" || element.tagName === "TEXTAREA" || element.hasAttribute("role")) {
+            textToSpeak = element.innerText || element.getAttribute("aria-label") || element.getAttribute("alt") || element.value || "Interactive element"
+        }
+        if (textToSpeak && screenReader) {
+            speechSynthesisInstance.cancel();
+            speakText(textToSpeak)
+        }
+    });
+
+    function toggleTextToSpeech() {
+        const tickIcon = document.getElementById('tickIcon_sp');
+        const button = document.getElementById('featureItem_sp');
+        button.classList.toggle(prefix + 'feature-active');
+        tickIcon.style.display = tickIcon.style.display === 'inline-flex' ? 'none' : 'inline-flex';
+        screenReader = !screenReader;
+        saveSettings();
+        if (speechSynthesis.speaking) {
+            speechSynthesis.cancel()
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const speakButton = document.getElementById('speak');
+        if (speakButton) {
+            speakButton.addEventListener('click', toggleTextToSpeech)
+        }
+    });
+
+    function applyTextSettings() {
+
+        let zoomValue = (1 + (fontSizeCount * 0.1)).toFixed(2);
+
+        document.querySelectorAll('body > *').forEach(el => {
+
+            // 🚀 Skip accessibility widget completely
+            if (el.closest('.sbiAcc') || el.classList.contains('sbiAccessibility-loading')) {
+                return;
+            }
+
+            el.style.zoom = zoomValue;
+        });
+    }
+
+    function adjustFontSize(data) {
+        if (data === '+1') {
+            fontSizeCount = (fontSizeCount + 1) % 5;
+            
+        } else {
+        	fontSizeCount = Math.max(0, fontSizeCount - 1);
+        }
+        
+        const button = document.getElementById('featureItem');
+        const tickIcon = document.getElementById('tickIcon');
+        const fontCheck = document.getElementById('featureSteps');
+        const smallerTextBtn = document.getElementById('btn-s17');
+
+        button.classList.add(prefix + 'feature-active');
+        applyTextSettings();
+        saveSettings();
+
+        // Enable or disable Smaller Text button based on fontSizeCount
+        if (fontSizeCount > 0) {
+            smallerTextBtn.disabled = false;
+        } else {
+            smallerTextBtn.disabled = true;
+        }
+
+        if (fontSizeCount === 0) {
+            button.classList.toggle(prefix + 'feature-active');
+            tickIcon.style.display = 'none';
+            fontCheck.classList.remove(prefix + 'featureSteps-visible');
+            let elements = document.querySelectorAll('body > *:not(.sbiAcc)');
+            elements.forEach(el => el.style.zoom = 1);
+            fontSizeSpans.forEach(span => span.classList.remove(prefix + 'active'))
+        } else {
+            tickIcon.style.display = 'inline-flex';
+            fontCheck.classList.add(prefix + 'featureSteps-visible');
+            fontSizeSpans.forEach(span => span.classList.remove(prefix + 'active'));
+            fontSizeSpans.forEach((span, index) => {
+                if (index <= fontSizeCount - 1) {
+                    span.classList.add(prefix + 'active')
+                }
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const btnIncrease = document.getElementById('btn-s9');
+        const btnDecrease = document.getElementById('btn-s17');
+
+        if (btnIncrease) {
+            btnIncrease.addEventListener('click', () => adjustFontSize('+1'));
+        }
+        if (btnDecrease) {
+            btnDecrease.addEventListener('click', () => adjustFontSize('-1'));
+        }
+    });
+
+    function createLineHeightStyles() {
+        // Remove existing line height styles if they exist
+        const existingStyle = document.getElementById('sbi-line-height-styles');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
+
+        // Create new style element
+        const style = document.createElement('style');
+        style.id = 'sbi-line-height-styles';
+
+        // Create dynamic CSS class based on current lineHeightCount
+        if (lineHeightCount > 0) {
+            const lineHeightValue = 1.2 + (lineHeightCount * 0.3); // Base 1.2 + incremental increase
+            style.textContent = `
+                .sbi-line-height {
+                    line-height: ${lineHeightValue} !important;
+                }
+            `;
+        }
+
+        document.head.appendChild(style);
+    }
+
+    // Updated updateLineHeight function to use CSS classes
+    function updateLineHeight() {
+        // Remove existing line height classes from all elements
+        document.querySelectorAll('.sbi-line-height').forEach((el) => {
+            el.classList.remove('sbi-line-height');
+        });
+
+        if (lineHeightCount > 0) {
+            // Create/update CSS class
+            createLineHeightStyles();
+
+            // Add class to text elements
+            const textElements = document.querySelectorAll('p:not(.sbiAcc *):not(.sbiAcc), h1:not(.sbiAcc *):not(.sbiAcc), h2:not(.sbiAcc *):not(.sbiAcc), h3:not(.sbiAcc *):not(.sbiAcc), h4:not(.sbiAcc *):not(.sbiAcc), h5:not(.sbiAcc *):not(.sbiAcc), h6:not(.sbiAcc *):not(.sbiAcc), div:not(.sbiAcc *):not(.sbiAcc), span:not(.sbiAcc *):not(.sbiAcc), li:not(.sbiAcc *):not(.sbiAcc), td:not(.sbiAcc *):not(.sbiAcc), th:not(.sbiAcc *):not(.sbiAcc)');
+
+            // Use requestAnimationFrame for better performance
+            requestAnimationFrame(() => {
+                textElements.forEach((el) => {
+                    // Skip elements that are hidden or have no content
+                    if (el.offsetHeight === 0 || !el.textContent.trim()) return;
+
+                    el.classList.add('sbi-line-height');
+                });
+            });
+        } else {
+            // Remove the style element if lineHeightCount is 0
+            const existingStyle = document.getElementById('sbi-line-height-styles');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+        }
+    }
+
+    function adjustLineHeight() {
+        const button = document.getElementById('featureItem-lh');
+
+        button.classList.add(prefix + 'feature-active');
+        lineHeightCount = (lineHeightCount + 1) % 5;
+
+        if (lineHeightCount !== 0) {
+            updateLineHeight();
+        }
+
+        saveSettings();
+
+        const tickIcon = document.getElementById('tickIcon-lh');
+        const lineHeightCheck = document.getElementById('featureSteps-lh');
+
+        if (lineHeightCount === 0) {
+            button.classList.remove(prefix + 'feature-active');
+            tickIcon.style.display = 'none';
+            lineHeightCheck.classList.remove(prefix + 'featureSteps-visible');
+
+            // Remove classes instead of inline styles
+            document.querySelectorAll('.sbi-line-height').forEach((el) => {
+                el.classList.remove('sbi-line-height');
+            });
+
+            // Remove the style element
+            const existingStyle = document.getElementById('sbi-line-height-styles');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+
+            lineHeightSpans.forEach(span => span.classList.remove(prefix + 'active'));
+        } else {
+            tickIcon.style.display = 'inline-flex';
+            lineHeightSpans.forEach(span => span.classList.remove(prefix + 'active'));
+            lineHeightSpans.forEach((span, index) => {
+                if (index <= lineHeightCount - 1) {
+                    span.classList.add(prefix + 'active');
+                }
+            });
+            lineHeightCheck.classList.add(prefix + 'featureSteps-visible');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const lineHeightBtn = document.getElementById('btn-s12');
+        if (lineHeightBtn) {
+            lineHeightBtn.addEventListener('click', adjustLineHeight)
+        }
+    });
+
+    // Add this function to create/update CSS classes dynamically for text spacing
+    function createTextSpacingStyles() {
+        // Remove existing text spacing styles if they exist
+        const existingStyle = document.getElementById('sbi-text-spacing-styles');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
+
+        // Create new style element
+        const style = document.createElement('style');
+        style.id = 'sbi-text-spacing-styles';
+
+        // Create dynamic CSS class based on current textSpacingCount 0.12 0.16 and 0.05 0.08
+        if (textSpacingCount > 0) {
+            style.textContent = `
+                .sbi-text-spacing {
+                    letter-spacing: ${textSpacingCount * 0.04}em !important;
+                    word-spacing: ${textSpacingCount * 0.06}em !important;
+                    overflow-wrap: break-word !important;
+                    word-break: break-word !important;
+                    white-space: normal !important;
+                }
+            `;
+        }
+
+        document.head.appendChild(style);
+    }
+
+    // Updated updateLetterSpacing function to use CSS classes
+    function updateLetterSpacing() {
+        // Remove existing text spacing classes from all elements
+        document.querySelectorAll('.sbi-text-spacing').forEach((el) => {
+            el.classList.remove('sbi-text-spacing');
+        });
+
+        if (textSpacingCount > 0) {
+            // Create/update CSS class
+            createTextSpacingStyles();
+
+            // Add class to elements
+            document.querySelectorAll('body *:not(.sbiAcc *):not(.sbiAcc)').forEach((el) => {
+                el.classList.add('sbi-text-spacing');
+            });
+        } else {
+            // Remove the style element if textSpacingCount is 0
+            const existingStyle = document.getElementById('sbi-text-spacing-styles');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+        }
+    }
+
+    function adjustTextSpacing() {
+        const button = document.getElementById('featureItem-ts');
+        button.classList.add(prefix + 'feature-active');
+        textSpacingCount = (textSpacingCount + 1) % 4;
+
+        if (textSpacingCount > 0) {
+            updateLetterSpacing();
+        }
+
+        saveSettings();
+        const tickIcon = document.getElementById('tickIcon-ts');
+        const textSpacingCheck = document.getElementById('featureSteps-ts');
+
+        if (textSpacingCount <= 0) {
+            button.classList.remove(prefix + 'feature-active');
+            tickIcon.style.display = 'none';
+            textSpacingCheck.classList.remove(prefix + 'featureSteps-visible');
+
+            // Remove classes instead of inline styles
+            document.querySelectorAll('.sbi-text-spacing').forEach(el => {
+                el.classList.remove('sbi-text-spacing');
+            });
+
+            // Remove the style element
+            const existingStyle = document.getElementById('sbi-text-spacing-styles');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+
+            textSpacingSpans.forEach(span => span.classList.remove(prefix + 'active'))
+        } else {
+            tickIcon.style.display = 'inline-flex';
+            textSpacingSpans.forEach(span => span.classList.remove(prefix + 'active'));
+            textSpacingSpans.forEach((span, index) => {
+                if (index <= textSpacingCount - 1) {
+                    span.classList.add(prefix + 'active')
+                }
+            });
+            textSpacingCheck.classList.add(prefix + 'featureSteps-visible')
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const spacingBtn = document.getElementById('btn-s13');
+        if (spacingBtn) {
+            spacingBtn.addEventListener('click', adjustTextSpacing)
+        }
+    });
+
+    function toggleHighlightLinks() {
+        const button = document.getElementById('featureItem-ht');
+        const tickIcon = document.getElementById('tickIcon-ht');
+        button.classList.toggle(prefix + 'feature-active');
+        tickIcon.style.display = tickIcon.style.display === 'inline-flex' ? 'none' : 'inline-flex';
+        document.body.classList.toggle(prefix + 'highlight-links');
+        let tool = document.querySelector('.sbiAcc');
+        if (tool) {
+            tool.classList.remove(prefix + 'highlight-links')
+        }
+        saveSettings()
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const highlightBtn = document.getElementById('btn-s10');
+        if (highlightBtn) {
+            highlightBtn.addEventListener('click', toggleHighlightLinks)
+        }
+    });
+
+    function toggleDyslexiaMode() {
+        const button = document.getElementById('featureItem-df');
+        const tickIcon = document.getElementById('tickIcon-df');
+        button.classList.toggle(prefix + 'feature-active');
+        tickIcon.style.display = tickIcon.style.display === 'inline-flex' ? 'none' : 'inline-flex';
+        document.body.classList.toggle(prefix + 'dyslexia-mode');
+        saveSettings()
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const dyslexiaBtn = document.getElementById('btn-df');
+        if (dyslexiaBtn) {
+            dyslexiaBtn.addEventListener('click', toggleDyslexiaMode)
+        }
+    });
+
+   
+    document.addEventListener('DOMContentLoaded', function () {
+        const hideImagesBtn = document.getElementById('btn-s11');
+        if (hideImagesBtn) {
+            hideImagesBtn.addEventListener('click', hideImages)
+        }
+    });
+
+    function changeCursor() {
+        const button = document.getElementById('featureItem-Cursor');
+        const tickIcon = document.getElementById('tickIcon-cursor');
+        button.classList.toggle(prefix + 'feature-active');
+        tickIcon.style.display = tickIcon.style.display === 'inline-flex' ? 'none' : 'inline-flex';
+        document.body.classList.toggle(prefix + 'custom-cursor');
+        saveSettings()
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const cursorBtn = document.getElementById('btn-cursor');
+        if (cursorBtn) {
+            cursorBtn.addEventListener('click', changeCursor)
+        }
+    });
+
+    function toggleDarkMode() {
+        const button = document.getElementById('featureItem-ht-dark');
+        const tickIcon = document.getElementById('tickIcon-ht-dark');
+        button.classList.toggle(prefix + 'feature-active');
+        tickIcon.style.display = tickIcon.style.display === 'inline-flex' ? 'none' : 'inline-flex';
+        document.body.classList.toggle(prefix + "dark-mode");
+        saveSettings()
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const darkModeBtn = document.getElementById('dark-btn');
+        if (darkModeBtn) {
+            darkModeBtn.addEventListener('click', toggleDarkMode)
+        }
+    });
+    // on scape key press, close the panel
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            const sbiMain = document.getElementById('sbi-main');
+            if (sbiMain) {
+                sbiMain.style.right = '-530px';
+            }
+        }
+    });
+
+    function invertColor() {
+        const button = document.getElementById('featureItem-ic');
+        const tickIcon = document.getElementById('tickIcon-ic');
+        button.classList.toggle(prefix + 'feature-active');
+        tickIcon.style.display = tickIcon.style.display === 'inline-flex' ? 'none' : 'inline-flex';
+        document.documentElement.classList.toggle(prefix + "invert-colors");
+        saveSettings()
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const invertBtn = document.getElementById('btn-invert');
+        if (invertBtn) {
+            invertBtn.addEventListener('click', invertColor)
+        }
+    });
+
+    function saturateColor() {
+        const button = document.getElementById('featureItem-saturate');
+        const tickIcon = document.getElementById('tickIcon-saturate');
+        const saturateCheck = document.getElementById('featureStepsSaturate');
+
+        // Remove existing saturate classes
+        document.documentElement.classList.remove(prefix + 'saturate-low', prefix + 'saturate-high', prefix + 'saturate-desaturate');
+
+        // Increment saturate count and cycle through options (0-3)
+        saturateCount = (saturateCount + 1) % 4;
+
+        // Hide all saturate text labels
+        for (let i = 0; i <= 3; i++) {
+            const textElement = document.getElementById(`saturate-text-${i}`);
+            const textElement1 = document.getElementById(`saturate-detail-text-${i}`);
+            if (textElement) {
+                textElement.style.display = 'none';
+            }
+            if (textElement1) {
+                textElement1.style.display = 'none';
+            }
+        }
+
+        // Show current saturate text and apply corresponding class
+        const currentTextElement = document.getElementById(`saturate-text-${saturateCount}`);
+        if (currentTextElement) {
+            currentTextElement.style.display = 'inline';
+        }
+
+        const currentTextElement1 = document.getElementById(`saturate-detail-text-${saturateCount}`);
+        if (currentTextElement1) {
+            currentTextElement1.style.display = 'inline';
+        }
+
+        if (saturateCount === 0) {
+            // Reset state - no saturate applied
+            button.classList.remove(prefix + 'feature-active');
+            tickIcon.style.display = 'none';
+            saturateCheck.classList.remove(prefix + 'featureSteps-visible');
+            saturateSpans.forEach(span => span.classList.remove(prefix + 'active'));
+        } else {
+            // Apply saturate based on count
+            button.classList.add(prefix + 'feature-active');
+            tickIcon.style.display = 'inline-flex';
+            saturateCheck.classList.add(prefix + 'featureSteps-visible');
+
+            // Apply the appropriate saturate class
+            if (saturateCount === 1) {
+                document.documentElement.classList.add(prefix + 'saturate-low');
+            } else if (saturateCount === 2) {
+                document.documentElement.classList.add(prefix + 'saturate-high');
+            } else if (saturateCount === 3) {
+                document.documentElement.classList.add(prefix + 'saturate-desaturate');
+            }
+
+            // Update step indicators
+            saturateSpans.forEach(span => span.classList.remove(prefix + 'active'));
+            saturateSpans.forEach((span, index) => {
+                if (index <= saturateCount - 1) {
+                    span.classList.add(prefix + 'active');
+                }
+            });
+        }
+
+        saveSettings();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const saturateBtn = document.getElementById('btn-saturate');
+        if (saturateBtn) {
+            saturateBtn.addEventListener('click', saturateColor)
+        }
+    });
+
+    function pauseAnimation() {
+        const button = document.getElementById('featureItem-animate');
+        const tickIcon = document.getElementById('tickIcon-animate');
+        button.classList.toggle(prefix + 'feature-active');
+        tickIcon.style.display = tickIcon.style.display === 'inline-flex' ? 'none' : 'inline-flex';
+
+        // Toggle pause animation class on body
+        document.body.classList.toggle(prefix + 'animation-pause');
+
+        // Pause/resume videos and audio elements
+        const isAnimationPaused = document.body.classList.contains(prefix + 'animation-pause');
+
+        if (isAnimationPaused) {
+            // Pause all videos
+            document.querySelectorAll('video:not(.sbiAcc video):not(.sbiAcc)').forEach(video => {
+                if (!video.paused) {
+                    video.setAttribute('data-was-playing', 'true');
+                    video.pause();
+                }
+            });
+
+            // Pause all audio elements
+            document.querySelectorAll('audio:not(.sbiAcc audio):not(.sbiAcc)').forEach(audio => {
+                if (!audio.paused) {
+                    audio.setAttribute('data-was-playing', 'true');
+                    audio.pause();
+                }
+            });
+        } else {
+            // Resume all videos that were playing
+            document.querySelectorAll('video[data-was-playing="true"]:not(.sbiAcc video):not(.sbiAcc)').forEach(video => {
+                video.play();
+                video.removeAttribute('data-was-playing');
+            });
+
+            // Resume all audio elements that were playing
+            document.querySelectorAll('audio[data-was-playing="true"]:not(.sbiAcc audio):not(.sbiAcc)').forEach(audio => {
+                audio.play();
+                audio.removeAttribute('data-was-playing');
+            });
+        }
+
+        saveSettings();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const pauseAnimationBtn = document.getElementById('btn-animation');
+        if (pauseAnimationBtn) {
+            pauseAnimationBtn.addEventListener('click', pauseAnimation);
+        }
+    });
+
+    function toggleADHDFriendlyMode() {
+        const button = document.getElementById('featureItem-adhd');
+        const tickIcon = document.getElementById('tickIcon-adhd');
+
+        if (adhdActive) {
+            // Remove active state
+            button.classList.remove(prefix + 'feature-active');
+            tickIcon.style.display = 'none';
+
+            readingMask.classList.add('mask-hidden');
+            readingMask.classList.remove('mask-visible');
+            document.body.classList.remove(prefix + 'adhd-saturate');
+            adhdActive = false;
+        } else {
+            // Add active state
+            button.classList.add(prefix + 'feature-active');
+            tickIcon.style.display = 'inline-flex';
+            readingMask.classList.remove('mask-hidden');
+            readingMask.classList.add('mask-visible');
+            document.body.classList.add(prefix + 'adhd-saturate');
+            adhdActive = true;
+        }
+
+        saveSettings();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const adhdBtn = document.getElementById('btn-adhd');
+        if (adhdBtn) {
+            adhdBtn.addEventListener('click', toggleADHDFriendlyMode)
+        }
+    });
+    function clearAccessibilityCookie() {
+    	document.cookie = "accessibilitySettings=; Max-Age=0; path=/"; 
+    	document.cookie = "accessibilitySettings=; Max-Age=0; path=/; domain=" + location.hostname;
+    	document.cookie = "accessibilitySettings=; Max-Age=0; path=/; domain=." + location.hostname;
+    	}
+    
+    function resetAccessibilityUIClasses() {
+        const root = document.querySelector('.sbiAcc');
+        if (!root) return;
+        
+        root.querySelectorAll('.sbi-accessibility-feature-active')
+            .forEach(el => el.classList.remove('sbi-accessibility-feature-active'));
+     
+        root.querySelectorAll('.sbi-accessibility-featureSteps-visible')
+            .forEach(el => el.classList.remove('sbi-accessibility-featureSteps-visible'));
+    
+        root.querySelectorAll('.sbi-accessibility-active')
+            .forEach(el => el.classList.remove('sbi-accessibility-active'));
+    }
+    
+    function resetSettings() {
+        clearAccessibilityCookie(); 
+        resetAccessibilityUIClasses(); 
+        speechSynthesisInstance.cancel();
+
+        // Reset counters
+        fontSizeCount = 0;
+        lineHeightCount = 0;
+        textSpacingCount = 0;
+        saturateCount = 0;
+        screenReader = false;
+        adhdActive = false;
+
+        // Remove all accessibility classes
+        document.body.classList.remove(
+            prefix + "dark-mode",
+            prefix + "custom-cursor",
+            prefix + "dyslexia-mode",
+            prefix + "highlight-links",
+            prefix + "hide-images",
+            prefix + "animation-pause",
+            prefix + "adhd-saturate"
+        );
+
+        document.documentElement.classList.remove(
+            prefix + "invert-colors",
+            prefix + "saturate-low",
+            prefix + "saturate-high",
+            prefix + "saturate-desaturate"
+        );
+
+        // Reset styles
+        document.querySelectorAll('body *:not(.sbiAcc)').forEach(el => {
+            el.style.zoom = "1";
+            el.style.fontSize = "";
+            el.style.lineHeight = "";
+            el.classList.remove(
+                'sbi-line-height',
+                'sbi-text-spacing'
+            );
+        });
+
+        // Remove dynamic styles
+        document.getElementById('sbi-line-height-styles')?.remove();
+        document.getElementById('sbi-text-spacing-styles')?.remove();
+
+        // Reset ADHD mask
+        readingMask.classList.add('mask-hidden');
+        readingMask.classList.remove('mask-visible');
+
+        // Reset widget UI
+        document.querySelectorAll('.sbiAcc input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('[id^="tickIcon"]').forEach(icon => icon.style.display = 'none');
+
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const resetBtn = document.getElementById('reset-all');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', resetSettings)
+            console.log("clicked");
+        }
+        
+        loadSettings();
+
+    });
+
+    function getCookie(name) {
+        const value = "; " + document.cookie;
+        const parts = value.split("; " + name + "=");
+        if (parts.length === 2) return decodeURIComponent(parts.pop().split(";").shift());
+    }
+
+
+    function saveSettings() {
+        const settings = {
+            screenReader,
+            fontSizeCount,
+            lineHeightCount,
+            textSpacingCount,
+            saturateCount,
+            highlightLinks: document.body.classList.contains(prefix + 'highlight-links'),
+            dyslexiaMode: document.body.classList.contains(prefix + 'dyslexia-mode'),
+            hideImages: document.body.classList.contains(prefix + 'hide-images'),
+            darkMode: document.body.classList.contains(prefix + 'dark-mode'),
+            cursorChanged: document.body.classList.contains(prefix + 'custom-cursor'),
+            invert: document.documentElement.classList.contains(prefix + 'invert-colors'),
+            adhdFriendly: adhdActive,
+            pauseAnimation: document.body.classList.contains(prefix + 'animation-pause'),
+        };
+
+        document.cookie = `accessibilitySettings=${encodeURIComponent(
+            JSON.stringify(settings)
+        )}; path=/; max-age=${60 * 60 * 24 * 30}`;
+    }
+
+    function updateWidgetToggles(settings) {
+        const speakOn = document.getElementById('tickIcon_sp');
+        if (speakOn) {
+            speakOn.style.display = settings.screenReader ? 'inline-flex' : 'none'
+        }
+        const highlightToggle = document.getElementById('tickIcon-ht');
+        if (highlightToggle) {
+            highlightToggle.style.display = settings.highlightLinks ? 'inline-flex' : 'none'
+        }
+        const darkModeToggle = document.getElementById('tickIcon-ht-dark');
+        if (darkModeToggle) {
+            darkModeToggle.style.display = settings.darkMode ? 'inline-flex' : 'none'
+        }
+        const invertToggle = document.getElementById('tickIcon-ic');
+        if (invertToggle) {
+            invertToggle.style.display = settings.invert ? 'inline-flex' : 'none'
+        }
+        const dyslexiaToggle = document.getElementById('tickIcon-df');
+        if (dyslexiaToggle) {
+            dyslexiaToggle.style.display = settings.dyslexiaMode ? 'inline-flex' : 'none'
+        }
+        const adhdToggle = document.getElementById('tickIcon-adhd');
+        if (adhdToggle) {
+            adhdToggle.style.display = settings.adhdFriendly ? 'inline-flex' : 'none'
+        }
+        const hideImagesToggle = document.getElementById('tickIcon-hi');
+        if (hideImagesToggle) {
+            hideImagesToggle.style.display = settings.hideImages ? 'inline-flex' : 'none'
+        }
+        const cursorToggle = document.getElementById('tickIcon-cursor');
+        if (cursorToggle) {
+            cursorToggle.style.display = settings.cursorChanged ? 'inline-flex' : 'none'
+        }
+        const saturateToggle = document.getElementById('tickIcon-saturate');
+        if (saturateToggle) {
+            saturateToggle.style.display = settings.saturateCount > 0 ? 'inline-flex' : 'none'
+        }
+
+        const animationToggle = document.getElementById('tickIcon-animate');
+        if (animationToggle) {
+            animationToggle.style.display = settings.pauseAnimation ? 'inline-flex' : 'none'
+        }
+    }
+
+    function loadSettings() {
+        const settingsStr = getCookie('accessibilitySettings');
+        if (!settingsStr) return;
+
+        const settings = JSON.parse(settingsStr);
+
+        // Restore counters
+        fontSizeCount = settings.fontSizeCount || 0;
+        lineHeightCount = settings.lineHeightCount || 0;
+        textSpacingCount = settings.textSpacingCount || 0;
+        saturateCount = settings.saturateCount || 0;
+        screenReader = settings.screenReader || false;
+        adhdActive = settings.adhdFriendly || false;
+
+        // Font size
+        if (fontSizeCount > 0) {
+        	document.querySelectorAll('body > *').forEach(el => {
+        	    if (el.closest('.sbiAcc') || el.classList.contains('sbiAccessibility-loading')) return;
+        	    el.style.zoom = (1 + (fontSizeCount * 0.1)).toFixed(2);
+        	});
+        	
+        }
+
+        // Line height
+        if (lineHeightCount > 0) updateLineHeight();
+
+        // Text spacing
+        if (textSpacingCount > 0) updateLetterSpacing();
+
+        // Visual toggles
+        document.body.classList.toggle(prefix + 'highlight-links', settings.highlightLinks);
+        document.body.classList.toggle(prefix + 'dyslexia-mode', settings.dyslexiaMode);
+        document.body.classList.toggle(prefix + 'dark-mode', settings.darkMode);
+        document.body.classList.toggle(prefix + 'custom-cursor', settings.cursorChanged);
+        document.body.classList.toggle(prefix + 'animation-pause', settings.pauseAnimation);
+        document.documentElement.classList.toggle(prefix + 'invert-colors', settings.invert);
+
+        // ADHD mode (NO TOGGLE)
+        if (settings.adhdFriendly) {
+            readingMask.classList.remove('mask-hidden');
+            readingMask.classList.add('mask-visible');
+            document.body.classList.add(prefix + 'adhd-saturate');
+        }
+
+        // Saturation
+        document.documentElement.classList.remove(
+            prefix + 'saturate-low',
+            prefix + 'saturate-high',
+            prefix + 'saturate-desaturate'
+        );
+
+        if (saturateCount === 1) document.documentElement.classList.add(prefix + 'saturate-low');
+        if (saturateCount === 2) document.documentElement.classList.add(prefix + 'saturate-high');
+        if (saturateCount === 3) document.documentElement.classList.add(prefix + 'saturate-desaturate');
+
+        updateWidgetToggles(settings);
+        
+        if (fontSizeCount > 0) {
+            document.getElementById('featureItem')
+                ?.classList.add(prefix + 'feature-active');
+
+            document.getElementById('tickIcon')
+                ?.style.setProperty('display', 'inline-flex');
+
+            document.getElementById('featureSteps')
+                ?.classList.add(prefix + 'featureSteps-visible');
+
+            fontSizeSpans.forEach((span, index) => {
+                if (index <= fontSizeCount - 1) {
+                    span.classList.add(prefix + 'active');
+                }
+            });
+
+            document.getElementById('btn-s17').disabled = false;
+        }
+
+        // 🔥 Restore Line Height UI
+        if (lineHeightCount > 0) {
+            document.getElementById('featureItem-lh')
+                ?.classList.add(prefix + 'feature-active');
+
+            document.getElementById('tickIcon-lh')
+                ?.style.setProperty('display', 'inline-flex');
+
+            document.getElementById('featureSteps-lh')
+                ?.classList.add(prefix + 'featureSteps-visible');
+
+            lineHeightSpans.forEach((span, index) => {
+                if (index <= lineHeightCount - 1) {
+                    span.classList.add(prefix + 'active');
+                }
+            });
+        }
+
+        // 🔥 Restore Text Spacing UI
+        if (textSpacingCount > 0) {
+            document.getElementById('featureItem-ts')
+                ?.classList.add(prefix + 'feature-active');
+
+            document.getElementById('tickIcon-ts')
+                ?.style.setProperty('display', 'inline-flex');
+
+            document.getElementById('featureSteps-ts')
+                ?.classList.add(prefix + 'featureSteps-visible');
+
+            textSpacingSpans.forEach((span, index) => {
+                if (index <= textSpacingCount - 1) {
+                    span.classList.add(prefix + 'active');
+                }
+            });
+        }
+
+        // 🔥 Restore Saturate UI
+        if (saturateCount > 0) {
+            document.getElementById('featureItem-saturate')
+                ?.classList.add(prefix + 'feature-active');
+
+            document.getElementById('tickIcon-saturate')
+                ?.style.setProperty('display', 'inline-flex');
+
+            document.getElementById('featureStepsSaturate')
+                ?.classList.add(prefix + 'featureSteps-visible');
+
+            saturateSpans.forEach((span, index) => {
+                if (index <= saturateCount - 1) {
+                    span.classList.add(prefix + 'active');
+                }
+            });
+        }
+
+    }
+   
+
+    function detectRouteChange() {
+        setInterval(() => {
+            let currentPath = window.location.pathname;
+            if (currentPath !== lastPath) {
+                console.log('Route changed from', lastPath, 'to', currentPath);
+                speechSynthesisInstance.cancel();
+                lastPath = currentPath;
+
+                // Get settings from cookie (not localStorage)
+                const settingsStr = getCookie(SETTINGS_KEY);
+                if (settingsStr) {
+                    const settings = JSON.parse(settingsStr);
+
+                    // Re-apply ADHD mode if it was active
+                    if (settings.adhdFriendly && !adhdActive) {
+                        toggleADHDFriendlyMode()
+                    }
+
+                    // Apply line height changes using classes
+                    if (settings.lineHeightCount && settings.lineHeightCount > 0) {
+                        lineHeightCount = settings.lineHeightCount;
+                        updateLineHeight();
+                    }
+
+                    // Apply text spacing changes using classes
+                    if (settings.textSpacingCount && settings.textSpacingCount > 0) {
+                        textSpacingCount = settings.textSpacingCount;
+                        updateLetterSpacing();
+                    }
+                }
+            }
+        }, 1000);
+    }
+})()
+
+
+//this code for page loading showing accessibility code issue fixed 
+window.addEventListener("load", function () {
+    document.body.classList.remove("sbiAccessibility-loading");
+});
+
+// // start here hide image and background hide
+function hideBackgroundImages() {
+    if (!document.body.classList.contains('sbi-accessibility-hide-images')) return;
+
+    document.querySelectorAll('*:not(#sbi-main):not(#sbi-main *):not(.reading-mask-horizontal)')
+        .forEach(el => {
+            const bgImage = getComputedStyle(el).backgroundImage;
+            if (bgImage.includes('url(')) {
+                el.dataset.origBgImage = bgImage; // Store original
+                el.style.setProperty('background-image', 'none', 'important');
+            }
+        });
+}
+
+function restoreBackgroundImages() {
+    document.querySelectorAll('[data-orig-bg-image]').forEach(el => {
+        el.style.backgroundImage = el.dataset.origBgImage;
+        delete el.dataset.origBgImage;
+    });
+}
+
+function toggleBackgroundImageHiding() {
+    if (document.body.classList.contains('sbi-accessibility-hide-images')) {
+        hideBackgroundImages();
+    } else {
+        restoreBackgroundImages();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', hideBackgroundImages);
+
+new MutationObserver(mutations => {
+    if (mutations.some(m => m.attributeName === 'class')) {
+        toggleBackgroundImageHiding();
+    }
+}).observe(document.body, { attributes: true });
+
+
+
+// end here hide image and background hide

@@ -1,4 +1,167 @@
-let isFlipbookInitialized = false;
+l
+function popup_previewPage(popURL, title, w) {
+    /* Bypass the cache every time. */
+    var hiddenToken = $('#OWASP_CSRFTOKEN').val();
+    // showDataLoader(); 
+    
+    // 1. DEFINE YOUR EXCLUDED FILES HERE
+    // Add any common JS or CSS file names (or partial paths) you want to remove
+    var excludedFiles = [
+        'common.js', 
+        'header.js', 
+        'bootstrap.min.css',
+        'global-style.css'
+    ];
+
+    $.ajaxSetup({
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("OWASP_CSRFTOKEN", hiddenToken);
+        }, 
+        cache: false
+    });
+    
+    $.ajax({
+        url: popURL, 
+        dataType: 'html', 
+        data: '', 
+        success: function(resp) {
+            
+            if ($('#popupWithinPop_pagePreview').length > 0) {
+                $('#popupWithinPop_pagePreview').remove();
+            }
+            
+            $('header:first').after(
+                '<div id="popupWithinPop_pagePreview" class="popupWithinPop_pagePreview">' +
+                '<div class="hdr clearfix"><span id="popupWithinPop_pagePreview_title" class="fLft">Title goes here</span>' +
+                '<div class="fRght">' +
+                '<a href="javascript:;" class="viewPage" style="text-decoration:none;" title="Click here to visit this page">Edit Now | Visit Page &nbsp;</a>' +
+                '<img src="newimg/maximize.png" alt="maximize" style="width:18px;filter:invert(1);"/>&nbsp;&nbsp;' +
+                '<a href="javascript:;" class="sprite icon-close" onclick="hidePopup(\'popupWithinPop_pagePreview\', \'popupWithinPop_overlay_pagePreview\')">Close</a></div></div>' +
+                '<div id="popupWithinPop_content_pagePreview" class="cont"></div>' +
+                '</div>'
+            );
+
+            var objPop = $("#popupWithinPop_pagePreview");
+            var container = objPop.find('#popupWithinPop_content_pagePreview');
+
+            // ==========================================
+            // 2. PARSE AND CLEAN THE HTML RESPONSE
+            // ==========================================
+            var parser = new DOMParser();
+            // Parse response safely into a virtual DOM
+            var virtualDoc = parser.parseFromString(resp, 'text/html');
+
+            // Find and remove matching <script> tags
+            virtualDoc.querySelectorAll('script[src]').forEach(function(script) {
+                // Check if the script's src contains any of the excluded file strings
+                var shouldRemove = excludedFiles.some(function(file) {
+                    return script.src.includes(file);
+                });
+                if (shouldRemove) {
+                    script.remove();
+                }
+            });
+
+            // Find and remove matching <link rel="stylesheet"> tags
+            virtualDoc.querySelectorAll('link[rel="stylesheet"]').forEach(function(link) {
+                var shouldRemove = excludedFiles.some(function(file) {
+                    return link.href.includes(file);
+                });
+                if (shouldRemove) {
+                    link.remove();
+                }
+            });
+
+            // Combine <head> content (for unique page styles) and <body> content
+            var cleanedHtml = virtualDoc.head.innerHTML + virtualDoc.body.innerHTML;
+
+            // Inject the cleaned HTML into your container
+            container.html(cleanedHtml); 
+
+            // ==========================================
+            // 3. APPLY DOM MANIPULATIONS 
+            // ==========================================
+            if (objPop.find('#popupWithinPop_pagePreview_title').length) {
+                $('#popupWithinPop_pagePreview_title').html(title);
+            } else {
+                $('#popupWithinPop_pagePreview_title').html(title); 
+            }
+
+            objPop.css({ 'width': w + '%' });
+            objPop.center().show();
+            
+            container.find('.rghtCol').css({'width': '100%'});
+            container.css({'background': 'none'});
+            
+            container.find('input').attr({'disabled': true});
+            container.find('input[type="text"]:not(".datepicker"), textarea').attr("readonly", "readonly");
+            container.find('div.rghtCol').addClass('iframeRghtCol');
+            
+            container.find('div.rghtCol').find('a').each(function () {
+                var _str = $(this).text();
+                _str = _str.replace(/\s{2,}/g, ' ').trim();
+                var _str_space = _str.split(' ');
+                var _str_slash = _str.split('/');
+                
+                if ($(this).hasClass('dataSource')) {
+                    $(this).attr('href', 'javascript:;');
+                    $(this).removeAttr('onclick');
+                }
+                
+                if ($.trim(_str_space[0]) == 'Edit' || $.trim(_str_space[0]) == 'Modify' || $.trim(_str_slash[0]) == 'Edit' || $.trim(_str_slash[0]) == 'Modify' ||
+                    $.trim(_str_space[0]) == 'View' || $.trim(_str_space[0]) == 'Add/Edit' || $.trim(_str_slash[0]) == 'Add/Edit' ||
+                    $.trim(_str_space[0]) == 'Create/Edit' || $.trim(_str_space[0]) == 'Create/Modify' ) {
+                    
+                    if(_str.indexOf("Add/Edit") >= 0) { _str = _str.replace("Add/Edit", "View"); }
+                    else if(_str.indexOf("Add/Modify") >= 0) { _str = _str.replace("Add/Modify", "View"); }
+                    else if(_str.indexOf("Create/Edit") >= 0) { _str = _str.replace("Create/Edit", "View"); }
+                    else if(_str.indexOf("Create/Modify") >= 0) { _str = _str.replace("Create/Modify", "View"); }
+                    else if(_str.indexOf("View/Edit") >= 0) { _str = _str.replace("View/Edit", "View"); }
+                    else if(_str.indexOf("View/Modify") >= 0) { _str = _str.replace("View/Modify", "View"); }
+                    else if($.trim(_str_space[0]) == 'Edit' || $.trim(_str_slash[0]) == 'Edit') { _str = _str.replace("Edit", "View"); }
+                    else if($.trim(_str_space[0]) == 'Modify' || $.trim(_str_slash[0]) == 'Modify') { _str = _str.replace("Modify", "View"); }
+                    
+                    $(this).text(_str);
+                }
+                else if ($.trim(_str_space[0]) == 'Add' || $.trim(_str_space[0]) == 'Create' || $.trim(_str_space[0]) == 'Delete' || $.trim(_str_space[0]) == 'Cancel' ||
+                         $.trim(_str_slash[0]) == 'DeLink' || $.trim(_str_slash[0]) == 'Add' || $.trim(_str_slash[0]) == 'Create' || $.trim(_str_slash[0]) == 'Delete' || $.trim(_str_slash[0]) == 'Cancel' || $.trim(_str_slash[0]) == 'DeLink' ) {
+                    $(this).replaceWith('<span style="color:#999;text-decoration:underline">' + $(this).html() + '</span>');
+                }
+            });
+
+            $('#popupWithinPop_pagePreview').find('a.viewPage').bind('click', function () {
+                let _src = popURL; 
+                if(_src.indexOf('openTab') > -1) { _src = removeParam(_src, 'openTab'); }
+                if(_src.indexOf('scrollTab') > -1) { _src = removeParam(_src, 'scrollTab'); }
+                $(this).attr('href', _src);
+            });
+
+            $('#popupWithinPop_pagePreview').find('.icon-close').bind('click', function () {
+                container.find('div.rghtCol').removeClass('iframeRghtCol');
+            });
+
+            container.find('.rghtCol').append('<style>.restore_div{display: none !important;}</style>');
+            container.find('nav.mainTabCtrl, header.header, div.lftCol, #mscHeaderTbl').remove();
+
+            if(typeof hideDataLoader === "function") {
+                hideDataLoader();
+            }
+
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            if(typeof hideDataLoader === "function") {
+                hideDataLoader();
+            }
+            alert("Failed: " + textStatus + " - Exception: " + errorThrown);
+        }
+    });
+}
+
+
+
+###############
+
+et isFlipbookInitialized = false;
 let currentPDF = null;
 -------
 const pdfModal = document.getElementById('pdfModal');

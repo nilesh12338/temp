@@ -1,3 +1,40 @@
+function getBase64FileSizeInMB(base64String) {
+  // 1. Remove the data URI prefix if it exists (e.g., "data:application/pdf;base64,")
+  const base64 = base64String.split(',')[1] || base64String;
+
+  // 2. Get the total length of the base64 string
+  const base64Length = base64.length;
+
+  // 3. Count the padding characters ('=') at the end of the string
+  let padding = 0;
+  if (base64.endsWith('==')) {
+    padding = 2;
+  } else if (base64.endsWith('=')) {
+    padding = 1;
+  }
+
+  // 4. Calculate the size in bytes
+  // Every 4 characters represents 3 bytes of data, minus any padding
+  const sizeInBytes = (base64Length * (3 / 4)) - padding;
+
+  // 5. Convert bytes to Megabytes (MB)
+  const sizeInMB = sizeInBytes / (1024 * 1024);
+
+  return sizeInMB;
+}
+
+// Example usage:
+const pdfBase64 = "data:application/pdf;base64,JVBERi0xLjcKCjEgMCBvYmog..."; // truncated for example
+const fileSizeMB = getBase64FileSizeInMB(pdfBase64);
+
+console.log(`File size: ${fileSizeMB.toFixed(2)} MB`);
+
+##########
+
+
+
+
+
 l
 function popup_previewPage(popURL, title, w) {
     /* Bypass the cache every time. */

@@ -1,3 +1,311 @@
+
+<script>
+    $(document).ready(function() {
+        const prefix = "sbi-accessibility-";
+        let fontSizeCount = 0;
+        let lineHeightCount = 0;
+        let textSpacingCount = 0;
+        let saturateCount = 0;
+        let adhdActive = false;
+        let screenReader = false;
+        const synth = window.speechSynthesis;
+
+        // =========================================
+        // SESSION STORAGE LOGIC
+        // =========================================
+        function saveSettings() {
+            const settings = {
+                fontSizeCount: fontSizeCount,
+                lineHeightCount: lineHeightCount,
+                textSpacingCount: textSpacingCount,
+                saturateCount: saturateCount,
+                adhdActive: adhdActive,
+                screenReader: screenReader,
+                dyslexiaMode: $('body').hasClass(prefix + 'dyslexia-mode'),
+                darkMode: $('body').hasClass(prefix + 'dark-mode'),
+                highlightLinks: $('body').hasClass(prefix + 'highlight-links'),
+                cursor: $('body').hasClass(prefix + 'custom-cursor'),
+                pauseAnimation: $('body').hasClass(prefix + 'animation-pause'),
+                invertColors: $('html').hasClass(prefix + 'invert-colors')
+            };
+            sessionStorage.setItem('sbiAccSettings', JSON.stringify(settings));
+        }
+
+        function loadSettings() {
+            const savedData = sessionStorage.getItem('sbiAccSettings');
+            if (!savedData) return;
+            
+            const settings = JSON.parse(savedData);
+
+            // Restore internal states
+            fontSizeCount = settings.fontSizeCount || 0;
+            lineHeightCount = settings.lineHeightCount || 0;
+            textSpacingCount = settings.textSpacingCount || 0;
+            saturateCount = settings.saturateCount || 0;
+            adhdActive = settings.adhdActive || false;
+            screenReader = settings.screenReader || false;
+
+            // Re-apply basic toggle classes and active button states
+            if (settings.dyslexiaMode) { $('body').addClass(prefix + 'dyslexia-mode'); $('#btn-df').addClass(prefix + 'feature-active'); }
+            if (settings.darkMode) { $('body').addClass(prefix + 'dark-mode'); $('#dark-btn').addClass(prefix + 'feature-active'); }
+            if (settings.highlightLinks) { $('body').addClass(prefix + 'highlight-links'); $('#btn-s10').addClass(prefix + 'feature-active'); }
+            if (settings.cursor) { $('body').addClass(prefix + 'custom-cursor'); $('#btn-cursor').addClass(prefix + 'feature-active'); }
+            if (settings.pauseAnimation) { $('body').addClass(prefix + 'animation-pause'); $('#btn-animation').addClass(prefix + 'feature-active'); }
+            if (settings.invertColors) { $('html').addClass(prefix + 'invert-colors'); $('#btn-invert').addClass(prefix + 'feature-active'); }
+            if (screenReader) { $('#speak').addClass(prefix + 'feature-active'); }
+            if (adhdActive) { 
+                $('#readingMask').addClass('mask-visible'); 
+                $('#btn-adhd').addClass(prefix + 'feature-active'); 
+            }
+
+            // Re-apply Text Sizing
+            if (fontSizeCount > 0) {
+                applyTextSettings();
+                $('#btn-s9').parent().children('button').addClass(prefix + 'feature-active');
+                $('#featureSteps').addClass(prefix + 'featureSteps-visible');
+                $('#featureSteps span').each(function(index) { if (index < fontSizeCount) $(this).addClass(prefix + 'active'); });
+                $('#btn-s17').prop('disabled', false);
+            }
+
+            // Re-apply Line Height
+            if (lineHeightCount > 0) {
+                $('p, h1, h2, h3, div, span, li').not('.sbiAcc *, .sbiAcc').addClass('sbi-line-height');
+                $('#btn-s12').addClass(prefix + 'feature-active');
+                $('#featureSteps-lh').addClass(prefix + 'featureSteps-visible');
+                $('#featureSteps-lh span').each(function(index) { if (index < lineHeightCount) $(this).addClass(prefix + 'active'); });
+            }
+
+            // Re-apply Text Spacing
+            if (textSpacingCount > 0) {
+                $('body *').not('.sbiAcc *, .sbiAcc').addClass('sbi-text-spacing');
+                $('#btn-s13').addClass(prefix + 'feature-active');
+                $('#featureSteps-ts').addClass(prefix + 'featureSteps-visible');
+                $('#featureSteps-ts span').each(function(index) { if (index < textSpacingCount) $(this).addClass(prefix + 'active'); });
+            }
+
+            // Re-apply Saturation
+            if (saturateCount > 0) {
+                $('#btn-saturate').addClass(prefix + 'feature-active');
+                $('#featureStepsSaturate').addClass(prefix + 'featureSteps-visible');
+                if (saturateCount === 1) { $('html').addClass(prefix + 'saturate-low'); $('#sat-text').text('Low Saturation'); }
+                if (saturateCount === 2) { $('html').addClass(prefix + 'saturate-high'); $('#sat-text').text('High Saturation'); }
+                if (saturateCount === 3) { $('html').addClass(prefix + 'saturate-desaturate'); $('#sat-text').text('Desaturate'); }
+                $('#featureStepsSaturate span').each(function(index) { if (index < saturateCount) $(this).addClass(prefix + 'active'); });
+            }
+        }
+
+        // =========================================
+        // WIDGET UI LOGIC
+        // =========================================
+        $('#sbi-main').draggable({ handle: ".second-panel", containment: "window" });
+
+        $('#sbi-widget-custom-trigger').on('click', function() {
+            const widget = $('#sbi-main');
+            if (widget.is(':hidden')) {
+                widget.css({ left: '0', top: 'auto', bottom: '85px' }); 
+                widget.toggle('slide', { direction: 'left' }, 400);
+            } else {
+                widget.toggle('slide', { direction: 'left' }, 400);
+            }
+        });
+
+        $('.sbiAcc-close').on('click', function() {
+            $('#sbi-main').toggle('slide', { direction: 'left' }, 400);
+        });
+
+        // =========================================
+        // FEATURE FUNCTIONS
+        // =========================================
+
+        $('#btn-adhd').on('click', function() {
+            adhdActive = !adhdActive;
+            $(this).toggleClass(prefix + 'feature-active', adhdActive);
+            if (adhdActive) { $('#readingMask').addClass('mask-visible'); } 
+            else { $('#readingMask').removeClass('mask-visible'); }
+            saveSettings();
+        });
+
+        $(document).on('mousemove', function(e) {
+            if (adhdActive) { $('#readingMask').css('--y', e.clientY + 'px'); }
+        });
+
+        $('#btn-df').on('click', function() {
+            $(this).toggleClass(prefix + 'feature-active');
+            $('body').toggleClass(prefix + 'dyslexia-mode');
+            saveSettings();
+        });
+
+        $('#dark-btn').on('click', function() {
+            $(this).toggleClass(prefix + 'feature-active');
+            $('body').toggleClass(prefix + 'dark-mode');
+            saveSettings();
+        });
+
+        $('#btn-saturate').on('click', function() {
+            saturateCount = (saturateCount + 1) % 4;
+            const $btn = $(this);
+            const $steps = $('#featureStepsSaturate');
+            
+            $('html').removeClass(prefix + 'saturate-low ' + prefix + 'saturate-high ' + prefix + 'saturate-desaturate');
+            
+            if (saturateCount === 0) {
+                $btn.removeClass(prefix + 'feature-active');
+                $steps.removeClass(prefix + 'featureSteps-visible');
+                $('#sat-text').text('Saturation');
+                $('#featureStepsSaturate span').removeClass(prefix + 'active');
+            } else {
+                $btn.addClass(prefix + 'feature-active');
+                $steps.addClass(prefix + 'featureSteps-visible');
+                
+                if (saturateCount === 1) { $('html').addClass(prefix + 'saturate-low'); $('#sat-text').text('Low Saturation'); }
+                if (saturateCount === 2) { $('html').addClass(prefix + 'saturate-high'); $('#sat-text').text('High Saturation'); }
+                if (saturateCount === 3) { $('html').addClass(prefix + 'saturate-desaturate'); $('#sat-text').text('Desaturate'); }
+
+                $('#featureStepsSaturate span').removeClass(prefix + 'active').each(function(index) {
+                    if (index < saturateCount) $(this).addClass(prefix + 'active');
+                });
+            }
+            saveSettings();
+        });
+
+        $('#btn-s10').on('click', function() {
+            $(this).toggleClass(prefix + 'feature-active');
+            $('body').toggleClass(prefix + 'highlight-links');
+            saveSettings();
+        });
+
+        $('#speak').on('click', function() {
+            screenReader = !screenReader;
+            $(this).toggleClass(prefix + 'feature-active', screenReader);
+            if (!screenReader) synth.cancel();
+            saveSettings();
+        });
+
+        $(document).on('click', function(e) {
+            if (screenReader) {
+                const text = $(e.target).text().trim() || $(e.target).attr('alt') || "Clickable element";
+                if (text) {
+                    synth.cancel();
+                    synth.speak(new SpeechSynthesisUtterance(text));
+                }
+            }
+        });
+
+        $('#btn-cursor').on('click', function() {
+            $(this).toggleClass(prefix + 'feature-active');
+            $('body').toggleClass(prefix + 'custom-cursor');
+            saveSettings();
+        });
+
+        $('#btn-animation').on('click', function() {
+            $(this).toggleClass(prefix + 'feature-active');
+            $('body').toggleClass(prefix + 'animation-pause');
+            saveSettings();
+        });
+
+        $('#btn-invert').on('click', function() {
+            $(this).toggleClass(prefix + 'feature-active');
+            $('html').toggleClass(prefix + 'invert-colors');
+            saveSettings();
+        });
+
+        function applyTextSettings() {
+            let zoomValue = (1 + (fontSizeCount * 0.1)).toFixed(2);
+            $('body > *').not('.sbiAcc, .sbi-widget-custom-trigger, .reading-mask-horizontal').css('zoom', zoomValue);
+        }
+
+        function adjustFontSize(direction) {
+            if (direction === '+1') fontSizeCount = (fontSizeCount + 1) % 5;
+            else fontSizeCount = Math.max(0, fontSizeCount - 1);
+
+            const $btn = $('#btn-s9').parent();
+            $('#btn-s17').prop('disabled', fontSizeCount === 0);
+            applyTextSettings();
+
+            if (fontSizeCount === 0) {
+                $btn.children('button').removeClass(prefix + 'feature-active');
+                $('#featureSteps').removeClass(prefix + 'featureSteps-visible');
+                $('#featureSteps span').removeClass(prefix + 'active');
+            } else {
+                $btn.children('button').addClass(prefix + 'feature-active');
+                $('#featureSteps').addClass(prefix + 'featureSteps-visible');
+                $('#featureSteps span').removeClass(prefix + 'active').each(function(index) {
+                    if (index < fontSizeCount) $(this).addClass(prefix + 'active');
+                });
+            }
+            saveSettings();
+        }
+
+        $('#btn-s9').on('click', function() { adjustFontSize('+1'); });
+        $('#btn-s17').on('click', function() { adjustFontSize('-1'); });
+
+        $('#btn-s12').on('click', function() {
+            lineHeightCount = (lineHeightCount + 1) % 5;
+            $('p, h1, h2, h3, div, span, li').not('.sbiAcc *, .sbiAcc').toggleClass('sbi-line-height', lineHeightCount > 0);
+            
+            if (lineHeightCount === 0) {
+                $(this).removeClass(prefix + 'feature-active');
+                $('#featureSteps-lh').removeClass(prefix + 'featureSteps-visible');
+                $('#featureSteps-lh span').removeClass(prefix + 'active');
+            } else {
+                $(this).addClass(prefix + 'feature-active');
+                $('#featureSteps-lh').addClass(prefix + 'featureSteps-visible');
+                $('#featureSteps-lh span').removeClass(prefix + 'active').each(function(index) {
+                    if (index < lineHeightCount) $(this).addClass(prefix + 'active');
+                });
+            }
+            saveSettings();
+        });
+
+        $('#btn-s13').on('click', function() {
+            textSpacingCount = (textSpacingCount + 1) % 4;
+            $('body *').not('.sbiAcc *, .sbiAcc').toggleClass('sbi-text-spacing', textSpacingCount > 0);
+            
+            if (textSpacingCount === 0) {
+                $(this).removeClass(prefix + 'feature-active');
+                $('#featureSteps-ts').removeClass(prefix + 'featureSteps-visible');
+                $('#featureSteps-ts span').removeClass(prefix + 'active');
+            } else {
+                $(this).addClass(prefix + 'feature-active');
+                $('#featureSteps-ts').addClass(prefix + 'featureSteps-visible');
+                $('#featureSteps-ts span').removeClass(prefix + 'active').each(function(index) {
+                    if (index < textSpacingCount) $(this).addClass(prefix + 'active');
+                });
+            }
+            saveSettings();
+        });
+
+        // Reset All Settings
+        $('#reset-all').on('click', function() {
+            fontSizeCount = 0; lineHeightCount = 0; textSpacingCount = 0; saturateCount = 0;
+            adhdActive = false; screenReader = false; synth.cancel();
+
+            $('html').removeClass(prefix + 'invert-colors ' + prefix + 'saturate-low ' + prefix + 'saturate-high ' + prefix + 'saturate-desaturate');
+            $('body').removeClass(prefix + 'dyslexia-mode ' + prefix + 'dark-mode ' + prefix + 'highlight-links ' + prefix + 'custom-cursor ' + prefix + 'animation-pause');
+            
+            $('body *').removeClass('sbi-line-height sbi-text-spacing');
+            $('body > *').css('zoom', '1');
+            $('#readingMask').removeClass('mask-visible');
+            $('#sat-text').text('Saturation');
+            
+            $('.sbiAcc-features__item__i').removeClass(prefix + 'feature-active');
+            $('.sbiAcc-features__item__steps').removeClass(prefix + 'featureSteps-visible');
+            $('.sbiAcc-features__step').removeClass(prefix + 'active');
+            $('#btn-s17').prop('disabled', true);
+
+            sessionStorage.removeItem('sbiAccSettings');
+        });
+
+        // Initialize state on page load
+        loadSettings();
+    });
+</script>
+
+
+
+
+#########
+
 function getBase64FileSizeInMB(base64String) {
   // 1. Remove the data URI prefix if it exists (e.g., "data:application/pdf;base64,")
   const base64 = base64String.split(',')[1] || base64String;

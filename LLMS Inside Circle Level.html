@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Dashboard - Circle Level</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 0.85rem;
+        }
+
+        /* Top Tabs Styling */
+        .top-tabs .nav-link {
+            color: #6c757d;
+            font-weight: 600;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 1rem 1.5rem;
+            border-radius: 0;
+        }
+        .top-tabs .nav-link.active {
+            color: #1e3a8a;
+            border-bottom: 3px solid #1e3a8a;
+            background: none;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            margin-bottom: 20px;
+        }
+        .filter-label {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-bottom: 0.2rem;
+            display: block;
+        }
+        .form-select {
+            font-size: 0.85rem;
+            border-color: #e2e8f0;
+        }
+        .btn-fetch {
+            background-color: #1e293b;
+            color: white;
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
+        .btn-fetch:hover {
+            background-color: #0f172a;
+            color: white;
+        }
+
+        /* Card Columns Styling */
+        .data-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+            height: 100%;
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-header-custom {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        /* Specific Card Colors */
+        .card-leads { border-top: 4px solid #3b82f6; }
+        .card-leads .icon-box { background: #3b82f6; color: white; }
+        .card-leads .inner-tabs .nav-link.active { background: #3b82f6; color: white; }
+
+        .card-cra { border-top: 4px solid #6b21a8; }
+        .card-cra .icon-box { background: #6b21a8; color: white; }
+        .card-cra .inner-tabs .nav-link.active { background: #6b21a8; color: white; }
+
+        .card-proposals { border-top: 4px solid #ea580c; }
+        .card-proposals .icon-box { background: #ea580c; color: white; }
+        .card-proposals .inner-tabs .nav-link.active { background: #ea580c; color: white; }
+
+        .card-post { border-top: 4px solid #0f766e; }
+        .card-post .icon-box { background: #0f766e; color: white; }
+        .card-post .inner-tabs .nav-link.active { background: #0f766e; color: white; }
+
+        .icon-box {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        /* Inner Tabs (Created / Approved) */
+        .inner-tabs-container {
+            padding: 0 15px 15px 15px;
+        }
+        .inner-tabs {
+            background: #f8fafc;
+            border-radius: 6px;
+            padding: 4px;
+        }
+        .inner-tabs .nav-link {
+            color: #64748b;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Table Styling */
+        .table-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 400px; /* Fixed height for lazy loading scroll */
+            padding: 0 15px;
+        }
+        .table-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+            color: #64748b;
+            font-weight: 500;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.75rem;
+        }
+        .table tbody td {
+            color: #334155;
+            padding: 12px 8px;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .total-row {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            font-weight: bold;
+            border-top: 2px solid #e2e8f0;
+            z-index: 1;
+        }
+        .loader {
+            text-align: center;
+            padding: 10px;
+            display: none;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid p-4">
+    
+    <!-- Top Navigation -->
+    <div class="d-flex justify-content-between align-items-center bg-white rounded shadow-sm mb-4">
+        <ul class="nav nav-tabs top-tabs w-100" id="mainTab" role="tablist">
+            <li class="nav-item"><a class="nav-link" href="#">Module Level</a></li>
+            <li class="nav-item"><a class="nav-link active" href="#">Circle</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Network</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Module</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">RBO</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Branch</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">CBS</a></li>
+        </ul>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-section">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-2">
+                <label class="filter-label">Business Group</label>
+                <select class="form-select"><option>Select</option></select>
+            </div>
+            <div class="col-md-2">
+                <label class="filter-label">Circle</label>
+                <select class="form-select"><option>Select</option></select>
+            </div>
+            <div class="col-md-2">
+                <label class="filter-label">Module</label>
+                <select class="form-select"><option>Select</option></select>
+            </div>
+            <div class="col-md-2">
+                <label class="filter-label">RBO</label>
+                <select class="form-select"><option>Select</option></select>
+            </div>
+            <div class="col-md-2">
+                <label class="filter-label">Branch</label>
+                <select class="form-select"><option>Select</option></select>
+            </div>
+            <div class="col-md-2">
+                <label class="filter-label">Required Activities</label>
+                <div class="d-flex gap-2">
+                    <select class="form-select"><option>Select</option></select>
+                    <button class="btn btn-fetch flex-shrink-0" id="fetchBtn">
+                        <i class="fa-solid fa-rotate"></i> Fetch Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Cards Row -->
+    <div class="row g-4">
+        
+        <!-- LEADS CARD -->
+        <div class="col-xl-3 col-md-6">
+            <div class="data-card card-leads">
+                <div class="card-header-custom">
+                    <div class="icon-box"><i class="fa-solid fa-users"></i></div> LEADS
+                </div>
+                <div class="inner-tabs-container">
+                    <ul class="nav nav-pills nav-fill inner-tabs" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#leads-created">Created</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#leads-approved">Approved</a></li>
+                    </ul>
+                </div>
+                <div class="tab-content table-container" id="scroll-leads">
+                    <div class="tab-pane fade show active" id="leads-created" role="tabpanel">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Circle</th>
+                                    <th>Module /<br>Source</th>
+                                    <th class="text-end">Today</th>
+                                    <th class="text-end">Amount<br>(Lakh)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-leads-created">
+                                <!-- Data injected via AJAX -->
+                            </tbody>
+                        </table>
+                        <div class="loader" id="loader-leads-created"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+                    </div>
+                    <div class="tab-pane fade" id="leads-approved" role="tabpanel">
+                        <!-- Similar table for Approved -->
+                        <div class="p-3 text-center text-muted">No data fetched yet.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CRA / CUE / ESG / DR CARD -->
+        <div class="col-xl-3 col-md-6">
+            <div class="data-card card-cra">
+                <div class="card-header-custom">
+                    <div class="icon-box"><i class="fa-solid fa-chart-column"></i></div> CRA / CUE / ESG / DR
+                </div>
+                <div class="inner-tabs-container">
+                    <ul class="nav nav-pills nav-fill inner-tabs" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#cra-created">Created</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#cra-approved">Approved</a></li>
+                    </ul>
+                </div>
+                <div class="tab-content table-container" id="scroll-cra">
+                    <div class="tab-pane fade show active" id="cra-created" role="tabpanel">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Circle</th>
+                                    <th>Module /<br>Source</th>
+                                    <th class="text-end">Today</th>
+                                    <th class="text-end">Amount<br>(Lakh)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-cra-created"></tbody>
+                        </table>
+                        <div class="loader" id="loader-cra-created"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+                    </div>
+                    <div class="tab-pane fade" id="cra-approved" role="tabpanel"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROPOSALS CARD -->
+        <div class="col-xl-3 col-md-6">
+            <div class="data-card card-proposals">
+                <div class="card-header-custom">
+                    <div class="icon-box"><i class="fa-solid fa-file-lines"></i></div> PROPOSALS
+                </div>
+                <div class="inner-tabs-container">
+                    <ul class="nav nav-pills nav-fill inner-tabs" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#prop-created">Created</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#prop-approved">Approved</a></li>
+                    </ul>
+                </div>
+                <div class="tab-content table-container" id="scroll-prop">
+                    <div class="tab-pane fade show active" id="prop-created" role="tabpanel">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Circle</th>
+                                    <th>Module /<br>Source</th>
+                                    <th class="text-end">Today</th>
+                                    <th class="text-end">Amount<br>(Lakh)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-prop-created"></tbody>
+                        </table>
+                        <div class="loader" id="loader-prop-created"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+                    </div>
+                    <div class="tab-pane fade" id="prop-approved" role="tabpanel"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- POST SANCTION CARD -->
+        <div class="col-xl-3 col-md-6">
+            <div class="data-card card-post">
+                <div class="card-header-custom">
+                    <div class="icon-box"><i class="fa-solid fa-briefcase"></i></div> POST SANCTION
+                </div>
+                <div class="inner-tabs-container">
+                    <ul class="nav nav-pills nav-fill inner-tabs" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#post-created">Created</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#post-approved">Approved</a></li>
+                    </ul>
+                </div>
+                <div class="tab-content table-container" id="scroll-post">
+                    <div class="tab-pane fade show active" id="post-created" role="tabpanel">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Circle</th>
+                                    <th>Module /<br>Source</th>
+                                    <th class="text-end">Today</th>
+                                    <th class="text-end">Amount<br>(Lakh)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-post-created"></tbody>
+                        </table>
+                        <div class="loader" id="loader-post-created"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+                    </div>
+                    <div class="tab-pane fade" id="post-approved" role="tabpanel"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- jQuery 3.7.1 & Bootstrap 5.3 JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(document).ready(function() {
+
+    // Dummy JSON generators for the simulation
+    const generateDummyData = (modulePrefix, count) => {
+        const circles = ['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Ahmedabad', 'Hyderabad', 'Pune', 'Kolkata'];
+        let data = [];
+        for(let i=0; i<count; i++) {
+            data.push({
+                circle: circles[Math.floor(Math.random() * circles.length)],
+                module: modulePrefix + '-' + Math.floor(Math.random() * 100),
+                today: (Math.random() * 15000).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+                amount: (Math.random() * 2000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            });
+        }
+        return data;
+    };
+
+    // State management for pagination/lazy load
+    let pages = {
+        'leads-created': 1, 'cra-created': 1, 'prop-created': 1, 'post-created': 1
+    };
+    let isFetching = false;
+
+    // Render logic
+    const renderTableRows = (targetBodyId, data, isAppend = false) => {
+        let html = '';
+        data.forEach(row => {
+            html += `
+                <tr>
+                    <td>${row.circle}</td>
+                    <td>${row.module}</td>
+                    <td class="text-end">${row.today}</td>
+                    <td class="text-end">${row.amount}</td>
+                </tr>
+            `;
+        });
+        if(isAppend) {
+            $(`#${targetBodyId}`).append(html);
+        } else {
+            $(`#${targetBodyId}`).html(html);
+        }
+    };
+
+    // Simulated AJAX Fetch Call
+    const fetchData = (tabId, targetBodyId, prefix, isLoadMore = false) => {
+        if(isFetching) return;
+        isFetching = true;
+        
+        const loaderId = `#loader-${targetBodyId.split('tbody-')[1]}`;
+        $(loaderId).show();
+
+        // Simulating network delay via setTimeout
+        setTimeout(() => {
+            const data = generateDummyData(prefix, 10); // Fetch 10 rows per request
+            renderTableRows(targetBodyId, data, isLoadMore);
+            $(loaderId).hide();
+            isFetching = false;
+            
+            // Re-append Totals row logic here if needed based on real app logic
+        }, 800);
+    };
+
+    // Initial Fetch on Button Click
+    $('#fetchBtn').on('click', function() {
+        // Reset pages
+        pages = { 'leads-created': 1, 'cra-created': 1, 'prop-created': 1, 'post-created': 1 };
+        
+        // Empty tables
+        $('#tbody-leads-created, #tbody-cra-created, #tbody-prop-created, #tbody-post-created').empty();
+
+        // Fetch initial data
+        fetchData('leads-created', 'tbody-leads-created', 'CLP', false);
+        fetchData('cra-created', 'tbody-cra-created', 'CRA', false);
+        fetchData('prop-created', 'tbody-prop-created', 'PROP', false);
+        fetchData('post-created', 'tbody-post-created', 'PSM', false);
+    });
+
+    // Lazy Loading on Scroll
+    $('.table-container').on('scroll', function() {
+        const container = $(this);
+        const activeTabPane = container.find('.tab-pane.active');
+        const tabId = activeTabPane.attr('id'); // e.g., leads-created
+        
+        // Check if we scrolled to the bottom (with a 5px threshold)
+        if(container.scrollTop() + container.innerHeight() >= container[0].scrollHeight - 5) {
+            
+            // Prevent multiple triggers
+            if(!isFetching) {
+                pages[tabId]++; // increment page
+                
+                // Map the tabId to a prefix for dummy data
+                let prefix = 'MOD';
+                if(tabId.includes('leads')) prefix = 'CLP';
+                if(tabId.includes('cra')) prefix = 'CRA';
+                if(tabId.includes('prop')) prefix = 'PROP';
+                if(tabId.includes('post')) prefix = 'PSM';
+
+                fetchData(tabId, `tbody-${tabId}`, prefix, true);
+            }
+        }
+    });
+
+});
+</script>
+
+</body>
+</html>

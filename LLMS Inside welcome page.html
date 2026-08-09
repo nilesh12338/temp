@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Dashboard</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #fafbfc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        .hero-title {
+            color: #1e293b;
+            font-weight: 700;
+            font-size: 3.5rem;
+            letter-spacing: -1px;
+        }
+        
+        .welcome-text {
+            color: #0d6efd;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .hero-subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 90%;
+        }
+
+        .main-card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
+            border: none;
+            padding: 3rem;
+            margin-top: -2rem;
+        }
+
+        .date-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background: #fff;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .date-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* Active Card Style (Today) */
+        .date-card.active-card {
+            border-color: #0d6efd;
+            background-color: #f8fbff;
+        }
+
+        .date-card.active-card .card-title {
+            color: #0d6efd;
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.2rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 0;
+        }
+
+        /* Custom Icon Colors */
+        .icon-blue { background-color: #e0f2fe; color: #0284c7; }
+        .icon-green { background-color: #dcfce7; color: #16a34a; }
+        .icon-yellow { background-color: #fef9c3; color: #ca8a04; }
+        .icon-purple { background-color: #f3e8ff; color: #9333ea; }
+        
+        .section-title {
+            color: #1e293b;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <!-- Top Hero Section -->
+    <div class="row align-items-center mb-5 pb-4">
+        <div class="col-lg-6 mb-4 mb-lg-0 pe-lg-5">
+            <h5 class="welcome-text mb-2">Welcome</h5>
+            <h1 class="hero-title mb-3">Ajay Singh</h1>
+            <p class="hero-subtitle">
+                Your central workspace to monitor, analyze and drive performance across all key business areas.
+            </p>
+        </div>
+        <div class="col-lg-6 text-center">
+            <!-- Placeholder for the custom illustration -->
+            <img src="https://via.placeholder.com/600x350/F8F9FA/CBD5E1?text=Dashboard+Illustration" 
+                 alt="Dashboard Illustration" 
+                 class="img-fluid rounded-4 shadow-sm"
+                 style="max-height: 350px; object-fit: cover; width: 100%;">
+        </div>
+    </div>
+
+    <!-- Date Range Selector Section -->
+    <div class="main-card">
+        <div class="text-center mb-5">
+            <h3 class="section-title mb-2">Select Date Range to View Data</h3>
+            <p class="text-muted">Choose a time period to view and analyze the performance data.</p>
+        </div>
+
+        <div class="row g-3">
+            <!-- Today Card -->
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="date-card active-card">
+                    <div class="icon-box icon-blue">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="card-title">Today</h6>
+                        <p class="card-subtitle">View today's performance</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yesterday Card -->
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="date-card">
+                    <div class="icon-box icon-green">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="card-title">Yesterday</h6>
+                        <p class="card-subtitle">View yesterday's performance</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- This Month Till Date Card -->
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="date-card">
+                    <div class="icon-box icon-yellow">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="card-title">This Month Till date</h6>
+                        <p class="card-subtitle">View this month's performance</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Last Month Card -->
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="date-card">
+                    <div class="icon-box icon-purple">
+                        <i class="bi bi-calendar2-minus"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="card-title">Last Month</h6>
+                        <p class="card-subtitle">View this month's performance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

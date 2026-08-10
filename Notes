@@ -1,3 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last Updated Widget</title>
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        /* Custom colors to match the provided image */
+        .widget-text-color {
+            color: #2b4c7e; 
+        }
+        .widget-icon-bg {
+            background-color: #e6edff; 
+        }
+        .widget-border {
+            border-color: #e2e8f0 !important;
+        }
+        .widget-text-size {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body class="p-5">
+
+    <!-- Last Updated Component Start -->
+    <div class="d-inline-flex align-items-center border widget-border rounded-3 p-2 bg-white shadow-sm">
+        
+        <!-- Icon Container -->
+        <div class="widget-icon-bg rounded-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+            <i class="bi bi-clock-history widget-text-color fs-4"></i>
+        </div>
+        
+        <!-- Text Container -->
+        <div class="ms-3 widget-text-color fw-semibold widget-text-size pe-2">
+            Last Updated: 21 May 2025,<br>
+            10:30 AM
+        </div>
+        
+    </div>
+    <!-- Last Updated Component End -->
+
+    <!-- Bootstrap 5.3 JS Bundle (Optional, if you need other interactive components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+
+
 
 <script>
     $(document).ready(function() {

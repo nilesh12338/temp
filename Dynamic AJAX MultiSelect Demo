@@ -371,6 +371,26 @@
                 });
             });
         });
+
+// --- 3. GET SELECTED VALUES ON BUTTON CLICK ---
+$('#btnGetValues').on('click', function () {
+    const selectedValues = [];
+    
+    // Loop through all checked item checkboxes
+    $('.item-checkbox:checked').each(function () {
+        selectedValues.push($(this).val());
+    });
+
+    // Output the array to the browser console
+    console.log("Selected Array:", selectedValues);
+    
+    // Display it on the page
+    if(selectedValues.length > 0) {
+        $('#resultDisplay').text("Saved Values: " + selectedValues.join(', '));
+    } else {
+        $('#resultDisplay').text("No values selected.");
+    }
+});
     </script>
 </body>
 </html>

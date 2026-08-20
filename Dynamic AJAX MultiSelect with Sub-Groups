@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic AJAX MultiSelect with Sub-Groups</title>
+    
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 40px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .dropdown-wrapper {
+            position: relative;
+            max-width: 320px;
+        }
+
+        /* Trigger Button */
+        .custom-multiselect-btn {
+            background-color: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 6px 12px;
+            width: 100%;
+            text-align: left;
+            font-size: 0.875rem;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .custom-multiselect-btn:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            outline: 0;
+        }
+
+        /* Dropdown Panel */
+        .custom-multiselect-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 1050;
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid #c5c5c5;
+            border-radius: 2px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            margin-top: 2px;
+            display: none;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .custom-multiselect-menu.show {
+            display: block;
+        }
+
+        /* Top Action Bar */
+        .multiselect-header-bar {
+            background-color: #e9ecef;
+            border-bottom: 1px solid #ced4da;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .header-action-btn {
+            color: #333;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .header-action-btn:hover {
+            color: #000;
+        }
+
+        .close-dropdown-btn {
+            color: #666;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        /* Optgroup Header Row */
+        .group-header {
+            background-color: #f1f3f5;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e6ea;
+            border-top: 1px solid #e2e6ea;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #212529;
+            user-select: none;
+        }
+
+        .group-header label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        /* Toggle Icon */
+        .collapse-toggle {
+            cursor: pointer;
+            color: #495057;
+            font-size: 0.9rem;
+            padding: 0 4px;
+        }
+
+        /* Child Options List */
+        .group-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .group-items li.flat-item {
+            padding: 4px 10px 4px 28px;
+        }
+
+        .group-items li.flat-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .group-items label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            font-size: 0.85rem;
+            color: #333;
+            width: 100%;
+        }
+
+        .form-check-input {
+            cursor: pointer;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dropdown-wrapper">
+        <label class="form-label fw-bold mb-1">Activity</label>
+        
+        <!-- Dropdown Trigger Button -->
+        <button type="button" class="custom-multiselect-btn" id="multiselectTrigger">
+            <span id="selectedText">Select options</span>
+            <i class="bi bi-chevron-expand text-muted ms-2"></i>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="custom-multiselect-menu" id="multiselectMenu">
+            <!-- Static Header with Check/Uncheck All -->
+            <div class="multiselect-header-bar">
+                <div class="header-actions">
+                    <span class="header-action-btn" id="btnCheckAll">
+                        <i class="bi bi-check-lg fw-bold"></i> Check all
+                    </span>
+                    <span class="header-action-btn" id="btnUncheckAll">
+                        <i class="bi bi-x-lg fw-bold"></i> Uncheck all
+                    </span>
+                </div>
+                <i class="bi bi-x-circle-fill close-dropdown-btn" id="btnCloseMenu"></i>
+            </div>
+
+            <!-- Dynamic content appended here -->
+            <div id="dynamicGroupsContainer">
+                <div class="p-4 text-center text-muted" id="loadingIndicator">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div> Loading data...
+                </div>
+            </div>
+        </div>
+        
+        <!-- Button to fetch selected values -->
+        <button id="btnGetValues" class="btn btn-primary mt-3 w-100">Get Selected Values</button>
+        <div id="resultDisplay" class="mt-3 text-primary fw-bold text-wrap" style="font-size: 0.85rem;"></div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            const $trigger = $('#multiselectTrigger');
+            const $menu = $('#multiselectMenu');
+            const $selectedText = $('#selectedText');
+            const $dynamicContainer = $('#dynamicGroupsContainer');
+
+            // --- 1. AJAX DATA FETCH & RENDER ---
+            function fetchDropdownData() {
+                setTimeout(function() {
+                    const mockApiResponse = [
+                        {
+                            groupName: "LEADS",
+                            isCollapsedByDefault: false,
+                            items: [
+                                { value: "CLP", label: "CLP" },
+                                { value: "CLPBRE", label: "CLPBRE" },
+                                { value: "CLP_DD", label: "CLP_DD" },
+                                { value: "CRM", label: "CRM" },
+                                { value: "RM", label: "RM" },
+                                { value: "SBOSS", label: "SBOSS" },
+                                { value: "IBG", label: "IBG" },
+                                { value: "Others", label: "Others" }
+                            ]
+                        },
+                        {
+                            groupName: "CRA / CUE / ESG / DR",
+                            isCollapsedByDefault: true,
+                            items: [
+                                { value: "CRA", label: "CRA" },
+                                { value: "CUE", label: "CUE" },
+                                { value: "ESG", label: "ESG" },
+                                { value: "DynamicReview", label: "Dynamic Review" }
+                            ]
+                        },
+                        {
+                            groupName: "PROPOSALS",
+                            isCollapsedByDefault: true,
+                            items: [
+                                { value: "DD", label: "DD" },
+                                { value: "DDS", label: "DDS" },
+                                { value: "PABL", label: "PABL" },
+                                { value: "PASBL", label: "PASBL" },
+                                { value: "BREEDFSPDM", label: "BRE EDFS PDM" },
+                                { value: "BREMUDRAPDM", label: "BRE MUDRA PDM" },
+                                { value: "BREDDSPDM", label: "BRE DDSPDM" },
+                                { value: "BRECAFPDM", label: "BRE CAFPDM" },
+                                { value: "CAFPM2New", label: "CAFPM2 (New)" },
+                                { value: "DDSQV2New", label: "DDSQ V2 (New)" },
+                                { value: "FormM", label: "Form M" },
+                                { value: "RFMT", label: "RFMT" },
+                                { value: "Others", label: "Others" }
+                            ]
+                        },
+                        {
+                            groupName: "POST SANCTION",
+                            isCollapsedByDefault: true,
+                            items: [
+                                { value: "StockStatements", label: "Stock Statements" },
+                                { value: "InspectionReports", label: "Inspection Reports" },
+                                { value: "QRR1", label: "QRR1" },
+                                { value: "QRR2", label: "QRR2" },
+                                { value: "FFR1", label: "FFR1" },
+                                { value: "FFR2", label: "FFR2" },
+                                { value: "FSMTL", label: "FSMIL" },
+                                { value: "CAPSA", label: "CAPSA" },
+                                { value: "NPAAUCAAccounts", label: "NPA & AUCA Accounts" }
+                            ]
+                        },
+                        {
+                            groupName: "CBS",
+                            isCollapsedByDefault: false,
+                            subGroups: [
+                                {
+                                    subGroupName: "Account Opening",
+                                    items: [
+                                        { value: "CCOD", label: "CC/OD" },
+                                        { value: "Contingent", label: "Contingent" },
+                                        { value: "FCNRB", label: "FCNR-B" },
+                                        { value: "POOLPurchase", label: "POOL Purchase" }
+                                    ]
+                                },
+                                {
+                                    subGroupName: "Disbursement",
+                                    items: [
+                                        { value: "DLTC", label: "DLTC" }
+                                    ]
+                                },
+                                {
+                                    subGroupName: "Other activity",
+                                    items: [
+                                        { value: "CUE_CBS", label: "CUE" },
+                                        { value: "ORA", label: "ORA" },
+                                        { value: "ECRA", label: "ECRA" },
+                                        { value: "LimitExpiry", label: "Limit Expiry date updated" },
+                                        { value: "UdyamPlant", label: "Udyam and plant" },
+                                        { value: "RenewalData", label: "Renewal Data Updating" },
+                                        { value: "RepaySch", label: "Repay sch. create" },
+                                        { value: "DisbSch", label: "Disb sch. create" },
+                                        { value: "RateOfInterest", label: "Rate of interest" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ];
+                    
+                    renderDropdownItems(mockApiResponse);
+                }, 800); 
+            }
+
+            function renderDropdownItems(data) {
+                let html = '';
+                
+                data.forEach(group => {
+                    const displayStyle = group.isCollapsedByDefault ? 'style="display: none;"' : '';
+                    const iconClass = group.isCollapsedByDefault ? 'bi-plus-circle-fill' : 'bi-dash-circle-fill';
+
+                    html += `
+                    <div class="group-container">
+                        <div class="group-header">
+                            <label>
+                                <input type="checkbox" class="form-check-input group-checkbox">
+                                <span>All ${group.groupName}</span>
+                            </label>
+                            <i class="bi ${iconClass} collapse-toggle"></i>
+                        </div>
+                        <ul class="group-items" ${displayStyle}>`;
+
+                    if (group.subGroups && group.subGroups.length > 0) {
+                        group.subGroups.forEach(sub => {
+                            html += `
+                            <li class="subgroup-container pt-2 pb-1 border-bottom">
+                                <label class="fw-bold text-secondary ms-3 d-flex align-items-center gap-2" style="font-size: 0.8rem;">
+                                    <input type="checkbox" class="form-check-input subgroup-checkbox">
+                                    ${sub.subGroupName}
+                                </label>
+                                <ul class="list-unstyled ms-4 mt-1 mb-2">`;
+                            
+                            sub.items.forEach(item => {
+                                html += `
+                                    <li class="flat-item">
+                                        <label>
+                                            <input type="checkbox" class="form-check-input item-checkbox" value="${item.value}"> 
+                                            ${item.label}
+                                        </label>
+                                    </li>`;
+                            });
+                            
+                            html += `</ul></li>`;
+                        });
+                    } else if (group.items) {
+                        group.items.forEach(item => {
+                            html += `
+                                <li class="flat-item">
+                                    <label>
+                                        <input type="checkbox" class="form-check-input item-checkbox" value="${item.value}"> 
+                                        ${item.label}
+                                    </label>
+                                </li>`;
+                        });
+                    }
+
+                    html += `</ul></div>`;
+                });
+
+                $dynamicContainer.html(html);
+                updateSelectedDisplayText();
+            }
+
+            fetchDropdownData();
+
+            // --- 2. EVENT LISTENERS ---
+            
+            $trigger.on('click', function (e) {
+                e.stopPropagation();
+                $menu.toggleClass('show');
+            });
+
+            $('#btnCloseMenu').on('click', function () {
+                $menu.removeClass('show');
+            });
+
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.dropdown-wrapper').length) {
+                    $menu.removeClass('show');
+                }
+            });
+
+            function updateSelectedDisplayText() {
+                const checkedValues = [];
+                $('.item-checkbox:checked').each(function () {
+                    checkedValues.push($(this).parent().text().trim());
+                });
+
+                if (checkedValues.length === 0) {
+                    $selectedText.text('Select options');
+                } else if (checkedValues.length <= 3) {
+                    $selectedText.text(checkedValues.join(', '));
+                } else {
+                    $selectedText.text(checkedValues.slice(0, 3).join(', ') + `, +${checkedValues.length - 3} more`);
+                }
+            }
+
+            $('#btnCheckAll').on('click', function () {
+                $menu.find('input[type="checkbox"]').prop('checked', true);
+                updateSelectedDisplayText();
+            });
+
+            $('#btnUncheckAll').on('click', function () {
+                $menu.find('input[type="checkbox"]').prop('checked', false);
+                updateSelectedDisplayText();
+            });
+
+            // Group Checkbox Logic
+            $menu.on('change', '.group-checkbox', function () {
+                const isChecked = $(this).is(':checked');
+                const $container = $(this).closest('.group-container');
+                $container.find('.item-checkbox, .subgroup-checkbox').prop('checked', isChecked);
+                updateSelectedDisplayText();
+            });
+
+            // Sub-group Checkbox Logic
+            $menu.on('change', '.subgroup-checkbox', function () {
+                const isChecked = $(this).is(':checked');
+                const $subContainer = $(this).closest('.subgroup-container');
+                $subContainer.find('.item-checkbox').prop('checked', isChecked);
+                
+                const $mainContainer = $(this).closest('.group-container');
+                const totalItems = $mainContainer.find('.item-checkbox').length;
+                const checkedItems = $mainContainer.find('.item-checkbox:checked').length;
+                $mainContainer.find('.group-checkbox').prop('checked', totalItems === checkedItems && totalItems > 0);
+                
+                updateSelectedDisplayText();
+            });
+
+            // Individual Child Checkbox Logic
+            $menu.on('change', '.item-checkbox', function () {
+                const $subContainer = $(this).closest('.subgroup-container');
+                if ($subContainer.length > 0) {
+                    const totalSubItems = $subContainer.find('.item-checkbox').length;
+                    const checkedSubItems = $subContainer.find('.item-checkbox:checked').length;
+                    $subContainer.find('.subgroup-checkbox').prop('checked', totalSubItems === checkedSubItems && totalSubItems > 0);
+                }
+
+                const $mainContainer = $(this).closest('.group-container');
+                const totalItems = $mainContainer.find('.item-checkbox').length;
+                const checkedItems = $mainContainer.find('.item-checkbox:checked').length;
+                $mainContainer.find('.group-checkbox').prop('checked', totalItems === checkedItems && totalItems > 0);
+                
+                updateSelectedDisplayText();
+            });
+
+            // Collapsible Behavior
+            $menu.on('click', '.collapse-toggle', function (e) {
+                e.stopPropagation();
+                const $icon = $(this);
+                const $itemsList = $icon.closest('.group-container').find('.group-items');
+
+                $itemsList.slideToggle(150, function () {
+                    if ($itemsList.is(':visible')) {
+                        $icon.removeClass('bi-plus-circle-fill').addClass('bi-dash-circle-fill');
+                    } else {
+                        $icon.removeClass('bi-dash-circle-fill').addClass('bi-plus-circle-fill');
+                    }
+                });
+            });
+
+            // --- 3. GET VALUES BUTTON ---
+            $('#btnGetValues').on('click', function () {
+                const selectedValues = [];
+                $('.ite

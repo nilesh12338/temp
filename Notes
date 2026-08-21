@@ -1,3 +1,174 @@
+/* CBS Card Styling */
+.card-cbs { border-top: 4px solid #334155; }
+.card-cbs .icon-box { background: #334155; color: white; }
+.card-cbs .inner-tabs .nav-link.active { background: #334155; color: white; }
+
+/* Sub-Category and Sub-Total Styling */
+.category-header {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #1e293b;
+    background-color: #f8fafc;
+}
+.category-header td {
+    padding-top: 15px !important;
+    padding-bottom: 5px !important;
+}
+.subtotal-row {
+    font-weight: 700;
+}
+.subtotal-row td {
+    color: #0f766e; /* Matches the teal total color in the screenshot */
+    border-top: 1px solid #cbd5e1 !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+
+
+<!-- CBS CARD -->
+<div class="col-xl-3 col-md-6">
+    <div class="data-card card-cbs">
+        <div class="card-header-custom">
+            <div class="icon-box"><i class="fa-solid fa-server"></i></div> CBS
+        </div>
+        <div class="inner-tabs-container">
+            <ul class="nav nav-pills nav-fill inner-tabs" role="tablist">
+                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#cbs-initiated">Initiated</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#cbs-completed">Completed</a></li>
+            </ul>
+        </div>
+        <div class="tab-content table-container" id="scroll-cbs">
+            <!-- Initiated Tab -->
+            <div class="tab-pane fade show active h-100" id="cbs-initiated" role="tabpanel">
+                <table class="table table-borderless mb-0">
+                    <thead>
+                        <tr>
+                            <th>Module / Source</th>
+                            <th class="text-end">Count</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-cbs-initiated"></tbody>
+                </table>
+                <div class="loader" id="loader-cbs-initiated"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+            
+            <!-- Completed Tab -->
+            <div class="tab-pane fade h-100" id="cbs-completed" role="tabpanel">
+                <table class="table table-borderless mb-0">
+                    <thead>
+                        <tr>
+                            <th>Module / Source</th>
+                            <th class="text-end">Count</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-cbs-completed"></tbody>
+                </table>
+                <div class="loader" id="loader-cbs-completed"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+// Dummy JSON Data Generator for Grouped CBS Data
+const generateCBSGroupedData = () => {
+    return [
+        {
+            category: "Account Opening",
+            items: [
+                { source: "CCCO", count: 5893, amount: 155921 },
+                { source: "Contingent", count: 2, amount: 145247 },
+                { source: "FCNR-B", count: 2096, amount: 112096 },
+                { source: "POOL Purchase", count: 22985, amount: 122985 }
+            ]
+        },
+        {
+            category: "Disbursement",
+            items: [
+                { source: "DLTC", count: 1865, amount: 111865 }
+            ]
+        },
+        {
+            category: "Other activity",
+            items: [
+                { source: "CUE", count: 980, amount: 111980 },
+                { source: "CRA", count: 1703, amount: 111195 },
+                { source: "ECRA", count: 125, amount: 45000 },
+                { source: "Limit Expiry date updated", count: 45, amount: 12000 },
+                { source: "Udyam and plant", count: 88, amount: 33000 },
+                { source: "Renewal Date Updating", count: 210, amount: 95000 },
+                { source: "Repay sch. create", count: 150, amount: 82000 },
+                { source: "Rate of interest", count: 320, amount: 105000 }
+            ]
+        }
+    ];
+};
+
+// Render function specifically for grouped data with sub-totals
+const renderCBSTableRows = (targetBodyId, groupedData) => {
+    const tbody = $(`#${targetBodyId}`);
+    let html = '';
+
+    groupedData.forEach(group => {
+        // 1. Inject Sub-Category Header
+        html += `<tr class="category-header"><td colspan="3">${group.category}</td></tr>`;
+        
+        let subTotalCount = 0;
+        let subTotalAmount = 0;
+
+        // 2. Inject Data Rows and calculate running totals
+        group.items.forEach(item => {
+            html += `
+                <tr>
+                    <td>${item.source}</td>
+                    <td class="text-end">${item.count.toLocaleString()}</td>
+                    <td class="text-end">${item.amount.toLocaleString()}</td>
+                </tr>
+            `;
+            subTotalCount += item.count;
+            subTotalAmount += item.amount;
+        });
+
+        // 3. Inject Sub-Total Row at the end of the group
+        html += `
+            <tr class="subtotal-row">
+                <td>TOTAL</td>
+                <td class="text-end">${subTotalCount.toLocaleString()}</td>
+                <td class="text-end">${subTotalAmount.toLocaleString()}</td>
+            </tr>
+        `;
+    });
+
+    tbody.html(html);
+};
+
+// Simulated AJAX call for CBS
+const fetchCBSDetails = (tabId) => {
+    const loaderId = `#loader-${tabId}`;
+    const targetBodyId = `tbody-${tabId}`;
+    
+    $(loaderId).show();
+    
+    setTimeout(() => {
+        const groupedData = generateCBSGroupedData();
+        renderCBSTableRows(targetBodyId, groupedData);
+        $(loaderId).hide();
+    }, 600); // Simulated 600ms network delay
+};
+
+// Hook the CBS fetch into your existing 'fetchBtn' click event
+$('#fetchBtn').on('click', function() {
+    // ... your existing code for other tabs ...
+    
+    $('#tbody-cbs-initiated, #tbody-cbs-completed').empty();
+    fetchCBSDetails('cbs-initiated');
+    fetchCBSDetails('cbs-completed');
+});
+
+
 
 Developer Name
 Basic Entity Details → Umesh

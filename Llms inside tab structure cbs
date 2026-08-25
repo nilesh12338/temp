@@ -3,383 +3,433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Dashboard</title>
+    <title>Dynamic Dashboard with Tree Dropdown</title>
     
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Select2 CSS for multiselect -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <!-- jQuery UI CSS (Requested) -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f4f6f9;
             font-size: 0.85rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
         .filter-section {
             background: white;
-            padding: 15px;
+            padding: 15px 20px;
             border-bottom: 1px solid #e0e0e0;
             margin-bottom: 20px;
         }
+
+        /* Custom Tree Dropdown Styling */
+        .custom-tree-dropdown .dropdown-menu {
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            font-size: 0.85rem;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        .custom-tree-dropdown .action-bar {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .custom-tree-dropdown .action-bar span {
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .custom-tree-dropdown .action-bar span:hover {
+            opacity: 0.8;
+        }
+        .tree-group {
+            margin-top: 5px;
+        }
+        .tree-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            background: #fff;
+            border-radius: 4px;
+        }
+        .tree-header:hover { background-color: #f1f3f5; }
+        .tree-header label { margin: 0; cursor: pointer; width: 90%; font-weight: 600; color: #495057;}
+        .tree-header .toggle-icon { cursor: pointer; width: 10%; text-align: right; color: #6c757d; }
+        .tree-children {
+            padding-left: 25px;
+            /* Default hidden for collapsed ones */
+        }
+        .tree-children label {
+            display: block;
+            margin: 0;
+            padding: 3px 8px;
+            cursor: pointer;
+            color: #495057;
+        }
+        .tree-children label:hover { background-color: #f1f3f5; border-radius: 4px; }
+        
+        .sub-group-title {
+            font-weight: 600;
+            padding: 4px 8px;
+            margin-top: 4px;
+            color: #343a40;
+            border-bottom: 1px dashed #dee2e6;
+        }
+
+        /* Tab Navigation Styling */
         .nav-tabs .nav-link {
             color: #6c757d;
             font-weight: 600;
             border: none;
             border-bottom: 3px solid transparent;
+            padding: 10px 20px;
         }
         .nav-tabs .nav-link.active {
-            color: #4b6baf;
+            color: #e95922; /* Matching the orange from the image */
             background: transparent;
-            border-bottom: 3px solid #4b6baf;
+            border-bottom: 3px solid #e95922;
         }
-        .nav-tabs .nav-link:hover {
-            border-color: #e9ecef;
-        }
+        .nav-tabs .nav-link:hover { border-color: #e9ecef; }
         
-        /* CBS Tab Specific Styling */
+        /* CBS Tab Content Styling (Preserved) */
         .stat-card {
-            display: flex;
-            align-items: center;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex; align-items: center; background: white; padding: 15px;
+            border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-            margin-right: 15px;
+            width: 50px; height: 50px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 1.5rem; color: white; margin-right: 15px;
         }
         .icon-blue { background-color: #4b6baf; }
         .icon-green { background-color: #28a745; }
-        
-        .data-table-container {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+        .data-table-container { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .border-top-blue { border-top: 4px solid #4b6baf; }
         .border-top-green { border-top: 4px solid #28a745; }
-        
-        .table th {
-            color: #6c757d;
-            font-weight: 600;
-            border-bottom-width: 1px;
-        }
-        .table td {
-            color: #495057;
-            vertical-align: middle;
-        }
-        .table-total {
-            font-weight: bold;
-            color: #4b6baf;
-        }
-        .table-total td {
-            color: #4b6baf;
-        }
+        .table th { color: #6c757d; font-weight: 600; border-bottom-width: 1px; }
+        .table td { color: #495057; vertical-align: middle; }
+        .table-total { font-weight: bold; color: #4b6baf; }
     </style>
 </head>
 <body>
 
-    <!-- Filters Section (Top) -->
+    <!-- Filters Section -->
     <div class="filter-section container-fluid">
         <div class="row align-items-end">
-            <!-- Placeholders for other dropdowns shown in image -->
-            <div class="col-md-2 mb-2">
-                <label class="form-label text-muted small">Business Group</label>
-                <select class="form-select form-select-sm"><option>Select</option></select>
-            </div>
-            <div class="col-md-2 mb-2">
-                <label class="form-label text-muted small">State</label>
-                <select class="form-select form-select-sm"><option>Select</option></select>
-            </div>
             <div class="col-md-2 mb-2">
                 <label class="form-label text-muted small">Branch</label>
-                <select class="form-select form-select-sm"><option>Select</option></select>
+                <select class="form-select form-select-sm"><option>Select Item(s)</option></select>
             </div>
-            <!-- The requested Module Multiselect -->
-            <div class="col-md-4 mb-2">
-                <label class="form-label text-muted small fw-bold">Select Modules (Dynamic Tabs)</label>
-                <select id="module-multiselect" class="form-control" multiple="multiple">
-                    <option value="leads">Leads</option>
-                    <option value="cra">CRA / CUE / ERS / DR</option>
-                    <option value="proposals">Proposals</option>
-                    <option value="postsanction">Post Sanction</option>
-                    <option value="cbs" selected>CBS</option>
-                </select>
+            
+            <!-- Custom Tree Dropdown for Activity/Modules -->
+            <div class="col-md-3 mb-2">
+                <label class="form-label text-muted small fw-bold">Activity (Dynamic Tabs)</label>
+                <div class="dropdown custom-tree-dropdown">
+                    <!-- data-bs-auto-close="outside" keeps it open when clicking checkboxes inside -->
+                    <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start form-control-sm bg-white" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                        Select options
+                    </button>
+                    
+                    <div class="dropdown-menu w-100 shadow-sm border-0">
+                        <!-- Action Bar -->
+                        <div class="d-flex justify-content-between align-items-center action-bar mb-2">
+                            <div>
+                                <span class="text-dark me-3" id="btn-check-all"><i class="fas fa-check text-dark"></i> Check all</span>
+                                <span class="text-dark" id="btn-uncheck-all"><i class="fas fa-times text-dark"></i> Uncheck all</span>
+                            </div>
+                            <span class="text-muted" data-bs-dismiss="dropdown" style="cursor:pointer;"><i class="fas fa-times-circle"></i></span>
+                        </div>
+
+                        <!-- 1. LEADS Group -->
+                        <div class="tree-group">
+                            <div class="tree-header">
+                                <label><input type="checkbox" class="parent-cb form-check-input me-2" value="leads" data-tab-name="Leads"> LEADS (All)</label>
+                                <i class="fas fa-minus toggle-icon"></i>
+                            </div>
+                            <div class="tree-children">
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="clp"> CLP</label>
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="clpbre"> CLPBRE</label>
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="crm"> CRM</label>
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="rm"> RM</label>
+                            </div>
+                        </div>
+
+                        <!-- 2. CRA/CUE/ESG/DR Group -->
+                        <div class="tree-group">
+                            <div class="tree-header">
+                                <label><input type="checkbox" class="parent-cb form-check-input me-2" value="cra" data-tab-name="CRA/CUE/ESG/DR"> CRA/CUE/ESG/DR (All)</label>
+                                <i class="fas fa-plus toggle-icon"></i>
+                            </div>
+                            <div class="tree-children" style="display: none;">
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="sub1"> Sub Item 1</label>
+                            </div>
+                        </div>
+
+                        <!-- 3. PROPOSALS Group -->
+                        <div class="tree-group">
+                            <div class="tree-header">
+                                <label><input type="checkbox" class="parent-cb form-check-input me-2" value="proposals" data-tab-name="Proposals"> PROPOSALS (All)</label>
+                                <i class="fas fa-plus toggle-icon"></i>
+                            </div>
+                            <div class="tree-children" style="display: none;">
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="sub2"> Sub Item 2</label>
+                            </div>
+                        </div>
+
+                        <!-- 4. POST SANCTION Group -->
+                        <div class="tree-group">
+                            <div class="tree-header">
+                                <label><input type="checkbox" class="parent-cb form-check-input me-2" value="postsanction" data-tab-name="Post Sanction"> POST SANCTION (All)</label>
+                                <i class="fas fa-plus toggle-icon"></i>
+                            </div>
+                            <div class="tree-children" style="display: none;">
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="sub3"> Sub Item 3</label>
+                            </div>
+                        </div>
+
+                        <!-- 5. CBS Group (Checked by default for demo) -->
+                        <div class="tree-group">
+                            <div class="tree-header">
+                                <label><input type="checkbox" class="parent-cb form-check-input me-2" value="cbs" data-tab-name="CBS" checked> CBS (All)</label>
+                                <i class="fas fa-minus toggle-icon"></i>
+                            </div>
+                            <div class="tree-children">
+                                <div class="sub-group-title small">Account Opening</div>
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="ccod" checked> CC/OD</label>
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="contingent" checked> Contingent</label>
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="fcnrb" checked> FCNR-B</label>
+                                <label><input type="checkbox" class="child-cb form-check-input me-2" value="pool" checked> POOL Purchase</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
-            <div class="col-md-2 mb-2 text-end">
-                <button class="btn btn-secondary btn-sm"><i class="fas fa-sync-alt"></i> Fetch Details</button>
+            
+            <!-- Metadata Right Aligned -->
+            <div class="col-md-7 mb-2 text-end text-muted small">
+                <i class="far fa-clock"></i> Last Updated: 21 May 2025, 10:30 AM
             </div>
         </div>
     </div>
 
     <!-- Main Content Area -->
     <div class="container-fluid">
-        <!-- Dynamic Tabs Navigation -->
-        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom">
+        <div class="border-bottom mb-3">
             <ul class="nav nav-tabs" id="dynamic-tabs" role="tablist">
-                <!-- Tabs will be injected here via jQuery -->
+                <!-- Tabs injected dynamically -->
             </ul>
-            <div class="text-muted small">
-                <i class="fas fa-history"></i> Last Updated: 21 May 2025 10:30 AM
-            </div>
         </div>
-
-        <!-- Dynamic Tabs Content -->
         <div class="tab-content" id="dynamic-tabs-content">
-            <!-- Content panes injected here via jQuery -->
+            <!-- Panes injected dynamically -->
         </div>
     </div>
 
-    <!-- jQuery & Dependencies -->
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         $(document).ready(function() {
-            // Mock Data for AJAX Simulation
-            const mockDatabase = {
-                "cbs": {
-                    initiated: {
-                        todayAmount: "12 Cr",
-                        yesterdayCount: "12555",
-                        rows: [
-                            { module: "CLP", count: "5,893", amount: "5,921" },
-                            { module: "CLPBRE", count: "14,805", amount: "14,872" },
-                            { module: "CLP_DD", count: "1", amount: "2" },
-                            { module: "CRM", count: "2,083", amount: "2,096" },
-                            { module: "RM", count: "22,859", amount: "22,985" },
-                            { module: "SBOSS", count: "1,858", amount: "1,865" }
-                        ],
-                        total: { count: "87,396", amount: "87,916" }
-                    },
-                    completed: {
-                        todayAmount: "20 Cr",
-                        yesterdayCount: "12555",
-                        rows: [
-                            { module: "CLP", count: "5,893", amount: "5,921" },
-                            { module: "CLPBRE", count: "14,805", amount: "14,872" },
-                            { module: "CLP_DD", count: "1", amount: "2" },
-                            { module: "CRM", count: "2,083", amount: "2,096" },
-                            { module: "RM", count: "22,859", amount: "22,985" },
-                            { module: "SBOSS", count: "1,858", amount: "1,865" }
-                        ],
-                        total: { count: "87,396", amount: "87,916" }
-                    }
-                },
-                "leads": { message: "Data for Leads module loaded successfully via AJAX." },
-                "cra": { message: "Data for CRA/CUE/ERS/DR module loaded successfully via AJAX." },
-                "proposals": { message: "Data for Proposals module loaded successfully via AJAX." },
-                "postsanction": { message: "Data for Post Sanction module loaded successfully via AJAX." }
-            };
+            
+            // --- 1. Custom Tree Dropdown Logic ---
 
-            // Initialize Select2 for the multiselect dropdown
-            $('#module-multiselect').select2({
-                placeholder: "Select modules to view",
-                width: '100%'
-            });
-
-            // Listen for changes on the Multiselect Dropdown
-            $('#module-multiselect').on('change', function() {
-                updateTabs();
-            });
-
-            // Initial load based on default selected option
-            updateTabs();
-
-            // Function to synchronize tabs with the selected dropdown options
-            function updateTabs() {
-                const selectedOptions = $('#module-multiselect').select2('data');
-                const selectedIds = selectedOptions.map(opt => opt.id);
+            // Toggle Expand/Collapse (Plus/Minus Icon)
+            $('.toggle-icon').on('click', function(e) {
+                e.stopPropagation(); // Don't trigger the label click
+                let $group = $(this).closest('.tree-group');
+                let $children = $group.find('.tree-children');
                 
-                // 1. Remove tabs that are no longer selected
+                $children.slideToggle(200);
+                
+                if ($(this).hasClass('fa-minus')) {
+                    $(this).removeClass('fa-minus').addClass('fa-plus');
+                } else {
+                    $(this).removeClass('fa-plus').addClass('fa-minus');
+                }
+            });
+
+            // Parent Checkbox Logic: Check/Uncheck all children
+            $('.parent-cb').on('change', function() {
+                let isChecked = $(this).prop('checked');
+                $(this).closest('.tree-group').find('.child-cb').prop('checked', isChecked);
+                $(this).prop('indeterminate', false);
+                processSelectionsAndTabs();
+            });
+
+            // Child Checkbox Logic: Update Parent state
+            $('.child-cb').on('change', function() {
+                let $group = $(this).closest('.tree-group');
+                let totalChildren = $group.find('.child-cb').length;
+                let checkedChildren = $group.find('.child-cb:checked').length;
+                let $parentCb = $group.find('.parent-cb');
+
+                if (checkedChildren === 0) {
+                    $parentCb.prop('checked', false).prop('indeterminate', false);
+                } else if (checkedChildren === totalChildren) {
+                    $parentCb.prop('checked', true).prop('indeterminate', false);
+                } else {
+                    $parentCb.prop('checked', false).prop('indeterminate', true);
+                }
+                processSelectionsAndTabs();
+            });
+
+            // Check All / Uncheck All Buttons
+            $('#btn-check-all').on('click', function(e) {
+                e.stopPropagation();
+                $('.custom-tree-dropdown input[type="checkbox"]').prop('checked', true).prop('indeterminate', false);
+                processSelectionsAndTabs();
+            });
+            $('#btn-uncheck-all').on('click', function(e) {
+                e.stopPropagation();
+                $('.custom-tree-dropdown input[type="checkbox"]').prop('checked', false).prop('indeterminate', false);
+                processSelectionsAndTabs();
+            });
+
+            
+            // --- 2. Dynamic Tab Generation Logic ---
+
+            // Initialize on load
+            processSelectionsAndTabs();
+
+            function processSelectionsAndTabs() {
+                let activeModules = [];
+                let checkedCount = 0;
+
+                // Loop through groups to see which parent modules need a tab shown
+                $('.tree-group').each(function() {
+                    let $parentCb = $(this).find('.parent-cb');
+                    let parentId = $parentCb.val();
+                    let tabName = $parentCb.data('tab-name');
+                    
+                    // A tab should show if the parent is checked, indeterminate, or any child is checked
+                    if ($parentCb.prop('checked') || $parentCb.prop('indeterminate') || $(this).find('.child-cb:checked').length > 0) {
+                        activeModules.push({ id: parentId, text: tabName });
+                    }
+
+                    // Count total checkboxes for dropdown label update
+                    checkedCount += $(this).find('input[type="checkbox"]:checked').length;
+                });
+
+                // Update Dropdown Button Text
+                let btnText = checkedCount > 0 ? checkedCount + " options selected" : "Select options";
+                $('.custom-tree-dropdown .dropdown-toggle').text(btnText);
+
+                updateTabsDOM(activeModules);
+            }
+
+            function updateTabsDOM(activeModules) {
+                let activeIds = activeModules.map(m => m.id);
+
+                // Remove tabs that are no longer selected
                 $('#dynamic-tabs li').each(function() {
-                    const tabId = $(this).data('id');
-                    if (!selectedIds.includes(tabId)) {
+                    let tabId = $(this).data('id');
+                    if (!activeIds.includes(tabId)) {
                         $(this).remove();
                         $('#pane-' + tabId).remove();
                     }
                 });
 
-                // 2. Add new tabs that were selected
-                selectedOptions.forEach(opt => {
-                    if ($(`#tab-${opt.id}`).length === 0) {
-                        createTab(opt.id, opt.text);
+                // Add newly selected tabs
+                activeModules.forEach(mod => {
+                    if ($(`#tab-${mod.id}`).length === 0) {
+                        createTab(mod.id, mod.text);
                     }
                 });
 
-                // 3. Ensure at least one tab is active
-                if ($('#dynamic-tabs .nav-link.active').length === 0 && selectedIds.length > 0) {
-                    const firstTab = new bootstrap.Tab(document.querySelector(`#tab-${selectedIds[0]}`));
+                // Ensure an active tab is shown if current active is missing
+                if ($('#dynamic-tabs .nav-link.active').length === 0 && activeIds.length > 0) {
+                    let firstTab = new bootstrap.Tab(document.querySelector(`#tab-${activeIds[0]}`));
                     firstTab.show();
                 }
             }
 
-            // Function to create a tab and trigger AJAX fetch for its content
             function createTab(id, text) {
-                // Append Nav Item
-                const tabHtml = `
+                // Add Nav Tab
+                let tabHtml = `
                     <li class="nav-item" role="presentation" data-id="${id}">
                         <button class="nav-link" id="tab-${id}" data-bs-toggle="tab" data-bs-target="#pane-${id}" type="button" role="tab">${text}</button>
                     </li>
                 `;
                 $('#dynamic-tabs').append(tabHtml);
 
-                // Append Content Pane (Initially showing loader)
-                const paneHtml = `
+                // Add Content Pane
+                let paneHtml = `
                     <div class="tab-pane fade" id="pane-${id}" role="tabpanel">
                         <div class="p-5 text-center text-muted">
-                            <div class="spinner-border text-primary" role="status"></div>
-                            <p class="mt-2">Fetching data for ${text}...</p>
+                            <div class="spinner-border text-secondary" role="status"></div>
+                            <p class="mt-2">Loading data for ${text}...</p>
                         </div>
                     </div>
                 `;
                 $('#dynamic-tabs-content').append(paneHtml);
 
-                // Simulate AJAX Call
-                simulateAjaxFetch(id).then(data => {
-                    renderTabContent(id, text, data);
-                });
+                // Simulate AJAX Load
+                setTimeout(() => { renderTabContent(id, text); }, 500);
             }
 
-            // Simulated AJAX Function using Promises
-            function simulateAjaxFetch(moduleId) {
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        resolve(mockDatabase[moduleId] || { message: "No data found." });
-                    }, 600); // 600ms network delay simulation
-                });
-            }
-
-            // Function to render the specific content inside the tab pane
-            function renderTabContent(id, text, data) {
+            
+            // --- 3. Mock Data Rendering (Preserved from previous implementation) ---
+            
+            function renderTabContent(id, text) {
                 const pane = $(`#pane-${id}`);
                 
-                // If it's the CBS tab, render the specific complex layout from the image
                 if (id === 'cbs') {
-                    pane.html(generateCbsLayout(data));
-                } else {
-                    // For other tabs, render a generic placeholder
+                    // Injecting the specific CBS Layout requested previously
                     pane.html(`
-                        <div class="p-4 bg-white shadow-sm rounded border-top-blue mt-3">
-                            <h4>${text} Dashboard</h4>
-                            <p class="text-success"><i class="fas fa-check-circle"></i> ${data.message}</p>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="stat-card">
+                                    <div class="stat-icon icon-blue"><i class="fas fa-users"></i></div>
+                                    <div><h6 class="text-primary mb-1 fw-bold">CBS Initiated</h6><h4 class="mb-0 fw-bold">12 Cr <span class="fs-6 fw-normal text-muted">Today</span></h4><small class="text-muted">Proposals Yesterday Created: 12555</small></div>
+                                </div>
+                                <div class="data-table-container border-top-blue">
+                                    <h6 class="text-primary mb-3"><i class="fas fa-circle text-primary me-2" style="font-size:10px;"></i>CBS Initiated</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-borderless table-striped">
+                                            <thead><tr><th>Module</th><th>Count</th><th>Amount</th></tr></thead>
+                                            <tbody>
+                                                <tr><td>Account Opening</td><td>5,893</td><td>5,921</td></tr>
+                                                <tr><td>Loan Processing</td><td>14,805</td><td>14,872</td></tr>
+                                                <tr class="table-total border-top"><td>TOTAL</td><td>20,698</td><td>20,793</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card">
+                                    <div class="stat-icon icon-green"><i class="fas fa-user-check"></i></div>
+                                    <div><h6 class="text-success mb-1 fw-bold">CBS Completed</h6><h4 class="mb-0 fw-bold">20 Cr <span class="fs-6 fw-normal text-muted">Today</span></h4><small class="text-muted">Proposals Yesterday Created: 12555</small></div>
+                                </div>
+                                <div class="data-table-container border-top-green">
+                                    <h6 class="text-success mb-3"><i class="fas fa-circle text-success me-2" style="font-size:10px;"></i>CBS Completed</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-borderless table-striped">
+                                            <thead><tr><th>Module</th><th>Count</th><th>Amount</th></tr></thead>
+                                            <tbody>
+                                                <tr><td>Account Opening</td><td>5,893</td><td>5,921</td></tr>
+                                                <tr><td>Loan Processing</td><td>14,805</td><td>14,872</td></tr>
+                                                <tr class="table-total border-top"><td>TOTAL</td><td>20,698</td><td>20,793</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    pane.html(`
+                        <div class="p-4 bg-white shadow-sm rounded mt-3 border-top" style="border-color:#e95922 !important;">
+                            <h5>${text} Overview</h5>
+                            <p class="text-muted">Filtered module data loaded successfully based on sub-selections.</p>
                         </div>
                     `);
                 }
-            }
-
-            // Helper to generate table rows from data
-            function generateTableRows(rows) {
-                let html = '';
-                // Duplicating rows slightly just to simulate the long list in the image
-                const displayRows = [...rows, ...rows]; 
-                displayRows.forEach(row => {
-                    html += `
-                        <tr>
-                            <td>${row.module}</td>
-                            <td>${row.count}</td>
-                            <td>${row.amount}</td>
-                        </tr>
-                    `;
-                });
-                return html;
-            }
-
-            // Specific layout generator for the CBS Tab (Reference: IMG_20260825_105049361.jpg)
-            function generateCbsLayout(data) {
-                return `
-                    <div class="row mt-3">
-                        <!-- Left Column: CBS Initiated -->
-                        <div class="col-md-6">
-                            <div class="stat-card">
-                                <div class="stat-icon icon-blue">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div>
-                                    <h6 class="text-primary mb-1 fw-bold">CBS Initiated</h6>
-                                    <h4 class="mb-0 fw-bold">${data.initiated.todayAmount} <span class="fs-6 fw-normal text-muted">Today</span></h4>
-                                    <small class="text-muted">Proposals Yesterday Created: ${data.initiated.yesterdayCount}</small>
-                                </div>
-                            </div>
-                            
-                            <div class="data-table-container border-top-blue">
-                                <h6 class="text-primary mb-3"><i class="fas fa-circle text-primary me-2" style="font-size:10px;"></i>CBS Initiated</h6>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-borderless table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Lead Source / Module</th>
-                                                <th>Count</th>
-                                                <th>Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${generateTableRows(data.initiated.rows)}
-                                            <tr class="table-total border-top">
-                                                <td>TOTAL</td>
-                                                <td>${data.initiated.total.count}</td>
-                                                <td>${data.initiated.total.amount}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Column: CBS Completed -->
-                        <div class="col-md-6">
-                            <div class="stat-card">
-                                <div class="stat-icon icon-green">
-                                    <i class="fas fa-user-check"></i>
-                                </div>
-                                <div>
-                                    <h6 class="text-success mb-1 fw-bold">CBS Completed</h6>
-                                    <h4 class="mb-0 fw-bold">${data.completed.todayAmount} <span class="fs-6 fw-normal text-muted">Today</span></h4>
-                                    <small class="text-muted">Proposals Yesterday Created: ${data.completed.yesterdayCount}</small>
-                                </div>
-                            </div>
-                            
-                            <div class="data-table-container border-top-green">
-                                <h6 class="text-success mb-3"><i class="fas fa-circle text-success me-2" style="font-size:10px;"></i>CBS Completed</h6>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-borderless table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Lead Source / Module</th>
-                                                <th>Count</th>
-                                                <th>Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${generateTableRows(data.completed.rows)}
-                                            <tr class="table-total border-top">
-                                                <td>TOTAL</td>
-                                                <td>${data.completed.total.count}</td>
-                                                <td>${data.completed.total.amount}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
             }
         });
     </script>

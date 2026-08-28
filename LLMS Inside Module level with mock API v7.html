@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cascading AJAX MultiSelect Dropdowns with Subgrouped Cards</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background-color: #f4f5f7;
+            padding: 30px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .dropdown-wrapper { position: relative; width: 100%; }
+
+        /* Dropdown Styling */
+        .custom-multiselect-btn {
+            background-color: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 6px 12px;
+            width: 100%;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .custom-multiselect-btn:focus { border-color: #86b7fe; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); outline: 0; }
+        .custom-multiselect-btn:disabled { background-color: #e9ecef; cursor: not-allowed; color: #6c757d; }
+
+        .custom-multiselect-menu {
+            position: absolute; top: 100%; left: 0; z-index: 1050; width: 100%; min-width: 280px;
+            background-color: #ffffff; border: 1px solid #c5c5c5; border-radius: 2px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-top: 2px; display: none;
+            max-height: 400px; overflow-y: auto;
+        }
+        .custom-multiselect-menu.show { display: block; }
+
+        .multiselect-header-bar {
+            background-color: #e9ecef; border-bottom: 1px solid #ced4da; padding: 6px 10px;
+            display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;
+            position: sticky; top: 0; z-index: 10;
+        }
+        .header-actions { display: flex; gap: 12px; }
+        .header-action-btn { color: #333; text-decoration: none; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .header-action-btn:hover { color: #000; }
+        .close-dropdown-btn { color: #666; cursor: pointer; font-size: 1rem; line-height: 1; }
+
+        .group-header {
+            background-color: #f1f3f5; padding: 6px 10px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 1px solid #e2e6ea; border-top: 1px solid #e2e6ea;
+            font-weight: 700; font-size: 0.85rem; color: #212529; user-select: none;
+        }
+        .group-header label { cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 0; flex-grow: 1; }
+        .collapse-toggle { cursor: pointer; color: #495057; font-size: 0.9rem; padding: 0 4px; }
+
+        .group-items { list-style: none; padding: 0; margin: 0; }
+        .group-items li.flat-item { padding: 4px 10px 4px 28px; }
+        .group-items li.flat-item:hover { background-color: #f8f9fa; }
+        .group-items label { cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.85rem; color: #333; width: 100%; }
+        .form-check-input { cursor: pointer; margin: 0; }
+
+        /* ========================================= */
+        /* DASHBOARD CARDS STYLING                   */
+        /* ========================================= */
+        .dash-card {
+            background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden; border: 1px solid #e9ecef; border-top-width: 4px; height: 100%;
+        }
+
+        .dash-card-header { padding: 12px 16px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
+
+        /* Toggle Buttons */
+        .dash-toggle-container { display: flex; margin: 0 16px 16px 16px; background: #f8f9fa; border-radius: 4px; overflow: hidden; }
+        .dash-toggle-btn { flex: 1; text-align: center; padding: 8px; font-size: 0.8rem; font-weight: 600; border: none; background: transparent; color: #6c757d; cursor: pointer; transition: 0.2s; }
+
+        /* Tables */
+        .dash-table { width: 100%; font-size: 0.8rem; text-align: right; }
+        .dash-table th, .dash-table td { padding: 8px 16px; border-bottom: 1px solid #f1f3f5; }
+        .dash-table th:first-child, .dash-table td:first-child { text-align: left; }
+        .dash-table th { font-weight: 600; color: #fff; }
+        .dash-table tfoot { font-weight: 700; background-color: #f8f9fa; }
+
+        /* Subgroup Specific Styling (For CBS) */
+        .subgroup-subtotal { color: #0d8a85; font-weight: 700; } /* Teal total text */
+
+        /* Theme Colors */
+        .theme-blue { border-top-color: #5b8dec; }
+        .theme-blue .dash-card-header { color: #5b8dec; }
+        .theme-blue .dash-toggle-btn.active { background-color: #5b8dec; color: #fff; }
+        .theme-blue .dash-table th { background-color: #5b8dec; }
+        
+        .theme-purple { border-top-color: #7b4397; }
+        .theme-purple .dash-card-header { color: #7b4397; }
+        .theme-purple .dash-toggle-btn.active { background-color: #7b4397; color: #fff; }
+        .theme-purple .dash-table th { background-color: #7b4397; }
+        
+        .theme-orange { border-top-color: #e67e22; }
+        .theme-orange .dash-card-header { color: #e67e22; }
+        .theme-orange .dash-toggle-btn.active { background-color: #e67e22; color: #fff; }
+        .theme-orange .dash-table th { background-color: #e67e22; }
+
+        .theme-cbs { border-top-color: #563d7c; } /* Dark Indigo for CBS */
+        .theme-cbs .dash-card-header { color: #563d7c; }
+        .theme-cbs .dash-toggle-btn.active { background-color: #563d7c; color: #fff; }
+        .theme-cbs .dash-table th { background-color: #563d7c; }
+        .theme-cbs .dash-table tfoot td { color: #0d8a85; } /* Grand total teal */
+
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div class="row g-2 mb-3">
+            
+            <div class="col-md">
+                <div class="dropdown-wrapper" id="dd-business-group">
+                    <label class="form-label text-muted mb-1 small">Business Group</label>
+                    <button type="button" class="custom-multiselect-btn trigger-btn"><span class="selected-text">Select</span><i class="bi bi-chevron-down ms-2"></i></button>
+                    <div class="custom-multiselect-menu">
+                        <div class="multiselect-header-bar">
+                            <div class="header-actions"><span class="header-action-btn btn-check-all"><i class="bi bi-check-lg"></i> Check all</span><span class="header-action-btn btn-uncheck-all"><i class="bi bi-x-lg"></i> Uncheck all</span></div><i class="bi bi-x-circle-fill close-dropdown-btn"></i>
+                        </div>
+                        <div class="dynamic-container"><div class="p-3 text-center text-muted"><div class="spinner-border spinner-border-sm me-2"></div> Loading...</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md"><div class="dropdown-wrapper"><label class="form-label text-muted mb-1 small">Circle</label><button type="button" class="custom-multiselect-btn" disabled><span class="selected-text">Select Item(s)</span><i class="bi bi-chevron-down ms-2"></i></button></div></div>
+            <div class="col-md"><div class="dropdown-wrapper"><label class="form-label text-muted mb-1 small">Module</label><button type="button" class="custom-multiselect-btn" disabled><span class="selected-text">Select Item(s)</span><i class="bi bi-chevron-down ms-2"></i></button></div></div>
+            <div class="col-md"><div class="dropdown-wrapper"><label class="form-label text-muted mb-1 small">RBO</label><button type="button" class="custom-multiselect-btn" disabled><span class="selected-text">Select Item(s)</span><i class="bi bi-chevron-down ms-2"></i></button></div></div>
+
+            <div class="col-md">
+                <div class="dropdown-wrapper" id="dd-activity">
+                    <label class="form-label text-muted mb-1 small">Activity</label>
+                    <button type="button" class="custom-multiselect-btn trigger-btn"><span class="selected-text">Select options</span><i class="bi bi-chevron-down ms-2"></i></button>
+                    <div class="custom-multiselect-menu">
+                        <div class="multiselect-header-bar">
+                            <div class="header-actions"><span class="header-action-btn btn-check-all"><i class="bi bi-check-lg"></i> Check all</span><span class="header-action-btn btn-uncheck-all"><i class="bi bi-x-lg"></i> Uncheck all</span></div><i class="bi bi-x-circle-fill close-dropdown-btn"></i>
+                        </div>
+                        <div class="dynamic-container"><div class="p-3 text-center text-muted"><div class="spinner-border spinner-border-sm me-2"></div> Loading...</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button id="btnSubmit" class="btn btn-secondary text-white border-0 shadow-sm px-4" style="background-color: #6a5981;">
+            <i class="bi bi-download me-2"></i> Fetch Details
+        </button>
+        
+        <hr class="mt-4 mb-4 text-muted">
+
+        <div id="dashboardCardsContainer" class="row g-4">
+            </div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            
+            // ==========================================
+            // 1. DATA RENDERING ENGINE
+            // ==========================================
+            function renderDropdownData($wrapper, data) {
+                let html = '';
+                data.forEach(group => {
+                    const displayStyle = group.isCollapsedByDefault ? 'style="display: none;"' : '';
+                    const iconClass = group.isCollapsedByDefault ? 'bi-plus-circle-fill' : 'bi-dash-circle-fill';
+                    const groupValAttr = group.groupValue ? `value="${group.groupValue}"` : '';
+
+                    html += `
+                    <div class="group-container" data-group-name="${group.groupName}">
+                        <div class="group-header">
+                            <label><input type="checkbox" class="form-check-input group-checkbox" ${groupValAttr}><span>All ${group.groupName}</span></label>
+                            <i class="bi ${iconClass} collapse-toggle"></i>
+                        </div>
+                        <ul class="group-items" ${displayStyle}>`;
+
+                    if (group.subGroups && group.subGroups.length > 0) {
+                        group.subGroups.forEach(sub => {
+                            html += `
+                            <li class="subgroup-container pt-2 pb-1 border-bottom">
+                                <label class="fw-bold text-dark ms-3 d-flex align-items-center gap-2" style="font-size: 0.85rem; cursor: pointer;">
+                                    <input type="checkbox" class="form-check-input subgroup-checkbox">${sub.subGroupName}
+                                </label>
+                                <ul class="list-unstyled ms-4 mt-1 mb-2">`;
+                            sub.items.forEach(item => {
+                                html += `<li class="flat-item"><label><input type="checkbox" class="form-check-input item-checkbox" value="${item.value}">${item.label}</label></li>`;
+                            });
+                            html += `</ul></li>`;
+                        });
+                    } else if (group.items) {
+                        group.items.forEach(item => {
+                            html += `<li class="flat-item"><label><input type="checkbox" class="form-check-input item-checkbox" value="${item.value}">${item.label}</label></li>`;
+                        });
+                    }
+                    html += `</ul></div>`;
+                });
+
+                $wrapper.find('.dynamic-container').html(html);
+                $wrapper.find('.trigger-btn').prop('disabled', false);
+                updateSelectedDisplayText($wrapper);
+            }
+
+            // ==========================================
+            // 2. MOCK DATA FETCHERS
+            // ==========================================
+            function fetchBusinessGroups() {
+                const data = [{ groupName: "Leads", isCollapsedByDefault: false, items: [{ value: "DEF", label: "DEF" }] }];
+                renderDropdownData($('#dd-business-group'), data);
+            }
+
+            function fetchActivities() {
+                const mockApiResponse = [
+                    {
+                        groupName: "LEADS", groupValue: "leads", isCollapsedByDefault: true,
+                        items: [
+                            { value: "CLP", label: "CLP" }, { value: "CLPBRE", label: "CLPBRE" },
+                            { value: "CLP_DD", label: "CLP_DD" }, { value: "CRM", label: "CRM" }, 
+                            { value: "RM", label: "RM" }, { value: "SBOSS", label: "SBOSS" }, { value: "IBG", label: "IBG" }
+                        ]
+                    },
+                    {
+                        groupName: "CRA/CUE/ESG/DR", groupValue: "cra", isCollapsedByDefault: true,
+                        items: [
+                            { value: "CRA", label: "CRA" }, { value: "CUE", label: "CUE" },
+                            { value: "ESG", label: "ESG" }, { value: "DynamicReview", label: "Dynamic Review" }
+                        ]
+                    },
+                    {
+                        groupName: "PROPOSALS", groupValue: "proposals", isCollapsedByDefault: true,
+                        items: [
+                            { value: "BREDDSPDM", label: "BRE DDSPDM" }, { value: "BRECAFPDM", label: "BRE CAFPDM" },
+                            { value: "CAFPM2New", label: "CAFPM2 (New)" }, { value: "DDSQV2New", label: "DDSQ V2 (New)" },
+                            { value: "FormM", label: "Form M" }, { value: "RFMT", label: "RFMT" }, { value: "Others", label: "Others" }
+                        ]
+                    },
+                    {
+                        groupName: "CBS", groupValue: "cbs", isCollapsedByDefault: false,
+                        subGroups: [
+                            { subGroupName: "Account Opening", items: [
+                                { value: "CCOD", label: "CCOD" }, { value: "Contingent", label: "Contingent" },
+                                { value: "FCNRB", label: "FCNR-B" }, { value: "POOLPurchase", label: "POOL Purchase" }
+                            ]},
+                            { subGroupName: "Disbursement", items: [
+                                { value: "DLTC", label: "DLTC" }
+                            ]},
+                            { subGroupName: "Other activity", items: [
+                                { value: "CUE_CBS", label: "CUE" }, { value: "ORA", label: "ORA" },
+                                { value: "ECRA", label: "ECRA" }, { value: "LimitExpiry", label: "Limit Expiry date updated" },
+                                { value: "UdyamPlant", label: "Udyam and plant" }, { value: "RenewalData", label: "Renewal Date Updating" },
+                                { value: "RepaySch", label: "Repay sch. Create" }, { value: "DisbSch", label: "Disb sch. create" },
+                                { value: "RateOfInterest", label: "Rate of interest" }
+                            ]}
+                        ]
+                    }
+                ];
+                renderDropdownData($('#dd-activity'), mockApiResponse);
+            }
+
+            fetchBusinessGroups();
+            fetchActivities();
+
+
+            // ==========================================
+            // 3. UI DROPDOWN LOGIC
+            // ==========================================
+            function updateSelectedDisplayText($wrapper) {
+                const checkedLabels = [];
+                $wrapper.find('.item-checkbox:checked').each(function () { checkedLabels.push($(this).parent().text().trim()); });
+                const $selectedText = $wrapper.find('.selected-text');
+                if (checkedLabels.length === 0) $selectedText.text('Select options');
+                else if (checkedLabels.length <= 2) $selectedText.text(checkedLabels.join(', '));
+                else $selectedText.text(checkedLabels.slice(0, 2).join(', ') + `, +${checkedLabels.length - 2} more`);
+            }
+
+            function syncMainGroupCheckbox($container) {
+                const totalItems = $container.find('.item-checkbox').length;
+                const checkedItems = $container.find('.item-checkbox:checked').length;
+                $container.find('.group-checkbox').prop('checked', totalItems === checkedItems && totalItems > 0);
+            }
+
+            // Standard Dropdown Event Bindings (Open/Close/Sync)
+            $(document).on('click', '.trigger-btn', function (e) {
+                e.stopPropagation();
+                const $menu = $(this).siblings('.custom-multiselect-menu');
+                $('.custom-multiselect-menu').not($menu).removeClass('show');
+                $menu.toggleClass('show');
+            });
+
+            $(document).on('click', '.close-dropdown-btn', function () { $(this).closest('.custom-multiselect-menu').removeClass('show'); });
+            $(document).on('click', function (e) { if (!$(e.target).closest('.dropdown-wrapper').length) $('.custom-multiselect-menu').removeClass('show'); });
+            $(document).on('click', '.collapse-toggle', function (e) {
+                e.stopPropagation();
+                const $itemsList = $(this).closest('.group-container').find('.group-items');
+                $itemsList.slideToggle(150, () => {
+                    if ($itemsList.is(':visible')) $(this).removeClass('bi-plus-circle-fill').addClass('bi-dash-circle-fill');
+                    else $(this).removeClass('bi-dash-circle-fill').addClass('bi-plus-circle-fill');
+                });
+            });
+            $(document).on('click', '.btn-check-all', function () { $(this).closest('.dropdown-wrapper').find('input[type="checkbox"]').prop('checked', true); updateSelectedDisplayText($(this).closest('.dropdown-wrapper')); });
+            $(document).on('click', '.btn-uncheck-all', function () { $(this).closest('.dropdown-wrapper').find('input[type="checkbox"]').prop('checked', false); updateSelectedDisplayText($(this).closest('.dropdown-wrapper')); });
+            
+            $(document).on('change', '.group-checkbox', function () {
+                $(this).closest('.group-container').find('.item-checkbox, .subgroup-checkbox').prop('checked', $(this).is(':checked'));
+                updateSelectedDisplayText($(this).closest('.dropdown-wrapper'));
+            });
+            $(document).on('change', '.subgroup-checkbox', function () {
+                $(this).closest('.subgroup-container').find('.item-checkbox').prop('checked', $(this).is(':checked'));
+                syncMainGroupCheckbox($(this).closest('.group-container'));
+                updateSelectedDisplayText($(this).closest('.dropdown-wrapper'));
+            });
+            $(document).on('change', '.item-checkbox', function () {
+                const $subContainer = $(this).closest('.subgroup-container');
+                if ($subContainer.length > 0) {
+                    const totalSub = $subContainer.find('.item-checkbox').length;
+                    const checkedSub = $subContainer.find('.item-checkbox:checked').length;
+                    $subContainer.find('.subgroup-checkbox').prop('checked', totalSub === checkedSub && totalSub > 0);
+                }
+                syncMainGroupCheckbox($(this).closest('.group-container'));
+                updateSelectedDisplayText($(this).closest('.dropdown-wrapper'));
+            });
+
+
+            // ==========================================
+            // 4. MOCK API FOR STATS (tab1 & tab2 generalized)
+            // ==========================================
+            // tab1 maps to 'Created' or 'Initiated' | tab2 maps to 'Approved' or 'Completed'
+            const mockStatsData = {
+                "CLP": { tab1: { count: 7569, amount: 97739 }, tab2: { count: 4210, amount: 55420 } },
+                "CRA": { tab1: { count: 23648 }, tab2: { count: 18400 } },
+                "BREDDSPDM": { tab1: { count: 6826, amount: 74094 }, tab2: { count: 4000, amount: 45000 } },
+                
+                // CBS Specific Details from your image
+                "CCOD": { tab1: { count: 5893, amount: 155921 }, tab2: { count: 4000, amount: 120000 } },
+                "Contingent": { tab1: { count: 2, amount: 145247 }, tab2: { count: 1, amount: 70000 } },
+                "FCNRB": { tab1: { count: 2096, amount: 112096 }, tab2: { count: 1500, amount: 80000 } },
+                "POOLPurchase": { tab1: { count: 22985, amount: 122985 }, tab2: { count: 18000, amount: 90000 } },
+                
+                "DLTC": { tab1: { count: 1865, amount: 111865 }, tab2: { count: 1000, amount: 50000 } },
+                
+                "CUE_CBS": { tab1: { count: 980, amount: 111980 }, tab2: { count: 500, amount: 60000 } },
+                "ORA": { tab1: { count: 1703, amount: 111195 }, tab2: { count: 1200, amount: 80000 } },
+                
+                // Defaults for unmapped data (e.g. ECRA, LimitExpiry, etc)
+                "default": { tab1: { count: 0, amount: 0 }, tab2: { count: 0, amount: 0 } }
+            };
+
+            const formatNumber = (num) => {
+                if(!num) return '-';
+                return num.toLocaleString('en-IN');
+            };
+
+            // Configuration for themes and tab names
+            const cardThemes = {
+                "LEADS": { themeClass: "theme-blue", icon: "bi-people-fill", hasAmount: true, tabs: ["Created", "Approved"] },
+                "CRA/CUE/ESG/DR": { themeClass: "theme-purple", icon: "bi-bar-chart-fill", hasAmount: false, tabs: ["Created", "Approved"] },
+                "PROPOSALS": { themeClass: "theme-orange", icon: "bi-file-earmark-text-fill", hasAmount: true, tabs: ["Created", "Approved"] },
+                "CBS": { themeClass: "theme-cbs", icon: "bi-bank2", hasAmount: true, tabs: ["Initiated", "Completed"] }
+            };
+
+
+            // ==========================================
+            // 5. RENDER SPECIFIC TABLE BASED ON TAB
+            // ==========================================
+            function renderCardTable($card, statusTab) {
+                const groupName = $card.data('group');
+                const isSubgrouped = $card.data('isSubgrouped');
+                const themeConfig = cardThemes[groupName] || { themeClass: "theme-dark", icon: "bi-record-circle", hasAmount: true, tabs: ["Created", "Approved"] };
+
+                let tableRowsHtml = '';
+                let grandTotalCount = 0;
+                let grandTotalAmount = 0;
+                const colSpan = themeConfig.hasAmount ? 3 : 2;
+
+                // --- LOGIC FOR CARDS WITH SUBGROUPS (e.g., CBS) ---
+                if (isSubgrouped) {
+                    const subgroups = $card.data('subgroups');
+                    
+                    subgroups.forEach(sub => {
+                        // 1. Subgroup Title Row (Account Opening, Disbursement...)
+                        tableRowsHtml += `<tr><td colspan="${colSpan}" class="fw-bold text-dark pt-3 pb-1 border-bottom-0" style="font-size: 0.85rem;">${sub.name}</td></tr>`;
+
+                        let subTotalCount = 0;
+                        let subTotalAmount = 0;
+
+                        // 2. Subgroup Items
+                        sub.items.forEach(item => {
+                            const stats = (mockStatsData[item.value] || mockStatsData['default'])[statusTab];
+                            subTotalCount += stats.count;
+                            if (themeConfig.hasAmount) subTotalAmount += (stats.amount || 0);
+
+                            tableRowsHtml += `<tr><td>${item.label}</td><td>${formatNumber(stats.count)}</td>`;
+                            if (themeConfig.hasAmount) tableRowsHtml += `<td>${formatNumber(stats.amount)}</td>`;
+                            tableRowsHtml += `</tr>`;
+                        });
+
+                        // 3. Subgroup Total Row
+                        tableRowsHtml += `<tr class="subgroup-subtotal border-bottom"><td>TOTAL</td><td>${formatNumber(subTotalCount)}</td>`;
+                        if (themeConfig.hasAmount) tableRowsHtml += `<td>${formatNumber(subTotalAmount)}</td>`;
+                        tableRowsHtml += `</tr>`;
+
+                        grandTotalCount += subTotalCount;
+                        grandTotalAmount += subTotalAmount;
+                    });
+                } 
+                // --- LOGIC FOR FLAT CARDS (e.g., Leads, Proposals) ---
+                else {
+                    const items = $card.data('items');
+                    items.forEach(item => {
+                        const stats = (mockStatsData[item.value] || mockStatsData['default'])[statusTab];
+                        grandTotalCount += stats.count;
+                        
+                        tableRowsHtml += `<tr><td>${item.label}</td><td>${formatNumber(stats.count)}</td>`;
+                        if (themeConfig.hasAmount) {
+                            grandTotalAmount += (stats.amount || 0);
+                            tableRowsHtml += `<td>${formatNumber(stats.amount)}</td>`;
+                        }
+                        tableRowsHtml += `</tr>`;
+                    });
+                }
+
+                // Inject Body
+                $card.find('tbody').html(tableRowsHtml);
+                
+                // Inject Grand Total Footer
+                let tfootHtml = `<tr><td>TOTAL</td><td>${formatNumber(grandTotalCount)}</td>`;
+                if (themeConfig.hasAmount) tfootHtml += `<td>${formatNumber(grandTotalAmount)}</td>`;
+                tfootHtml += `</tr>`;
+                $card.find('tfoot').html(tfootHtml);
+            }
+
+
+            // ==========================================
+            // 6. GENERATE CARDS ON SUBMIT
+            // ==========================================
+            $('#btnSubmit').on('click', function() {
+                const $cardsContainer = $('#dashboardCardsContainer');
+                $cardsContainer.empty();
+
+                let hasData = false;
+
+                // Loop through each Main Group (Leads, CBS, etc)
+                $('#dd-activity .group-container').each(function() {
+                    const groupName = $(this).attr('data-group-name');
+                    const hasSubgroups = $(this).find('.subgroup-container').length > 0;
+                    
+                    let flatItems = [];
+                    let subgroups = [];
+                    let totalCheckedInGroup = 0;
+
+                    if (hasSubgroups) {
+                        $(this).find('.subgroup-container').each(function() {
+                            const subName = $(this).find('.subgroup-checkbox').parent().text().trim();
+                            const subItems = [];
+                            
+                            $(this).find('.item-checkbox:checked').each(function() {
+                                subItems.push({ value: $(this).val(), label: $(this).parent().text().trim() });
+                                totalCheckedInGroup++;
+                            });
+                            
+                            if (subItems.length > 0) subgroups.push({ name: subName, items: subItems });
+                        });
+                    } else {
+                        $(this).find('.item-checkbox:checked').each(function() {
+                            flatItems.push({ value: $(this).val(), label: $(this).parent().text().trim() });
+                            totalCheckedInGroup++;
+                        });
+                    }
+
+                    // If anything is checked in this group, generate the card
+                    if (totalCheckedInGroup > 0) {
+                        hasData = true;
+                        const themeConfig = cardThemes[groupName] || { themeClass: "theme-dark", icon: "bi-record-circle", hasAmount: true, tabs: ["Created", "Approved"] };
+                        
+                        const $cardWrapper = $(`<div class="col-lg-4 col-md-6"></div>`);
+                        const $card = $(`
+                            <div class="dash-card ${themeConfig.themeClass}">
+                                <div class="dash-card-header"><i class="bi ${themeConfig.icon}"></i> ${groupName}</div>
+                                <div class="dash-toggle-container">
+                                    <button class="dash-toggle-btn active" data-status="tab1">${themeConfig.tabs[0]}</button>
+                                    <button class="dash-toggle-btn" data-status="tab2">${themeConfig.tabs[1]}</button>
+                                </div>
+                                <table class="dash-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Module / Source</th>
+                                            <th>Count</th>
+                                            ${themeConfig.hasAmount ? '<th>Amount (in Cr.)</th>' : ''}
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                    <tfoot></tfoot>
+                                </table>
+                            </div>
+                        `);
+
+                        // Attach specific data to this card so tabs know what to render
+                        $card.data('group', groupName);
+                        $card.data('isSubgrouped', hasSubgroups);
+                        if (hasSubgroups) $card.data('subgroups', subgroups);
+                        else $card.data('items', flatItems);
+
+                        // Initial Render for Tab 1
+                        renderCardTable($card, 'tab1');
+
+                        $cardWrapper.append($card);
+                        $cardsContainer.append($cardWrapper);
+                    }
+                });
+
+                if (!hasData) $cardsContainer.html(`<div class="col-12 text-center text-danger mt-4">Please select options from the Activity dropdown to view data.</div>`);
+            });
+
+            // ==========================================
+            // 7. TAB CLICK LISTENER
+            // ==========================================
+            $(document).on('click', '.dash-toggle-btn', function() {
+                const $btn = $(this);
+                const $card = $btn.closest('.dash-card');
+                
+                $card.find('.dash-toggle-btn').removeClass('active');
+                $btn.addClass('active');
+
+                // status is 'tab1' or 'tab2'
+                const status = $btn.data('status'); 
+                renderCardTable($card, status);
+            });
+
+        });
+    </script>
+</body>
+</html>

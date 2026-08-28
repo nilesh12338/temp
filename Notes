@@ -1,3 +1,454 @@
+
+<td class="text-end">${row.amount}</td>
+                </tr>
+            `;
+        } else {
+            html += `
+                <tr>
+                    <td>${row.source}</td>
+                    <td class="text-end">${row.count}</td>
+                </tr>
+            `;
+        }
+    });
+    
+    // Calculate dummy totals for visual purposes
+    const dummyTotalCount = (Math.random() * 99999).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    const dummyTotalAmount = (Math.random() * 499999).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    // Append Total Row (Sticky via CSS)
+    let totalRowHtml = '';
+    data.forEach(row => {
+        if (row.amount) {
+            totalRowHtml = `
+                <tr class="total-row">
+                    <td>TOTAL</td>
+                    <td class="text-end">${dummyTotalCount}</td>
+                    <td class="text-end">${dummyTotalAmount}</td>
+                </tr>
+            `;
+        } else {
+            totalRowHtml = `
+                <tr class="total-row">
+                    <td>TOTAL</td>
+                    <td class="text-end">${dummyTotalCount}</td>
+                </tr>
+            `;
+        }
+    });
+
+    if (isAppend) {
+        tbody.append(html + totalRowHtml);
+    } else {
+        tbody.html(html + totalRowHtml);
+    }
+};
+
+// 5. Core AJAX Simulation Logic
+const fetchData = (tabId, isLoadMore = false) => {
+    if (isFetching[tabId]) return;
+    isFetching[tabId] = true;
+    const loaderId = `#loader-${tabId}`;
+    const targetBodyId = `tbody-${tabId}`;
+    $(loaderId).show();
+    
+    // Simulate 400ms - 800ms random server delay
+    const delay = Math.floor(Math.random() * 400) + 400;
+    setTimeout(() => {
+        // First load fetches 8 items to fit nicely, lazy loads fetch 5
+        const rowCount = isLoadMore ? 5 : 15;
+        const data = generateDummyData(tabId, rowCount);
+        renderTableRows(targetBodyId, data, isLoadMore);
+        $(loaderId).hide();
+        isFetching[tabId] = false;
+    }, delay);
+};
+
+// 6. Initial fetch for all tabs on click
+$('#fetchBtn').on('click', function () {
+    $('.showHideBasedOnDD').hide();
+    $('.group-container').each(function(j,k){
+        $(k).find('.item-checkbox').each(function(i,e){
+            if($(this).prop('checked')){
+                let activeModule=$(k).find('.group-header').find('.group-checkbox').val()
+                $('.card-'+activeModule).closest('.showHideBasedOnDD').show();
+                return;
+            }
+        });
+    });
+
+    resetStates();
+    tabsList.forEach(tab => {
+        $(`#tbody-${tab}`).empty();
+        fetchData(tab, false);
+    });
+    
+    $(`#tbody-cbs-initiated, #tbody-cbs-completed`).empty();
+    fetchCBSDetails('cbs-initiated');
+    fetchCBSDetails('cbs-completed');
+});
+
+// 7. Lazy loading on Scroll (Scoping to specific active tab panes)
+$('.table-container').on('scroll', function () {
+    const container = $(this);
+    const activeTabPane = container.find('.tab-pane.active');
+    const tabId = activeTabPane.attr('id');
+    // Check scroll boundary. ClientHeight + ScrollTop >= ScrollHeight checks if we hit bottom.
+    if (container.scrollTop() + container[0].clientHeight >= container[0].scrollHeight - 5) {
+        if (!isFetching[tabId]) {
+            // fetchData(tabId, true);
+        }
+    }
+});
+</script>
+
+<script>
+    $(document).ready(function () {
+        const $trigger = $('#multiSelectTrigger');
+        const $menu = $('#multiSelectMenu');
+        const $selectedText = $('#selectedText');
+        const $dynamicContainer = $('#dynamicGroupsContainer');
+
+        // --- 1. AJAX DATA FETCH & RENDER ---
+        function fetchDropdownData() {
+            setTimeout(function () {
+                const mockApiResponse = [
+                    {
+                        groupName: "LEADS",
+                        groupValue: "leads",
+                        isCollapsedByDefault: false,
+                        items: [
+                            { value: "CLP", label: "CLP" },
+                            { value: "CLPBRE", label: "CLPBRE" },
+                            { value: "CRM", label: "CRM" },
+                            { value: "RM", label: "RM" }
+                        ]
+                    },
+                    {
+                        groupName: "CRA/CUE/ESG/DR",
+                        groupValue: "cra",
+                        isCollapsedByDefault: true,
+                        items: [
+                            { value: "CRA", label: "CRA" },
+                            { value: "CUE", label: "CUE" },
+                            { value: "ESG", label: "ESG" },
+                            { value: "DynamicReview", label: "Dynamic Review" }
+                        ]
+                    },
+                    {
+                        groupName: "PROPOSALS",
+                        groupValue: "proposals",
+                        isCollapsedByDefault: true,
+                        items: [
+                            { value: "DD", label: "DD" },
+                            { value: "DDS", label: "DDS" }
+                        ]
+                    },
+                    {
+                        groupName: "POST SANCTION",
+                        groupValue: "post",
+                        isCollapsedByDefault: true,
+                        items: [
+                            { value: "StockStatements", label: "Stock Statements" },
+                            { value: "InspectionReports", label: "Inspection Reports" }
+                        ]
+                    },
+                    {
+                        groupName: "CBS",
+                        groupValue: "cbs",
+                        isCollapsedByDefault: false,
+                        subGroups: [
+                            {
+                                subGroupName: "Account Opening",
+                                items: [
+                                    { value: "CCOD", label: "CC/OD" },
+                                    { value: "Contingent", label: "Contingent" },
+                                    { value: "FCNRB", label: "FCNR-B" },
+                                    { value: "POOLPurchase", label: "POOL Purchase" }
+                                ]
+                            },
+                            {
+                                subGroupName: "Disbursement",
+                                items: [
+                                    { value: "DLTC", label: "DLTC" }
+                                ]
+                            },
+                            {
+                                subGroupName: "Other activity",
+                                items: [
+                                    { value: "CUE_CBS", label: "CUE" },
+                                    { value: "ORA", label: "ORA" },
+                                    { value: "ECRA", label: "ECRA" }
+                                ]
+                            }
+                        ]
+                    }
+                ];
+                renderDropdownItems(mockApiResponse);
+            }, 500);
+        }
+
+        function renderDropdownItems(data) {
+            let html = '';
+            data.forEach(group => {
+                const displayStyle = group.isCollapsedByDefault ? 'style="display: none;"' : '';
+                const iconClass = group.isCollapsedByDefault ? 'bi-plus-circle-fill' : 'bi-dash-circle-fill';
+                html += `
+                <div class="group-container">
+                    <div class="group-header">
+                        <label>
+                            <input type="checkbox" class="form-check-input group-checkbox" value="${group.groupValue}">
+                            <span>${group.groupName} (All)</span>
+                        </label>
+                        <i class="bi ${iconClass} collapse-toggle"></i>
+                    </div>
+                    <ul class="group-items pt-2 ps-3" ${displayStyle}>`;
+                
+                if (group.subGroups && group.subGroups.length > 0) {
+                    group.subGroups.forEach(sub => {
+                        html += `
+                        <li class="subgroup-container pt-2 pb-1 border-bottom">
+                            <!-- Checkbox explicitly added here for Account Opening, Disbursement, etc. -->
+                            <label class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.85rem; cursor: pointer;">
+                                <input type="checkbox" class="form-check-input subgroup-checkbox">
+                                ${sub.subGroupName}
+                            </label>
+                            <ul class="list-unstyled ms-2 mt-1 ps-3">`;
+                        
+                        sub.items.forEach(item => {
+                            html += `
+                                <li class="flat-item">
+                                    <label>
+                                        <input type="checkbox" class="form-check-input item-checkbox" value="${item.value}">
+                                        ${item.label}
+                                    </label>
+                                </li>`;
+                        });
+                        html += `</ul></li>`;
+                    });
+                } else if (group.items) {
+                    group.items.forEach(item => {
+                        html += `
+                            <li class="flat-item">
+                                <label>
+                                    <input type="checkbox" class="form-check-input item-checkbox" value="${item.value}">
+                                    ${item.label}
+                                </label>
+                            </li>`;
+                    });
+                }
+                html += `</ul></div>`;
+            });
+            $dynamicContainer.html(html);
+            updateSelectedDisplayText();
+        }
+
+        fetchDropdownData();
+
+        // --- 2. MENU UI TOGGLES ---
+        $trigger.on('click', function (e) {
+            e.stopPropagation();
+            $menu.toggleClass('show');
+        });
+
+        $('#btnCloseMenu').on('click', function () {
+            $menu.removeClass('show');
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.dropdown-wrapper').length) {
+                $menu.removeClass('show');
+            }
+        });
+
+        // Collapsible Behavior
+        $menu.on('click', '.collapse-toggle', function (e) {
+            e.stopPropagation();
+            const $icon = $(this);
+            const $itemsList = $icon.closest('.group-container').find('.group-items');
+            
+            $itemsList.slideToggle(150, function () {
+                if ($itemsList.is(':visible')) {
+                    $icon.removeClass('bi-plus-circle-fill').addClass('bi-dash-circle-fill');
+                } else {
+                    $icon.removeClass('bi-dash-circle-fill').addClass('bi-plus-circle-fill');
+                }
+            });
+        });
+
+        // --- 3. CHECKBOX SYNCING LOGIC ---
+        function updateSelectedDisplayText() {
+            const checkedLabels = [];
+            $('.item-checkbox:checked').each(function () {
+                checkedLabels.push($(this).parent().text().trim());
+            });
+
+            if (checkedLabels.length === 0) {
+                $selectedText.text('Select options');
+            } else if (checkedLabels.length <= 3) {
+                $selectedText.text(checkedLabels.join(', '));
+            } else {
+                $selectedText.text(checkedLabels.slice(0, 3).join(', ') + `, +${checkedLabels.length - 3} more`);
+            }
+        }
+
+        // Sync Helper Function for Main Groups
+        function syncMainGroupCheckbox($container) {
+            const totalItems = $container.find('.item-checkbox').length;
+            const checkedItems = $container.find('.item-checkbox:checked').length;
+            $container.find('.group-checkbox').prop('checked', totalItems === checkedItems && totalItems > 0);
+        }
+
+        $('#btnCheckAll').on('click', function () {
+            $menu.find('input[type="checkbox"]').prop('checked', true);
+            updateSelectedDisplayText();
+        });
+
+        $('#btnUncheckAll').on('click', function () {
+            $menu.find('input[type="checkbox"]').prop('checked', false);
+            updateSelectedDisplayText();
+        });
+
+        // A) Main Group Click (e.g., "All CBS")
+        $menu.on('change', '.group-checkbox', function () {
+            const isChecked = $(this).is(':checked');
+            const $container = $(this).closest('.group-container');
+            // Checks EVERYTHING inside the group (Sub-groups AND Items)
+            $container.find('.item-checkbox, .subgroup-checkbox').prop('checked', isChecked);
+            updateSelectedDisplayText();
+        });
+
+        // B) Sub-Group Click (e.g., "Account Opening")
+        $menu.on('change', '.subgroup-checkbox', function () {
+            const isChecked = $(this).is(':checked');
+            const $subContainer = $(this).closest('.subgroup-container');
+            // 1. Check all items directly under this subgroup
+            $subContainer.find('.item-checkbox').prop('checked', isChecked);
+            // 2. Sync the parent main group ("All CBS")
+            syncMainGroupCheckbox($(this).closest('.group-container'));
+            updateSelectedDisplayText();
+        });
+
+        // C) Individual Item Click (e.g., "CC/OD")
+        $menu.on('change', '.item-checkbox', function () {
+            const $subContainer = $(this).closest('.subgroup-container');
+            // 1. Sync parent sub-group (if it exists)
+            if ($subContainer.length > 0) {
+                const totalSubItems = $subContainer.find('.item-checkbox').length;
+                const checkedSubItems = $subContainer.find('.item-checkbox:checked').length;
+                $subContainer.find('.subgroup-checkbox').prop('checked', totalSubItems === checkedSubItems && totalSubItems > 0);
+            }
+            // 2. Sync parent main group ("All CBS")
+            syncMainGroupCheckbox($(this).closest('.group-container'));
+            updateSelectedDisplayText();
+        });
+
+        // --- 4. GET VALUES BUTTON ---
+        $('#btnGetValues').on('click', function () {
+            const selectedValues = [];
+            // Target ONLY the individual items so we don't accidentally submit "Account Opening" as a value
+            $('.item-checkbox:checked').each(function () {
+                selectedValues.push($(this).val());
+            });
+
+            if(selectedValues.length > 0) {
+                $('#resultDisplay').html("<strong>Submitted Values:</strong><br>" + selectedValues.join(', '));
+            } else {
+                $('#resultDisplay').html("<span class='text-danger'>No values selected.</span>");
+            }
+        });
+    });
+</script>
+
+<script>
+    // Dummy JSON Data Generator for Grouped CBS Data
+    const generateCBSGroupedData = () => {
+        return [
+            {
+                category: "Account Opening",
+                items: [
+                    { source: "CCOD", count: 5893, amount: 155921 },
+                    { source: "Contingent", count: 2, amount: 145247 },
+                    { source: "FCNR-B", count: 2096, amount: 112096 },
+                    { source: "POOL Purchase", count: 22985, amount: 122985 }
+                ]
+            },
+            {
+                category: "Disbursement",
+                items: [
+                    { source: "DLTC", count: 1865, amount: 111865 }
+                ]
+            },
+            {
+                category: "Other activity",
+                items: [
+                    { source: "CUE", count: 980, amount: 111980 },
+                    { source: "CRA", count: 1703, amount: 111196 },
+                    { source: "ECRA", count: 125, amount: 45000 },
+                    { source: "Limit Expiry date updated", count: 45, amount: 12000 },
+                    { source: "Udyam and plant", count: 88, amount: 33000 },
+                    { source: "Renewal Date Updating", count: 210, amount: 95000 },
+                    { source: "Repay sch. create", count: 150, amount: 82000 },
+                    { source: "Rate of interest", count: 320, amount: 105000 }
+                ]
+            }
+        ];
+    };
+
+    // Render function specifically for grouped data with sub-totals
+    const renderCBSTableRows = (targetBodyId, groupedData) => {
+        const tbody = $(`#${targetBodyId}`);
+        let html = '';
+        
+        groupedData.forEach(group => {
+            // 1. Inject Sub-Category Header
+            html += `<tr class="category-header"><td colspan="3">${group.category}</td></tr>`;
+            let subTotalCount = 0;
+            let subTotalAmount = 0;
+            
+            // 2. Inject Data Rows and calculate running totals
+            group.items.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.source}</td>
+                        <td class="text-end">${item.count.toLocaleString()}</td>
+                        <td class="text-end">${item.amount.toLocaleString()}</td>
+                    </tr>
+                `;
+                subTotalCount += item.count;
+                subTotalAmount += item.amount;
+            });
+            
+            // 3. Inject Sub-Total Row at the end of the group
+            html += `
+                <tr class="subtotal-row">
+                    <td>TOTAL</td>
+                    <td class="text-end">${subTotalCount.toLocaleString()}</td>
+                    <td class="text-end">${subTotalAmount.toLocaleString()}</td>
+                </tr>
+            `;
+        });
+        
+        tbody.html(html);
+    };
+
+    // Simulated AJAX call for CBS
+    const fetchCBSDetails = (tabId) => {
+        const loaderId = `#loader-${tabId}`;
+        const targetBodyId = `tbody-${tabId}`;
+        $(loaderId).show();
+        
+        setTimeout(() => {
+            const groupedData = generateCBSGroupedData();
+            renderCBSTableRows(targetBodyId, groupedData);
+            $(loaderId).hide();
+        }, 600); // Simulated 600ms network delay
+    };
+</script>
+</body>
+</html>
+zzzzzzzzzzzzzzzzzzzzzz
+
 /* CBS Card Styling */
 .card-cbs { border-top: 4px solid #334155; }
 .card-cbs .icon-box { background: #334155; color: white; }

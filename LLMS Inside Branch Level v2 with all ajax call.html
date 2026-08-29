@@ -1,4 +1,190 @@
+<script>
+    $(document).ready(function() {
+        
+        // --- State Management ---
+        let currentLevel = 5; 
+        const hierarchyConfig = [
+            { id: 1, key: 'circle', title: 'Circle' },
+            { id: 2, key: 'network', title: 'Network' },
+            { id: 3, key: 'module', title: 'Module' },
+            { id: 4, key: 'rbo', title: 'RBO' },
+            { id: 5, key: 'branch', title: 'Branch' }
+        ];
+        
+        // Define specific metric columns for each card
+        const cardConfig = {
+            'leads': { metrics: ['Count', 'Amount(in cr.)'] },
+            'cra': { metrics: ['Count'] },
+            'proposals': { metrics: ['Count', 'Amount(in cr.)'] },
+            'post': { metrics: ['Count'] }, 
+            'cbs': { metrics: ['Count', 'Amount(in cr.)'] } 
+        };
 
+        const cardState = {
+            'leads': { page: 1, loading: false, activeTab: 'created' },
+            'cra': { page: 1, loading: false, activeTab: 'created' },
+            'proposals': { page: 1, loading: false, activeTab: 'created' },
+            'post': { page: 1, loading: false, activeTab: 'created' }, 
+            'cbs': { page: 1, loading: false, activeTab: 'initiated' } 
+        };
+
+        // --- Mock Data Generator ---
+        function generateMockData(level, page, activeTab, count = 10) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    let data = [];
+                    const circles = ['Delhi', 'Mumbai', 'Chennai', 'Bengaluru'];
+                    
+                    for(let i = 0; i < count; i++) {
+                        let row = {};
+                        if (level >= 1) row.circle = circles[Math.floor(Math.random() * circles.length)];
+                        if (level >= 2) row.network = 'NW-' + Math.floor(Math.random() * 5 + 1);
+                        if (level >= 3) row.module = 'MOD-' + ['A', 'B', 'C'][Math.floor(Math.random() * 3)];
+                        if (level >= 4) row.rbo = 'RBO-' + Math.floor(Math.random() * 5 + 1);
+                        if (level >= 5) row.branch = 'BR-' + Math.floor(Math.random() * 999 + 1);
+                        
+                        let baseMetric = activeTab === 'created' || activeTab === 'initiated' ? 5000 : 1500;
+                        
+                        // Generate both data points, the table builder will pick what it needs
+                        row.countData = Math.floor(Math.random() * baseMetric); 
+                        row.amountData = (Math.random() * (baseMetric / 10)).toFixed(2); 
+                        data.push(row);
+                    }
+                    resolve(data);
+                }, 800 + Math.random() * 500); 
+            });
+        }
+
+        // --- Table Rendering Logic ---
+        function renderHeaders() {
+            // Render headers dynamically per card based on cardConfig
+            Object.keys(cardConfig).forEach(cardId => {
+                let thHTML = '';
+                
+                // 1. Hierarchy Columns
+                hierarchyConfig.forEach(col => {
+                    if (col.id <= currentLevel) {
+                        thHTML += `<th>${col.title}</th>`;
+                    }
+                });
+                
+                // 2. Specific Metric Columns
+                cardConfig[cardId].metrics.forEach(metric => {
+                    thHTML += `<th>${metric}</th>`;
+                });
+                
+                $(`#card-${cardId} .table-header-row`).html(thHTML);
+            });
+        }
+
+        function buildRowHTML(rowData, cardId) {
+            let trHTML = '<tr>';
+            
+            // 1. Hierarchy Data
+            hierarchyConfig.forEach(col => {
+                if (col.id <= currentLevel) {
+                    let displayVal = rowData[col.key];
+                    if (col.key === 'branch') displayVal = `C-BR-${displayVal.split('-')[1]}`;
+                    trHTML += `<td>${displayVal}</td>`;
+                }
+            });
+            
+            // 2. Specific Metric Data based on card config
+            const metrics = cardConfig[cardId].metrics;
+            if (metrics.includes('Count')) {
+                trHTML += `<td>${rowData.countData}</td>`;
+            }
+            if (metrics.includes('Amount(in cr.)')) {
+                trHTML += `<td>${rowData.amountData}</td>`;
+            }
+            
+            trHTML += `</tr>`;
+            return trHTML;
+        }
+
+        // --- Fetch & Load Logic ---
+        function loadCardData(cardId, isLazyLoad = false) {
+            if (cardState[cardId].loading) return;
+            cardState[cardId].loading = true;
+            
+            const $card = $(`#card-${cardId}`);
+            const $tbody = $card.find('tbody');
+            const $loaderOverlay = $card.find('.loader-overlay');
+            const $lazyLoader = $card.find('.lazy-loader');
+            const currentActiveTab = cardState[cardId].activeTab; 
+
+            if (!isLazyLoad) {
+                cardState[cardId].page = 1;
+                $tbody.empty();
+                $loaderOverlay.removeClass('d-none');
+            } else {
+                $lazyLoader.removeClass('d-none');
+            }
+
+            generateMockData(currentLevel, cardState[cardId].page, currentActiveTab).then(data => {
+                let htmlToAppend = '';
+                data.forEach(row => {
+                    htmlToAppend += buildRowHTML(row, cardId); // Pass cardId here to build correct columns
+                });
+                $tbody.append(htmlToAppend);
+
+                if (!isLazyLoad) $loaderOverlay.addClass('d-none');
+                $lazyLoader.addClass('d-none');
+                
+                cardState[cardId].page++;
+                cardState[cardId].loading = false;
+            });
+        }
+
+        function fetchAllData() {
+            renderHeaders();
+            Object.keys(cardState).forEach(cardId => {
+                loadCardData(cardId, false);
+            });
+        }
+
+        // --- Event Listeners ---
+        $('.level-btn').on('click', function() {
+            $('.level-btn').removeClass('active');
+            $(this).addClass('active');
+            currentLevel = parseInt($(this).data('level'));
+            renderHeaders();
+            $('tbody').empty();
+        });
+
+        $('#btnFetch').on('click', function() {
+            fetchAllData();
+        });
+
+        $('.card-tabs .nav-link').on('click', function(e) {
+            e.preventDefault();
+            if ($(this).hasClass('active')) return;
+
+            const $card = $(this).closest('.dashboard-card');
+            const cardId = $card.attr('id').replace('card-', '');
+            
+            if(cardState[cardId].loading) return; 
+
+            $card.find('.nav-link').removeClass('active');
+            $(this).addClass('active');
+
+            cardState[cardId].activeTab = $(this).data('tab');
+            loadCardData(cardId, false); 
+        });
+
+        $('.table-container').on('scroll', function() {
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 5) {
+                const cardId = $(this).data('card');
+                loadCardData(cardId, true);
+            }
+        });
+
+        // --- Initialization ---
+        renderHeaders();
+    });
+</script>
+
+zzzzzzzzzzzz
 <script>
     $(document).ready(function() {
         

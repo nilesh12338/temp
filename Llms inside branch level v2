@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Level Wise Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; font-size: 0.85rem; }
+        
+        /* Level Buttons */
+        .level-btn { font-weight: 500; color: #555; border-bottom: 3px solid transparent; border-radius: 0; padding: 10px 15px; }
+        .level-btn.active { color: #2c3e50; border-bottom-color: #3f51b5; background-color: #fff; }
+        
+        /* Filter Section */
+        .filter-section { background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .filter-label { font-size: 0.75rem; color: #777; margin-bottom: 2px; }
+        
+        /* Cards */
+        .dashboard-card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; overflow: hidden; }
+        .card-header-custom { padding: 12px 15px; font-weight: 600; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
+        
+        /* Specific Card Accents */
+        .card-leads .card-header-custom { color: #1976d2; }
+        .card-cra .card-header-custom { color: #6a1b9a; }
+        .card-proposals .card-header-custom { color: #e65100; }
+        .card-post .card-header-custom { color: #00695c; }
+        .card-cbs .card-header-custom { color: #283593; }
+
+        /* Tabs inside cards */
+        .card-tabs .nav-link { border: none; padding: 8px 0; margin: 0 15px; color: #888; font-weight: 500; border-bottom: 3px solid transparent; }
+        .card-tabs .nav-link.active { color: #000; border-bottom-color: currentColor; }
+
+        /* Table & Lazy Loading Container */
+        .table-container { max-height: 300px; overflow-y: auto; position: relative; }
+        .table thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 1; font-size: 0.75rem; text-transform: uppercase; color: #555; }
+        .table tbody td { vertical-align: middle; }
+        
+        /* Independent Loaders */
+        .loader-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10;
+        }
+        .lazy-loader { text-align: center; padding: 10px; font-size: 0.8rem; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid py-3">
+    
+    <div class="d-flex bg-white mb-3 shadow-sm rounded px-3" id="levelSelection">
+        <button class="btn level-btn" data-level="1">Circle</button>
+        <button class="btn level-btn" data-level="2">Network</button>
+        <button class="btn level-btn" data-level="3">Module</button>
+        <button class="btn level-btn" data-level="4">RBO</button>
+        <button class="btn level-btn active" data-level="5">Branch</button>
+    </div>
+
+    <div class="filter-section d-flex align-items-end gap-3 flex-wrap">
+        <div class="flex-grow-1">
+            <div class="filter-label">Business Group</div>
+            <select class="form-select form-select-sm" multiple><option>Group A</option></select>
+        </div>
+        <div class="flex-grow-1">
+            <div class="filter-label">Circle</div>
+            <select class="form-select form-select-sm" multiple><option>Delhi</option><option>Mumbai</option><option>Chennai</option></select>
+        </div>
+        <div class="flex-grow-1">
+            <div class="filter-label">Module</div>
+            <select class="form-select form-select-sm" multiple><option>MOD-A</option><option>MOD-B</option></select>
+        </div>
+        <div class="flex-grow-1">
+            <div class="filter-label">RBO</div>
+            <select class="form-select form-select-sm" multiple><option>RBO-1</option></select>
+        </div>
+        <div class="flex-grow-1">
+            <div class="filter-label">Branch</div>
+            <select class="form-select form-select-sm" multiple><option>BR-1</option></select>
+        </div>
+        <div>
+            <button class="btn btn-secondary btn-sm px-4 py-2" id="btnFetch">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-1" viewBox="0 0 16 16">
+                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                </svg>
+                Fetch Details
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card dashboard-card card-leads" id="card-leads">
+                <div class="card-header-custom">📋 LEADS</div>
+                <ul class="nav nav-tabs card-tabs">
+                    <li class="nav-item"><a class="nav-link active" href="#">Created</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Approved</a></li>
+                </ul>
+                <div class="card-body p-0 position-relative">
+                    <div class="loader-overlay d-none"><div class="spinner-border text-primary"></div></div>
+                    <div class="table-container" data-card="leads">
+                        <table class="table table-hover table-borderless mb-0">
+                            <thead><tr class="table-header-row"></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="lazy-loader d-none">Loading more...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card dashboard-card card-cra" id="card-cra">
+                <div class="card-header-custom">📊 CRA / CUE / ESG / DR</div>
+                <ul class="nav nav-tabs card-tabs">
+                    <li class="nav-item"><a class="nav-link active" href="#">Created</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Approved</a></li>
+                </ul>
+                <div class="card-body p-0 position-relative">
+                    <div class="loader-overlay d-none"><div class="spinner-border text-purple" style="color: #6a1b9a;"></div></div>
+                    <div class="table-container" data-card="cra">
+                        <table class="table table-hover table-borderless mb-0">
+                            <thead><tr class="table-header-row"></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="lazy-loader d-none">Loading more...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card dashboard-card card-proposals" id="card-proposals">
+                <div class="card-header-custom">📄 PROPOSALS</div>
+                <ul class="nav nav-tabs card-tabs">
+                    <li class="nav-item"><a class="nav-link active" href="#">Created</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Approved</a></li>
+                </ul>
+                <div class="card-body p-0 position-relative">
+                    <div class="loader-overlay d-none"><div class="spinner-border text-warning"></div></div>
+                    <div class="table-container" data-card="proposals">
+                        <table class="table table-hover table-borderless mb-0">
+                            <thead><tr class="table-header-row"></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="lazy-loader d-none">Loading more...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card dashboard-card card-post" id="card-post">
+                <div class="card-header-custom">💼 POST SANCTION</div>
+                <ul class="nav nav-tabs card-tabs">
+                    <li class="nav-item"><a class="nav-link active" style="color: #00695c;" href="#">Created</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Approved</a></li>
+                </ul>
+                <div class="card-body p-0 position-relative">
+                    <div class="loader-overlay d-none"><div class="spinner-border text-success"></div></div>
+                    <div class="table-container" data-card="post">
+                        <table class="table table-hover table-borderless mb-0">
+                            <thead><tr class="table-header-row"></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="lazy-loader d-none">Loading more...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card dashboard-card card-cbs" id="card-cbs">
+                <div class="card-header-custom">🏛️ CBS</div>
+                <ul class="nav nav-tabs card-tabs">
+                    <li class="nav-item"><a class="nav-link active" style="color: #283593;" href="#">Initiated</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Completed</a></li>
+                </ul>
+                <div class="card-body p-0 position-relative">
+                    <div class="loader-overlay d-none"><div class="spinner-border text-primary"></div></div>
+                    <div class="table-container" data-card="cbs">
+                        <table class="table table-hover table-borderless mb-0">
+                            <thead><tr class="table-header-row"></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="lazy-loader d-none">Loading more...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        
+        // --- State Management ---
+        let currentLevel = 5; // Default: 5 (Branch)
+        const hierarchyConfig = [
+            { id: 1, key: 'circle', title: 'Circle' },
+            { id: 2, key: 'network', title: 'Network' },
+            { id: 3, key: 'module', title: 'Module' },
+            { id: 4, key: 'rbo', title: 'RBO' },
+            { id: 5, key: 'branch', title: 'Branch' }
+        ];
+        const metricColumns = ['Today', 'Count/Amt'];
+        
+        const cardState = {
+            'leads': { page: 1, loading: false },
+            'cra': { page: 1, loading: false },
+            'proposals': { page: 1, loading: false },
+            'post': { page: 1, loading: false },
+            'cbs': { page: 1, loading: false }
+        };
+
+        // --- Mock Data Generator ---
+        function generateMockData(level, page, count = 10) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    let data = [];
+                    const circles = ['Delhi', 'Mumbai', 'Chennai', 'Bengaluru'];
+                    
+                    for(let i = 0; i < count; i++) {
+                        let row = {};
+                        if (level >= 1) row.circle = circles[Math.floor(Math.random() * circles.length)];
+                        if (level >= 2) row.network = 'NW-' + Math.floor(Math.random() * 5 + 1);
+                        if (level >= 3) row.module = 'MOD-' + ['A', 'B', 'C'][Math.floor(Math.random() * 3)];
+                        if (level >= 4) row.rbo = 'RBO-' + Math.floor(Math.random() * 5 + 1);
+                        if (level >= 5) row.branch = 'BR-' + Math.floor(Math.random() * 999 + 1);
+                        
+                        row.metric1 = Math.floor(Math.random() * 5000); // Today
+                        row.metric2 = (Math.random() * 900).toFixed(2); // Count/Amt
+                        data.push(row);
+                    }
+                    resolve(data);
+                }, 800 + Math.random() * 500); // Random delay between 800ms - 1300ms to mimic independent APIs
+            });
+        }
+
+        // --- Table Rendering Logic ---
+        function renderHeaders() {
+            let thHTML = '';
+            // Generate hierarchy headers based on selected level
+            hierarchyConfig.forEach(col => {
+                if (col.id <= currentLevel) {
+                    thHTML += `<th>${col.title}</th>`;
+                }
+            });
+            // Append metric headers
+            metricColumns.forEach(metric => {
+                thHTML += `<th>${metric}</th>`;
+            });
+            $('.table-header-row').html(thHTML);
+        }
+
+        function buildRowHTML(rowData) {
+            let trHTML = '<tr>';
+            hierarchyConfig.forEach(col => {
+                if (col.id <= currentLevel) {
+                    // Prefix branch names to match mockup style (e.g., PS-C-BR-457)
+                    let displayVal = rowData[col.key];
+                    if (col.key === 'branch') displayVal = `C-BR-${displayVal.split('-')[1]}`;
+                    
+                    trHTML += `<td>${displayVal}</td>`;
+                }
+            });
+            trHTML += `<td>${rowData.metric1}</td><td>${rowData.metric2}</td></tr>`;
+            return trHTML;
+        }
+
+        // --- Fetch & Load Logic ---
+        function loadCardData(cardId, isLazyLoad = false) {
+            if (cardState[cardId].loading) return;
+            cardState[cardId].loading = true;
+            
+            const $card = $(`#card-${cardId}`);
+            const $tbody = $card.find('tbody');
+            const $loaderOverlay = $card.find('.loader-overlay');
+            const $lazyLoader = $card.find('.lazy-loader');
+
+            if (!isLazyLoad) {
+                // Initial load: show full overlay, clear table, reset page
+                cardState[cardId].page = 1;
+                $tbody.empty();
+                $loaderOverlay.removeClass('d-none');
+            } else {
+                // Lazy load: show bottom text indicator
+                $lazyLoader.removeClass('d-none');
+            }
+
+            // Call Mock API
+            generateMockData(currentLevel, cardState[cardId].page).then(data => {
+                let htmlToAppend = '';
+                data.forEach(row => {
+                    htmlToAppend += buildRowHTML(row);
+                });
+                $tbody.append(htmlToAppend);
+
+                // Cleanup UI
+                if (!isLazyLoad) $loaderOverlay.addClass('d-none');
+                $lazyLoader.addClass('d-none');
+                
+                cardState[cardId].page++;
+                cardState[cardId].loading = false;
+            });
+        }
+
+        function fetchAllData() {
+            renderHeaders();
+            Object.keys(cardState).forEach(cardId => {
+                loadCardData(cardId, false);
+            });
+        }
+
+        // --- Event Listeners ---
+        
+        // 1. Level Toggle
+        $('.level-btn').on('click', function() {
+            $('.level-btn').removeClass('active');
+            $(this).addClass('active');
+            currentLevel = parseInt($(this).data('level'));
+            // Instantly clear tables and headers to reflect structure change
+            renderHeaders();
+            $('tbody').empty();
+        });
+
+        // 2. Fetch Details Button
+        $('#btnFetch').on('click', function() {
+            fetchAllData();
+        });
+
+        // 3. Lazy Loading (Infinite Scroll on each table container independently)
+        $('.table-container').on('scroll', function() {
+            // Check if user scrolled to the bottom of this specific container
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 5) {
+                const cardId = $(this).data('card');
+                loadCardData(cardId, true);
+            }
+        });
+
+        // --- Initialization ---
+        renderHeaders();
+        // Optional: Auto-fetch data on page load
+        // fetchAllData(); 
+    });
+</script>
+</body>
+</html>

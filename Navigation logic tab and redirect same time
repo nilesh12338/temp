@@ -1,3 +1,63 @@
+<div class="d-flex bg-white mb-3 shadow-sm rounded px-3" id="levelSelection">
+    <a href="#" class="btn level-btn nav-module-level">Module Level</a>
+    
+    <a href="#" class="btn level-btn" data-level="1">Circle</a>
+    <a href="#" class="btn level-btn" data-level="2">Network</a>
+    <a href="#" class="btn level-btn" data-level="3">Module</a>
+    <a href="#" class="btn level-btn" data-level="4">RBO</a>
+    <a href="#" class="btn level-btn active" data-level="5">Branch</a>
+</div
+
+// --- URL and Page State Management ---
+// Determine current page (checking if URL contains the filename)
+const currentPagePath = window.location.pathname.toLowerCase();
+const isBranchLevelPage = currentPagePath.includes('llmsinsightbranchlevel.html');
+
+// Check URL for a specific level parameter (e.g., ?level=3)
+const urlParams = new URLSearchParams(window.location.search);
+const requestedLevel = urlParams.get('level');
+
+// If on the branch level page and a level was passed in the URL, apply it immediately
+if (isBranchLevelPage && requestedLevel) {
+    currentLevel = parseInt(requestedLevel);
+    // Update active tab visuals
+    $('.level-btn').removeClass('active');
+    $(`.level-btn[data-level="${currentLevel}"]`).addClass('active');
+}
+
+// --- Navigation Click Logic ---
+$('.level-btn').on('click', function(e) {
+    e.preventDefault();
+
+    // 1. Logic for "Module Level" Tab
+    if ($(this).hasClass('nav-module-level')) {
+        window.location.href = 'llmsinsightmodulelevel.html';
+        return;
+    }
+
+    // 2. Logic for Hierarchy Tabs (Circle, Network, Module, RBO, Branch)
+    const selectedLevel = parseInt($(this).data('level'));
+
+    if (!isBranchLevelPage) {
+        // If NOT on the branch level page, redirect and pass the level in the URL
+        window.location.href = `llmsinsightbranchlevel.html?level=${selectedLevel}`;
+    } else {
+        // If ALREADY on the branch level page, just update the UI without reloading
+        $('.level-btn').removeClass('active');
+        $(this).addClass('active');
+        
+        currentLevel = selectedLevel;
+        
+        // Trigger the existing table updates
+        renderHeaders();
+        $('tbody').empty(); 
+        
+        // Optional: If you want data to fetch automatically when a tab is clicked, uncomment below
+        // fetchAllData();
+    }
+});
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

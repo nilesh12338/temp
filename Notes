@@ -1,3 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Modules Overview & Details</title>
+    
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background-color: #f0f2f5;
+            padding: 30px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        /* ========================================= */
+        /* DROPDOWN STYLING                          */
+        /* ========================================= */
+        .dropdown-wrapper { position: relative; width: 100%; }
+        .custom-multiselect-btn {
+            background-color: #ffffff; border: 1px solid #ced4da; border-radius: 4px; padding: 6px 12px;
+            width: 100%; text-align: left; font-size: 0.85rem; color: #333; display: flex;
+            justify-content: space-between; align-items: center; cursor: pointer; white-space: nowrap; overflow: hidden;
+        }
+        .custom-multiselect-btn:disabled { background-color: #e9ecef; cursor: not-allowed; color: #6c757d; }
+        .custom-multiselect-menu {
+            position: absolute; top: 100%; left: 0; z-index: 1050; width: 100%; min-width: 280px;
+            background-color: #ffffff; border: 1px solid #c5c5c5; border-radius: 2px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-top: 2px; display: none; max-height: 400px; overflow-y: auto;
+        }
+        .custom-multiselect-menu.show { display: block; }
+        .multiselect-header-bar {
+            background-color: #e9ecef; border-bottom: 1px solid #ced4da; padding: 6px 10px; display: flex;
+            justify-content: space-between; align-items: center; font-size: 0.8rem; position: sticky; top: 0; z-index: 10;
+        }
+        .header-actions { display: flex; gap: 12px; }
+        .header-action-btn { color: #333; text-decoration: none; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .header-action-btn:hover { color: #000; }
+        .close-dropdown-btn { color: #666; cursor: pointer; font-size: 1rem; line-height: 1; }
+        .group-header {
+            background-color: #f1f3f5; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #e2e6ea; border-top: 1px solid #e2e6ea; font-weight: 700; font-size: 0.85rem; color: #212529; user-select: none;
+        }
+        .group-header label { cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 0; flex-grow: 1; }
+        .collapse-toggle { cursor: pointer; color: #495057; font-size: 0.9rem; padding: 0 4px; }
+        .group-items { list-style: none; padding: 0; margin: 0; }
+        .group-items li.flat-item { padding: 4px 10px 4px 28px; }
+        .group-items li.flat-item:hover { background-color: #f8f9fa; }
+        .group-items label { cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.85rem; color: #333; width: 100%; }
+        .form-check-input { cursor: pointer; margin: 0; }
+
+        /* ========================================= */
+        /* MODULES OVERVIEW SUMMARY CARDS            */
+        /* ========================================= */
+        .section-title { font-size: 0.75rem; font-weight: 700; color: #6c757d; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0; }
+        
+        .summary-card {
+            background: #fff; border-radius: 12px; border: 1px solid #e4e6eb; padding: 16px;
+            cursor: pointer; transition: all 0.2s ease; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .summary-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+        .summary-header { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 0.85rem; color: #495057; margin-bottom: 16px; text-transform: uppercase; }
+        .summary-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem; }
+        .summary-stats { display: flex; justify-content: space-between; }
+        .stat-box { display: flex; flex-direction: column; }
+        .stat-value { font-size: 1.2rem; font-weight: 700; color: #212529; }
+        .stat-label { font-size: 0.65rem; color: #868e96; font-weight: 600; text-transform: uppercase; }
+
+        /* Search Input */
+        .search-container { position: relative; width: 300px; }
+        .search-container .bi-search { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #adb5bd; }
+        .search-container input { padding-left: 36px; border-radius: 20px; font-size: 0.85rem; }
+
+        /* ========================================= */
+        /* DETAILED DASHBOARD CARDS                  */
+        /* ========================================= */
+        .dash-card {
+            background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden; border: 1px solid #e9ecef; border-top-width: 4px; height: 100%;
+        }
+        .dash-card-header {
+            padding: 12px 16px; font-weight: 700; font-size: 0.9rem; display: flex;
+            justify-content: space-between; align-items: center; text-transform: uppercase;
+        }
+        .header-title-wrap { display: flex; align-items: center; gap: 8px; }
+        .card-minus-btn { cursor: pointer; font-size: 1.4rem; color: #adb5bd; line-height: 1; transition: color 0.2s; }
+        .card-minus-btn:hover { color: #343a40; }
+
+        /* Toggles & Tables */
+        .dash-toggle-container { display: flex; margin: 0 16px 16px 16px; background: #f8f9fa; border-radius: 4px; overflow: hidden; }
+        .dash-toggle-btn { flex: 1; text-align: center; padding: 6px; font-size: 0.75rem; font-weight: 600; border: none; background: transparent; color: #6c757d; cursor: pointer; transition: 0.2s; }
+        
+        .dash-table-wrapper { overflow-x: auto; }
+        .dash-table { width: 100%; font-size: 0.75rem; text-align: right; }
+        .dash-table th, .dash-table td { padding: 8px 12px; border-bottom: 1px solid #f1f3f5; white-space: nowrap; }
+        .dash-table th:first-child, .dash-table td:first-child { text-align: left; }
+        .dash-table th { font-weight: 600; color: #fff; }
+        .dash-table tfoot { font-weight: 700; background-color: #f8f9fa; border-top: 2px solid #dee2e6;}
+        .subgroup-subtotal { color: #000; font-weight: 700; background-color: #f8f9fa; } 
+
+        /* Highlight Row Class */
+        .highlight-row { background-color: #fff3cd !important; transition: background-color 0.2s; }
+
+        /* --- Dynamic Theme Colors --- */
+        .theme-blue { border-top-color: #4a78d6; } .theme-blue .dash-card-header, .theme-blue .subgroup-subtotal { color: #4a78d6; } .theme-blue .dash-toggle-btn.active, .bg-theme-blue { background-color: #4a78d6 !important; color: #fff; } .theme-blue .dash-table th { background-color: #4a78d6; }
+        .theme-purple { border-top-color: #9c27b0; } .theme-purple .dash-card-header, .theme-purple .subgroup-subtotal { color: #9c27b0; } .theme-purple .dash-toggle-btn.active, .bg-theme-purple { background-color: #9c27b0 !important; color: #fff; } .theme-purple .dash-table th { background-color: #9c27b0; }
+        .theme-green { border-top-color: #2b8a3e; } .theme-green .dash-card-header, .theme-green .subgroup-subtotal { color: #2b8a3e; } .theme-green .dash-toggle-btn.active, .bg-theme-green { background-color: #2b8a3e !important; color: #fff; } .theme-green .dash-table th { background-color: #2b8a3e; }
+        .theme-cbs { border-top-color: #5c4c70; } .theme-cbs .dash-card-header, .theme-cbs .subgroup-subtotal { color: #5c4c70; } .theme-cbs .dash-toggle-btn.active, .bg-theme-cbs { background-color: #5c4c70 !important; color: #fff; } .theme-cbs .dash-table th { background-color: #5c4c70; }
+        .theme-teal { border-top-color: #0ca678; } .theme-teal .dash-card-header, .theme-teal .subgroup-subtotal { color: #0ca678; } .theme-teal .dash-toggle-btn.active, .bg-theme-teal { background-color: #0ca678 !important; color: #fff; } .theme-teal .dash-table th { background-color: #0ca678; }
+        .theme-yellow { border-top-color: #d4a017; } .theme-yellow .dash-card-header, .theme-yellow .subgroup-subtotal { color: #d4a017; } .theme-yellow .dash-toggle-btn.active, .bg-theme-yellow { background-color: #d4a017 !important; color: #fff; } .theme-yellow .dash-table th { background-color: #d4a017; }
+        .theme-red { border-top-color: #e03131; } .theme-red .dash-card-header, .theme-red .subgroup-subtotal { color: #e03131; } .theme-red .dash-toggle-btn.active, .bg-theme-red { background-color: #e03131 !important; color: #fff; } .theme-red .dash-table th { background-color: #e03131; }
+        .theme-indigo { border-top-color: #6741d9; } .theme-indigo .dash-card-header, .theme-indigo .subgroup-subtotal { color: #6741d9; } .theme-indigo .dash-toggle-btn.active, .bg-theme-indigo { background-color: #6741d9 !important; color: #fff; } .theme-indigo .dash-table th { background-color: #6741d9; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid">
+        <!-- Filter Bar -->
+        <div class="row g-2 mb-4">
+            <div class="col-md"><div class="dropdown-wrapper" id="dd-business-group"><label class="form-label text-muted mb-1 small">Business Group</label><button type="button" class="custom-multiselect-btn trigger-btn"><span class="selected-text">Select</span><i class="bi bi-chevron-down ms-2"></i></button><div class="custom-multiselect-menu"><div class="multiselect-header-bar"><div class="header-actions"><span class="header-action-btn btn-check-all"><i class="bi bi-check-lg"></i> Check all</span><span class="header-action-btn btn-uncheck-all"><i class="bi bi-x-lg"></i> Uncheck all</span></div><i class="bi bi-x-circle-fill close-dropdown-btn"></i></div><div class="dynamic-container"><div class="p-3 text-center text-muted"><div class="spinner-border spinner-border-sm me-2"></div> Loading...</div></div></div></div></div>
+            <div class="col-md"><div class="dropdown-wrapper"><label class="form-label text-muted mb-1 small">Circle</label><button type="button" class="custom-multiselect-btn" disabled><span class="selected-text">Select</span><i class="bi bi-chevron-down ms-2"></i></button></div></div>
+            <div class="col-md"><div class="dropdown-wrapper"><label class="form-label text-muted mb-1 small">Module</label><button type="button" class="custom-multiselect-btn" disabled><span class="selected-text">Select</span><i class="bi bi-chevron-down ms-2"></i></button></div></div>
+            <div class="col-md"><div class="dropdown-wrapper"><label class="form-label text-muted mb-1 small">RBO</label><button type="button" class="custom-multiselect-btn" disabled><span class="selected-text">Select</span><i class="bi bi-chevron-down ms-2"></i></button></div></div>
+            
+            <!-- ACTIVITY DROPDOWN -->
+            <div class="col-md">
+                <div class="dropdown-wrapper" id="dd-activity">
+                    <label class="form-label text-muted mb-1 small">Activity</label>
+                    <button type="button" class="custom-multiselect-btn trigger-btn"><span class="selected-text">Select options</span><i class="bi bi-chevron-down ms-2"></i></button>
+                    <div class="custom-multiselect-menu">
+                        <div class="multiselect-header-bar"><div class="header-actions"><span class="header-action-btn btn-check-all"><i class="bi bi-check-lg"></i> Check all</span><span class="header-action-btn btn-uncheck-all"><i class="bi bi-x-lg"></i> Uncheck all</span></div><i class="bi bi-x-circle-fill close-dropdown-btn"></i></div>
+                        <div class="dynamic-container"><div class="p-3 text-center text-muted"><div class="spinner-border spinner-border-sm me-2"></div> Loading...</div></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-auto d-flex align-items-end">
+                <button id="btnSubmit" class="btn btn-secondary text-white border-0 shadow-sm px-4 w-100" style="background-color: #8c8596;">
+                    <i class="bi bi-download me-2"></i> Fetch Details
+                </button>
+            </div>
+        </div>
+
+        <hr class="mb-4 text-muted">
+
+        <!-- 1. MODULES OVERVIEW SECTION -->
+        <div id="overviewHeader" class="d-none d-flex justify-content-between align-items-center mb-4">
+            <h6 class="section-title mb-0">Modules Overview</h6>
+            
+            <div class="input-group shadow-sm" style="width: 380px;">
+                <input type="text" id="globalSearch" class="form-control" placeholder="Search module, count, or amount...">
+                <button class="btn btn-outline-secondary" type="button" id="btnClearSearch" title="Clear Search">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <button class="btn btn-primary px-3" type="button" id="btnSearch" style="background-color: #6a5981; border-color: #6a5981;">
+                    <i class="bi bi-search me-1"></i> Search
+                </button>
+            </div>
+        </div>
+        
+        <div id="moduleOverviewContainer" class="row g-3 mb-4">
+            <!-- Small Summary Cards will render here -->
+        </div>
+
+        <!-- 2. DETAILED TABLES SECTION -->
+        <div id="dashboardCardsContainer" class="row g-4">
+            <!-- Large Detail Cards will render here -->
+        </div>
+
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            
+            // ==========================================
+            // 1. DATA RENDERING ENGINE (Dropdowns)
+            // ==========================================
+            function renderDropdownData($wrapper, data) {
+                let html = '';
+                data.forEach(group => {
+                    const displayStyle = group.isCollapsedByDefault ? 'style="display: none;"' : '';
+                    const iconClass = group.isCollapsedByDefault ? 'bi-plus-circle-fill' : 'bi-dash-circle-fill';
+                    const groupValAttr = group.groupValue ? `value="${group.groupValue}"` : '';
+
+                    html += `<div class="group-container" data-group-name="${group.groupName}" data-group-value="${group.groupValue}"><div class="group-header"><label><input type="checkbox" class="form-check-input group-checkbox" ${groupValAttr}><span>All ${group.groupName}</span></label><i class="bi ${iconClass} collapse-toggle"></i></div><ul class="group-items" ${displayStyle}>`;
+                    if (group.subGroups && group.subGroups.length > 0) {
+                        group.subGroups.forEach(sub => {
+                            html += `<li class="subgroup-container pt-2 pb-1 border-bottom"><label class="fw-bold text-dark ms-3 d-flex align-items-center gap-2" style="font-size: 0.85rem; cursor: pointer;"><input type="checkbox" class="form-check-input subgroup-checkbox">${sub.subGroupName}</label><ul class="list-unstyled ms-4 mt-1 mb-2">`;
+                            sub.items.forEach(item => { html += `<li class="flat-item"><label><input type="checkbox" class="form-check-input item-checkbox" value="${item.value}">${item.label}</label></li>`; });
+                            html += `</ul></li>`;
+                        });
+                    } else if (group.items) {
+                        group.items.forEach(item => { html += `<li class="flat-item"><label><input type="checkbox" class="form-check-input item-checkbox" value="${item.value}">${item.label}</label></li>`; });
+                    }
+                    html += `</ul></div>`;
+                });
+                $wrapper.find('.dynamic-container').html(html);
+                $wrapper.find('.trigger-btn').prop('disabled', false);
+                updateSelectedDisplayText($wrapper);
+            }
+
+            // ==========================================
+            // 2. MOCK API - INITIALIZATION
+            // ==========================================
+            function fetchBusinessGroups() {
+                renderDropdownData($('#dd-business-group'), [{ groupName: "Leads", isCollapsedByDefault: false, items: [{ value: "DEF", label: "DEF" }] }]);
+            }
+
+            function fetchActivities() {
+                const mockApiResponse = [
+                    { groupName: "PROPOSALS", groupValue: "proposals", isCollapsedByDefault: false, items: [ { value: "DD", label: "DD" }, { value: "DDS", label: "DDS" }, { value: "PABL", label: "PABL" }, { value: "BREDDSPDM", label: "BRE DDSPDM" }, { value: "BRECAFPDM", label: "BRE CAFPDM" } ] },
+                    { groupName: "CONTROL REPORT", groupValue: "control_report", isCollapsedByDefault: true, items: [ { value: "CR_CLP", label: "CLP" }, { value: "CR_RM", label: "RM" } ] },
+                    { groupName: "POST SANCTION", groupValue: "post_sanction", isCollapsedByDefault: true, items: [ { value: "StockStatements", label: "Stock Statements" }, { value: "InspectionReports", label: "Inspection Reports" } ] },
+                    { groupName: "CBS", groupValue: "cbs", isCollapsedByDefault: true, subGroups: [ { subGroupName: "Account Opening", items: [{ value: "DLTC", label: "DLTC" }, { value: "CCOD", label: "CCOD" }, { value: "Contingent", label: "Contingent" }] } ] },
+                    { groupName: "CRA", groupValue: "cra", isCollapsedByDefault: true, items: [ { value: "CRA_CLP", label: "CLP" }, { value: "CRA_RM", label: "RM" } ] },
+                    { groupName: "LRM", groupValue: "lrm", isCollapsedByDefault: true, items: [ { value: "LRM_1", label: "LRM Check 1" } ] },
+                    { groupName: "MEETING", groupValue: "meeting", isCollapsedByDefault: true, items: [ { value: "MEET_DD", label: "DD" }, { value: "MEET_PABL", label: "PABL" } ] },
+                    { groupName: "LEAD", groupValue: "lead", isCollapsedByDefault: true, items: [ { value: "LEAD_CLP", label: "CLP" }, { value: "LEAD_IBG", label: "IBG" } ] }
+                ];
+                renderDropdownData($('#dd-activity'), mockApiResponse);
+            }
+            fetchBusinessGroups(); fetchActivities();
+
+            // ==========================================
+            // 3. UI DROPDOWN BEHAVIORS
+            // ==========================================
+            function updateSelectedDisplayText($wrapper) {
+                const checked = []; $wrapper.find('.item-checkbox:checked').each(function () { checked.push($(this).parent().text().trim()); });
+                const $txt = $wrapper.find('.selected-text');
+                if (checked.length === 0) $txt.text('Select options'); else if (checked.length <= 2) $txt.text(checked.join(', ')); else $txt.text(checked.slice(0, 2).join(', ') + `, +${checked.length - 2} more`);
+            }
+            function syncMainGroupCheckbox($container) {
+                const total = $container.find('.item-checkbox').length, checked = $container.find('.item-checkbox:checked').length;
+                $container.find('.group-checkbox').prop('checked', total === checked && total > 0);
+            }
+
+            $(document).on('click', '.trigger-btn', function (e) { e.stopPropagation(); const $menu = $(this).siblings('.custom-multiselect-menu'); $('.custom-multiselect-menu').not($menu).removeClass('show'); $menu.toggleClass('show'); });
+            $(document).on('click', '.close-dropdown-btn', function () { $(this).closest('.custom-multiselect-menu').removeClass('show'); });
+            $(document).on('click', function (e) { if (!$(e.target).closest('.dropdown-wrapper').length) $('.custom-multiselect-menu').removeClass('show'); });
+            $(document).on('click', '.collapse-toggle', function (e) { e.stopPropagation(); const $list = $(this).closest('.group-container').find('.group-items'); $list.slideToggle(150, () => { $(this).toggleClass('bi-plus-circle-fill bi-dash-circle-fill'); }); });
+            $(document).on('click', '.btn-check-all', function () { $(this).closest('.dropdown-wrapper').find('input[type="checkbox"]').prop('checked', true); updateSelectedDisplayText($(this).closest('.dropdown-wrapper')); });
+            $(document).on('click', '.btn-uncheck-all', function () { $(this).closest('.dropdown-wrapper').find('input[type="checkbox"]').prop('checked', false); updateSelectedDisplayText($(this).closest('.dropdown-wrapper')); });
+            $(document).on('change', '.group-checkbox', function () { $(this).closest('.group-container').find('.item-checkbox, .subgroup-checkbox').prop('checked', $(this).is(':checked')); updateSelectedDisplayText($(this).closest('.dropdown-wrapper')); });
+            $(document).on('change', '.subgroup-checkbox', function () { $(this).closest('.subgroup-container').find('.item-checkbox').prop('checked', $(this).is(':checked')); syncMainGroupCheckbox($(this).closest('.group-container')); updateSelectedDisplayText($(this).closest('.dropdown-wrapper')); });
+            $(document).on('change', '.item-checkbox', function () { const $sub = $(this).closest('.subgroup-container'); if ($sub.length) { const tot = $sub.find('.item-checkbox').length, chk = $sub.find('.item-checkbox:checked').length; $sub.find('.subgroup-checkbox').prop('checked', tot === chk && tot > 0); } syncMainGroupCheckbox($(this).closest('.group-container')); updateSelectedDisplayText($(this).closest('.dropdown-wrapper')); });
+
+
+            // ==========================================
+            // 4. THEMES & SERVER JSON DATA (STATIC)
+            // ==========================================
+            const formatNumber = (num) => (num !== undefined && num !== null) ? num.toLocaleString('en-IN') : '-';
+
+            const cardThemes = {
+                "proposals": { themeClass: "theme-blue", baseColor: "theme-blue", icon: "bi-file-earmark-text-fill", hasAmount: true, tabs: ["Created", "Approved"] },
+                "control_report": { themeClass: "theme-purple", baseColor: "theme-purple", icon: "bi-file-earmark-bar-graph-fill", hasAmount: true, tabs: ["Created", "Approved"] },
+                "post_sanction": { themeClass: "theme-green", baseColor: "theme-green", icon: "bi-check-square-fill", hasAmount: true, tabs: ["Created", "Approved"] },
+                "cbs": { themeClass: "theme-cbs", baseColor: "theme-cbs", icon: "bi-bank2", hasAmount: true, tabs: ["Initiated", "Completed"] },
+                "cra": { themeClass: "theme-teal", baseColor: "theme-teal", icon: "bi-pie-chart-fill", hasAmount: true, tabs: ["Created", "Approved"] },
+                "lrm": { themeClass: "theme-yellow", baseColor: "theme-yellow", icon: "bi-journal-text", hasAmount: true, tabs: ["Created", "Approved"] },
+                "meeting": { themeClass: "theme-red", baseColor: "theme-red", icon: "bi-camera-video-fill", hasAmount: true, tabs: ["Created", "Approved"] },
+                "lead": { themeClass: "theme-indigo", baseColor: "theme-indigo", icon: "bi-person-lines-fill", hasAmount: false, tabs: ["Total Created", "Approved"] }
+            };
+
+            // STATIC JSON OBJECT: Simulates data fetched from the server.
+            // Keys correspond to the "value" of the multiselect checkboxes.
+            const serverStatsData = {
+                // PROPOSALS
+                "DD": { tab1: { count: 5363, amount: 145387 }, tab2: { count: 4800, amount: 120000 } },
+                "DDS": { tab1: { count: 1485, amount: 141405 }, tab2: { count: 1200, amount: 110000 } },
+                "PABL": { tab1: { count: 876, amount: 14885 }, tab2: { count: 700, amount: 12000 } },
+                "BREDDSPDM": { tab1: { count: 2882, amount: 142914 }, tab2: { count: 2100, amount: 115000 } },
+                "BRECAFPDM": { tab1: { count: 22859, amount: 122985 }, tab2: { count: 18000, amount: 98000 } },
+                
+                // CONTROL REPORT
+                "CR_CLP": { tab1: { count: 2565, amount: 145387 }, tab2: { count: 2480, amount: 140000 } },
+                "CR_RM": { tab1: { count: 1485, amount: 141405 }, tab2: { count: 1400, amount: 135000 } },
+                
+                // POST SANCTION
+                "StockStatements": { tab1: { count: 5363, amount: 145387 }, tab2: { count: 5000, amount: 130000 } },
+                "InspectionReports": { tab1: { count: 1485, amount: 141405 }, tab2: { count: 1200, amount: 110000 } },
+                
+                // CBS
+                "DLTC": { tab1: { count: 1485, amount: 141405 }, tab2: { count: 1200, amount: 115000 } },
+                "CCOD": { tab1: { count: 876, amount: 14885 }, tab2: { count: 800, amount: 13000 } },
+                "Contingent": { tab1: { count: 2882, amount: 142914 }, tab2: { count: 2500, amount: 120000 } },
+                
+                // CRA
+                "CRA_CLP": { tab1: { count: 2400, amount: 145387 }, tab2: { count: 2200, amount: 135000 } },
+                "CRA_RM": { tab1: { count: 1500, amount: 141405 }, tab2: { count: 1300, amount: 125000 } },
+                
+                // LRM
+                "LRM_1": { tab1: { count: 2400, amount: 145387 }, tab2: { count: 2560, amount: 150000 } },
+                
+                // MEETING
+                "MEET_DD": { tab1: { count: 1200, amount: 145387 }, tab2: { count: 1100, amount: 135000 } },
+                "MEET_PABL": { tab1: { count: 1200, amount: 141405 }, tab2: { count: 1460, amount: 155000 } },
+                
+                // LEAD (No Amount Example)
+                "LEAD_CLP": { tab1: { count: 1400, amount: 0 }, tab2: { count: 1500, amount: 0 } },
+                "LEAD_IBG": { tab1: { count: 1000, amount: 0 }, tab2: { count: 1060, amount: 0 } },
+                
+                // DEFAULT FALLBACK
+                "default": { tab1: { count: 0, amount: 0 }, tab2: { count: 0, amount: 0 } }
+            };
+
+
+            // ==========================================
+            // 5. GLOBAL SEARCH HIGHLIGHT LOGIC
+            // ==========================================
+            function applySearchHighlight() {
+                const searchTerm = $('#globalSearch').val().toLowerCase().trim();
+                
+                // Clear existing highlights
+                $('.dash-table tbody tr').removeClass('highlight-row');
+                
+                if (searchTerm === '') {
+                    $('.detail-card-wrapper').fadeIn(200);
+                    return;
+                }
+
+                $('.detail-card-wrapper').each(function() {
+                    let cardHasMatch = false;
+
+                    $(this).find('.dash-table tbody tr').each(function() {
+                        if ($(this).hasClass('no-search') || $(this).hasClass('subgroup-subtotal')) return;
+                        
+                        const rowText = $(this).text().toLowerCase();
+                        if (rowText.includes(searchTerm)) {
+                            $(this).addClass('highlight-row');
+                            cardHasMatch = true;
+                        }
+                    });
+
+                    // Hide or show the entire card based on match
+                    if (cardHasMatch) {
+                        $(this).fadeIn(200);
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+
+            $('#btnSearch').on('click', function() { applySearchHighlight(); });
+            $('#globalSearch').on('keypress', function(e) { if (e.which === 13) applySearchHighlight(); });
+            $('#btnClearSearch').on('click', function() {
+                $('#globalSearch').val('');
+                applySearchHighlight(); 
+            });
+
+
+            // ==========================================
+            // 6. RENDER TABLE DETAILS (Tabs Logic)
+            // ==========================================
+            function renderCardTable($card, statusTab) {
+                const groupVal = $card.data('groupVal');
+                const isSubgrouped = $card.data('isSubgrouped');
+                const themeConfig = cardThemes[groupVal];
+
+                let theadHtml = `<tr><th>Module / Source</th>`;
+                let colSpan = 2; 
+
+                if (statusTab === 'tab3') {
+                    theadHtml += `<th>${themeConfig.tabs[0]}<br><small>Count</small></th>`;
+                    if (themeConfig.hasAmount) theadHtml += `<th>${themeConfig.tabs[0]}<br><small>Amount</small></th>`;
+                    theadHtml += `<th>${themeConfig.tabs[1]}<br><small>Count</small></th>`;
+                    if (themeConfig.hasAmount) theadHtml += `<th>${themeConfig.tabs[1]}<br><small>Amount</small></th>`;
+                    colSpan = themeConfig.hasAmount ? 5 : 3;
+                } else {
+                    theadHtml += `<th>Count</th>`;
+                    if (themeConfig.hasAmount) theadHtml += `<th>Amount</th>`;
+                    colSpan = themeConfig.hasAmount ? 3 : 2;
+                }
+                theadHtml += `</tr>`;
+                $card.find('thead').html(theadHtml);
+
+                let tableRowsHtml = '';
+                let grandCount1 = 0, grandAmt1 = 0, grandCount2 = 0, grandAmt2 = 0;
+
+                const buildRow = (item, isSubtotal = false, labelOverride = null) => {
+                    let html = '';
+                    let label = labelOverride || item.label;
+
+                    if (!isSubtotal) {
+                        // Access the static server JSON object
+                        const stats1 = (serverStatsData[item.value] || serverStatsData['default'])['tab1'];
+                        const stats2 = (serverStatsData[item.value] || serverStatsData['default'])['tab2'];
+                        
+                        html += `<tr><td>${label}</td>`;
+                        if (statusTab === 'tab3') {
+                            html += `<td>${formatNumber(stats1.count)}</td>`;
+                            if (themeConfig.hasAmount) html += `<td>${formatNumber(stats1.amount)}</td>`;
+                            html += `<td>${formatNumber(stats2.count)}</td>`;
+                            if (themeConfig.hasAmount) html += `<td>${formatNumber(stats2.amount)}</td>`;
+                        } else {
+                            const stats = (statusTab === 'tab1') ? stats1 : stats2;
+                            html += `<td>${formatNumber(stats.count)}</td>`;
+                            if (themeConfig.hasAmount) html += `<td>${formatNumber(stats.amount)}</td>`;
+                        }
+                        html += `</tr>`;
+                        return { html, c1: stats1.count, a1: stats1.amount, c2: stats2.count, a2: stats2.amount };
+                    } else {
+                        html += `<tr class="subgroup-subtotal"><td>${label}</td>`;
+                        if (statusTab === 'tab3') {
+                            html += `<td>${formatNumber(item.c1)}</td>`;
+                            if (themeConfig.hasAmount) html += `<td>${formatNumber(item.a1)}</td>`;
+                            html += `<td>${formatNumber(item.c2)}</td>`;
+                            if (themeConfig.hasAmount) html += `<td>${formatNumber(item.a2)}</td>`;
+                        } else {
+                            const c = (statusTab === 'tab1') ? item.c1 : item.c2;
+                            const a = (statusTab === 'tab1') ? item.a1 : item.a2;
+                            html += `<td>${formatNumber(c)}</td>`;
+                            if (themeConfig.hasAmount) html += `<td>${formatNumber(a)}</td>`;
+                        }
+                        html += `</tr>`;
+                        return html;
+                    }
+                };
+
+                if (isSubgrouped) {
+                    const subgroups = $card.data('subgroups');
+                    subgroups.forEach(sub => {
+                        tableRowsHtml += `<tr class="no-search"><td colspan="${colSpan}" class="fw-bold text-dark pt-3 pb-1 border-bottom-0" style="font-size: 0.8rem;">${sub.name}</td></tr>`;
+                        let subC1 = 0, subA1 = 0, subC2 = 0, subA2 = 0;
+
+                        sub.items.forEach(item => {
+                            const rowData = buildRow(item);
+                            tableRowsHtml += rowData.html;
+                            subC1 += rowData.c1; subA1 += rowData.a1;
+                            subC2 += rowData.c2; subA2 += rowData.a2;
+                        });
+
+                        tableRowsHtml += buildRow({ c1: subC1, a1: subA1, c2: subC2, a2: subA2 }, true, 'Total');
+                        grandCount1 += subC1; grandAmt1 += subA1;
+                        grandCount2 += subC2; grandAmt2 += subA2;
+                    });
+                } else {
+                    const items = $card.data('items');
+                    items.forEach(item => {
+                        const rowData = buildRow(item);
+                        tableRowsHtml += rowData.html;
+                        grandCount1 += rowData.c1; grandAmt1 += rowData.a1;
+                        grandCount2 += rowData.c2; grandAmt2 += rowData.a2;
+                    });
+                }
+
+                $card.find('tbody').html(tableRowsHtml);
+
+                let tfootHtml = `<tr><td>TOTAL</td>`;
+                if (statusTab === 'tab3') {
+                    tfootHtml += `<td>${formatNumber(grandCount1)}</td>`;
+                    if (themeConfig.hasAmount) tfootHtml += `<td>${formatNumber(grandAmt1)}</td>`;
+                    tfootHtml += `<td>${formatNumber(grandCount2)}</td>`;
+                    if (themeConfig.hasAmount) tfootHtml += `<td>${formatNumber(grandAmt2)}</td>`;
+                } else {
+                    const finalCount = (statusTab === 'tab1') ? grandCount1 : grandCount2;
+                    const finalAmt = (statusTab === 'tab1') ? grandAmt1 : grandAmt2;
+                    tfootHtml += `<td>${formatNumber(finalCount)}</td>`;
+                    if (themeConfig.hasAmount) tfootHtml += `<td>${formatNumber(finalAmt)}</td>`;
+                }
+                tfootHtml += `</tr>`;
+                
+                $card.find('tfoot').html(tfootHtml);
+
+                applySearchHighlight();
+            }
+
+
+            // ==========================================
+            // 7. GENERATE OVERVIEW & CARDS ON SUBMIT
+            // ==========================================
+            $('#btnSubmit').on('click', function() {
+                const $overviewContainer = $('#moduleOverviewContainer');
+                const $cardsContainer = $('#dashboardCardsContainer');
+                
+                $overviewContainer.empty();
+                $cardsContainer.empty();
+                $('#overviewHeader').addClass('d-none');
+                $('#globalSearch').val(''); 
+
+                let hasData = false;
+
+                $('#dd-activity .group-container').each(function() {
+                    const groupName = $(this).attr('data-group-name');
+                    const groupValue = $(this).attr('data-group-value');
+                    const hasSubgroups = $(this).find('.subgroup-container').length > 0;
+                    const themeConfig = cardThemes[groupValue] || cardThemes['proposals'];
+                    
+                    let flatItems = [];
+                    let subgroups = [];
+                    let totalCheckedInGroup = 0;
+                    
+                    let groupTab1Count = 0; 
+                    let groupTab2Count = 0;
+
+                    if (hasSubgroups) {
+                        $(this).find('.subgroup-container').each(function() {
+                            const subName = $(this).find('.subgroup-checkbox').parent().text().trim();
+                            const subItems = [];
+                            $(this).find('.item-checkbox:checked').each(function() {
+                                const val = $(this).val();
+                                subItems.push({ value: val, label: $(this).parent().text().trim() });
+                                groupTab1Count += (serverStatsData[val] || serverStatsData['default'])['tab1'].count;
+                                groupTab2Count += (serverStatsData[val] || serverStatsData['default'])['tab2'].count;
+                                totalCheckedInGroup++;
+                            });
+                            if (subItems.length > 0) subgroups.push({ name: subName, items: subItems });
+                        });
+                    } else {
+                        $(this).find('.item-checkbox:checked').each(function() {
+                            const val = $(this).val();
+                            flatItems.push({ value: val, label: $(this).parent().text().trim() });
+                            groupTab1Count += (serverStatsData[val] || serverStatsData['default'])['tab1'].count;
+                            groupTab2Count += (serverStatsData[val] || serverStatsData['default'])['tab2'].count;
+                            totalCheckedInGroup++;
+                        });
+                    }
+
+                    if (totalCheckedInGroup > 0) {
+                        hasData = true;
+                        
+                        const summaryCardHtml = `
+                            <div class="col-xl-3 col-lg-4 col-md-6">
+                                <div class="summary-card" data-target="detail-${groupValue}">
+                                    <div class="summary-header">
+                                        <div class="summary-icon bg-${themeConfig.baseColor}"><i class="bi ${themeConfig.icon}"></i></div>
+                                        ${groupName}
+                                    </div>
+                                    <div class="summary-stats">
+                                        <div class="stat-box">
+                                            <span class="stat-value">${formatNumber(groupTab1Count)}</span>
+                                            <span class="stat-label">Total ${themeConfig.tabs[0]}</span>
+                                        </div>
+                                        <div class="stat-box text-end">
+                                            <span class="stat-value">${formatNumber(groupTab2Count)}</span>
+                                            <span class="stat-label">${themeConfig.tabs[1]}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        $overviewContainer.append(summaryCardHtml);
+
+                        const $cardWrapper = $(`<div class="col-xl-4 col-lg-6 detail-card-wrapper" id="detail-${groupValue}"></div>`);
+                        const $card = $(`
+                            <div class="dash-card ${themeConfig.themeClass}">
+                                <div class="dash-card-header">
+                                    <div class="header-title-wrap"><i class="bi ${themeConfig.icon}"></i> ${groupName}</div>
+                                    <i class="bi bi-dash card-minus-btn hide-detail-btn" title="Hide Card"></i>
+                                </div>
+                                <div class="dash-toggle-container">
+                                    <button class="dash-toggle-btn active" data-status="tab1">${themeConfig.tabs[0]}</button>
+                                    <button class="dash-toggle-btn" data-status="tab2">${themeConfig.tabs[1]}</button>
+                                    <button class="dash-toggle-btn border-start" data-status="tab3">Both</button>
+                                </div>
+                                <div class="dash-table-wrapper">
+                                    <table class="dash-table">
+                                        <thead></thead>
+                                        <tbody></tbody>
+                                        <tfoot></tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        `);
+
+                        $card.data('groupVal', groupValue);
+                        $card.data('isSubgrouped', hasSubgroups);
+                        if (hasSubgroups) $card.data('subgroups', subgroups);
+                        else $card.data('items', flatItems);
+
+                        renderCardTable($card, 'tab1');
+                        
+                        $cardWrapper.append($card);
+                        $cardsContainer.append($cardWrapper);
+                    }
+                });
+
+                if (hasData) {
+                    $('#overviewHeader').removeClass('d-none');
+                } else {
+                    $overviewContainer.html(`<div class="col-12 text-center text-danger mt-2">Please select options from the Activity dropdown to view data.</div>`);
+                }
+            });
+
+            // ==========================================
+            // 8. INTERACTIONS (Toggles & Hide)
+            // ==========================================
+            
+            $(document).on('click', '.dash-toggle-btn', function() {
+                const $btn = $(this); const $card = $btn.closest('.dash-card');
+                $card.find('.dash-toggle-btn').removeClass('active');
+                $btn.addClass('active');
+                renderCardTable($card, $btn.data('status'));
+            });
+
+            $(document).on('click', '.hide-detail-btn', function() {
+                $(this).closest('.detail-card-wrapper').fadeOut(200);
+            });
+
+            $(document).on('click', '.summary-card', function() {
+                const targetId = $(this).data('target');
+                const $targetCard = $('#' + targetId);
+                
+                if ($targetCard.is(':visible')) {
+                    $targetCard.fadeOut(200);
+                } else {
+                    $targetCard.fadeIn(200);
+                    $('html, body').animate({ scrollTop: $targetCard.offset().top - 20 }, 300);
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+##############
+
+
+
 <svg width="32" height="26" viewBox="0 0 32 26" fill="none"
 
 xmlns="http://www.w3.org/2000/svg"

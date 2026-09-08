@@ -1,0 +1,22 @@
+<!-- DDE Face Authentication Badge: 32-pt Serrated (Electric Violet) -->
+<div style="filter: drop-shadow(0 14px 28px rgba(168, 85, 247, 0.45)) drop-shadow(0 0 20px rgba(124, 58, 237, 0.4)); display: inline-block;">
+  <a href="#face-auth-details" style="display: block; width: 350px; max-width: 100%; padding: 26px 26px; clip-path: polygon(50.00% 0.50%, 54.27% 6.65%, 59.66% 1.45%, 62.64% 8.32%, 68.94% 4.27%, 70.53% 11.58%, 77.50% 8.84%, 77.63% 16.33%, 85.00% 15.00%, 83.67% 22.37%, 91.16% 22.50%, 88.42% 29.47%, 95.73% 31.06%, 91.68% 37.36%, 98.55% 40.34%, 93.35% 45.73%, 99.50% 50.00%, 93.35% 54.27%, 98.55% 59.66%, 91.68% 62.64%, 95.73% 68.94%, 88.42% 70.53%, 91.16% 77.50%, 83.67% 77.63%, 85.00% 85.00%, 77.63% 83.67%, 77.50% 91.16%, 70.53% 88.42%, 68.94% 95.73%, 62.64% 91.68%, 59.66% 98.55%, 54.27% 93.35%, 50.00% 99.50%, 45.73% 93.35%, 40.34% 98.55%, 37.36% 91.68%, 31.06% 95.73%, 29.47% 88.42%, 22.50% 91.16%, 22.37% 83.67%, 15.00% 85.00%, 16.33% 77.63%, 8.84% 77.50%, 11.58% 70.53%, 4.27% 68.94%, 8.32% 62.64%, 1.45% 59.66%, 6.65% 54.27%, 0.50% 50.00%, 6.65% 45.73%, 1.45% 40.34%, 8.32% 37.36%, 4.27% 31.06%, 11.58% 29.47%, 8.84% 22.50%, 16.33% 22.37%, 15.00% 15.00%, 22.37% 16.33%, 22.50% 8.84%, 29.47% 11.58%, 31.06% 4.27%, 37.36% 8.32%, 40.34% 1.45%, 45.73% 6.65%);
+  -webkit-clip-path: polygon(50.00% 0.50%, 54.27% 6.65%, 59.66% 1.45%, 62.64% 8.32%, 68.94% 4.27%, 70.53% 11.58%, 77.50% 8.84%, 77.63% 16.33%, 85.00% 15.00%, 83.67% 22.37%, 91.16% 22.50%, 88.42% 29.47%, 95.73% 31.06%, 91.68% 37.36%, 98.55% 40.34%, 93.35% 45.73%, 99.50% 50.00%, 93.35% 54.27%, 98.55% 59.66%, 91.68% 62.64%, 95.73% 68.94%, 88.42% 70.53%, 91.16% 77.50%, 83.67% 77.63%, 85.00% 85.00%, 77.63% 83.67%, 77.50% 91.16%, 70.53% 88.42%, 68.94% 95.73%, 62.64% 91.68%, 59.66% 98.55%, 54.27% 93.35%, 50.00% 99.50%, 45.73% 93.35%, 40.34% 98.55%, 37.36% 91.68%, 31.06% 95.73%, 29.47% 88.42%, 22.50% 91.16%, 22.37% 83.67%, 15.00% 85.00%, 16.33% 77.63%, 8.84% 77.50%, 11.58% 70.53%, 4.27% 68.94%, 8.32% 62.64%, 1.45% 59.66%, 6.65% 54.27%, 0.50% 50.00%, 6.65% 45.73%, 1.45% 40.34%, 8.32% 37.36%, 4.27% 31.06%, 11.58% 29.47%, 8.84% 22.50%, 16.33% 22.37%, 15.00% 15.00%, 22.37% 16.33%, 22.50% 8.84%, 29.47% 11.58%, 31.06% 4.27%, 37.36% 8.32%, 40.34% 1.45%, 45.73% 6.65%); background: radial-gradient(circle at 30% 30%, #a855f7 0%, #7c3aed 55%, #3b0764 100%); text-decoration: none; color: #ffffff; position: relative; overflow: hidden; font-family: 'Plus Jakarta Sans', sans-serif;">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 14px; position: relative; z-index: 10;">
+      <!-- Biometric Face Scanner Icon -->
+      <div style="width: 48px; height: 48px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 50%; position: relative;">
+        <svg width="34" height="34" viewBox="0 0 100 100" fill="none" stroke="#ffffff" stroke-width="2.5">
+          <path d="M 24 36 L 24 26 L 34 26 M 76 36 L 76 26 L 66 26 M 24 64 L 24 74 L 34 74 M 76 64 L 76 74 L 66 74" stroke-linecap="round"/>
+          <path d="M 36 40 C 36 28 64 28 64 40 C 64 54 62 68 58 72 C 54 76 46 76 42 72 C 38 68 36 54 36 40 Z" stroke-linecap="round"/>
+          <circle cx="50" cy="42" r="1.5" fill="#ffffff"/><circle cx="43" cy="48" r="1.5" fill="#ffffff"/><circle cx="57" cy="48" r="1.5" fill="#ffffff"/><circle cx="50" cy="53" r="1.5" fill="#ffffff"/><circle cx="45" cy="58" r="1.5" fill="#ffffff"/><circle cx="55" cy="58" r="1.5" fill="#ffffff"/><circle cx="50" cy="64" r="1.5" fill="#ffffff"/>
+        </svg>
+      </div>
+      <!-- Label Details -->
+      <div style="display: flex; flex-direction: column; line-height: 1.25; text-align: left;">
+        <span style="font-weight: 700; font-size: 14px; color: #ffffff; white-space: nowrap;">DDE Face Authentication</span>
+        <span style="font-size: 12px; color: rgba(255, 255, 255, 0.95); margin-top: 2px; white-space: nowrap;">Also enable for customer now</span>
+        <span style="font-size: 12px; font-weight: 600; color: #facc15; text-decoration: underline; margin-top: 4px; white-space: nowrap;">Click here for more details</span>
+      </div>
+    </div>
+  </a>
+</div>

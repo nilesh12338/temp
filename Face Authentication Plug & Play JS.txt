@@ -1,0 +1,104 @@
+/* Face Authentication Plug & Play JS Module */
+(function(window, $) {
+  'use strict';
+
+  var FaceAuthWidget = {
+    defaultConfig: {
+      container: '.rightCol',
+      linkUrl: 'https://example.com/face-auth',
+      faceImg: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCLy_L5CuIXNsc_ilyH1c4O0NuFI1OB6qh0nRtiKMguWyJPhqneSY28zvIStUXQ2fU3Z9Cli6woq1nOmG913BB5lTLSHr2-YvmB76e9QhfZgUV1k2x_iPf64OTszic1UGt9pqUF9WWYKvzxnikiNvxxm6BXuwQcKDymdVI-_dIA6oFdbfXD-e88pczwff8ot4xNggcz3glVeT6uHz_cchrea9mrO8xMTJ1LDCC-6BnS4epZbwspV9DBPu5xTexR60Zy9Q',
+      confettiImg: 'https://lh3.googleusercontent.com/aida-public/AB6AXuApdMdhHk6sIg0UvNg3GPLeWVIL8VA3C9qKw44tYegGlNdsyM5Xh_R7pXqU6dlrYOFehZFczu9xs_yFvV-GHEBbxe0vFa1t3uTeFnlRC4k1bsbIxWmhujKh7pa9RYKroIosWY9vZOZwxXh8mBgkr1RfoUq33aXF8EhKK4nwzEPAto9WrBH2W25dKYyFMyf4dENPacorqUdOo97IMfD0YsXwoZ0c8RikF-ob7HW-VmRZQj6I593pywKrrET46JSLkPm7lg'
+    },
+
+    init: function(userOptions) {
+      var options = $.extend({}, this.defaultConfig, userOptions);
+      var $container = $(options.container);
+      if (!$container.length) return;
+
+      $('#face-auth-card-widget').remove();
+      this.injectStyles();
+      $container.append(this.buildHTML(options));
+      this.bindEvents(options);
+    },
+
+    injectStyles: function() {
+      if ($('#face-auth-widget-styles').length) return;
+      var css = [
+        '@keyframes fauth-blink { 0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 6px #3b82f6); } 50% { opacity: 0.35; transform: scale(0.96); filter: drop-shadow(0 0 1px #2563eb); } }',
+        '@keyframes fauth-slide-in { 0% { transform: translateX(115%); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }',
+        '@keyframes fauth-laser-sweep { 0% { top: 6%; opacity: 0.2; } 50% { top: 88%; opacity: 0.95; } 100% { top: 6%; opacity: 0.2; } }',
+        '@keyframes fauth-radar-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }',
+        '#face-auth-card-widget { position: absolute !important; right: 0 !important; top: calc(50% - 105px); width: 190px !important; max-width: 190px !important; z-index: 1050; cursor: grab; user-select: none; animation: fauth-slide-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }',
+        '#face-auth-card-widget:active { cursor: grabbing; }',
+        '#face-auth-card-widget.closing { transition: transform 0.35s ease-in, opacity 0.35s ease-in; transform: translateX(115%) !important; opacity: 0 !important; }',
+        '.fauth-link-box { display: block; text-decoration: none; color: inherit; background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(16px); border: 1px solid rgba(59, 130, 246, 0.35); border-right: none; border-radius: 16px 0 0 16px; padding: 12px 10px 14px 12px; box-shadow: -8px 10px 25px -4px rgba(0, 0, 0, 0.65), 0 0 20px rgba(37, 99, 235, 0.18); }',
+        '.fauth-top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }',
+        '.fauth-pill-new { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 9999px; animation: fauth-blink 1.8s infinite ease-in-out; }',
+        '.fauth-close-btn { width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); color: #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer; }',
+        '.fauth-scan-frame { position: relative; width: 82px; height: 82px; margin: 0 auto 10px; border-radius: 50%; background: radial-gradient(circle, rgba(14, 28, 54, 0.95), rgba(3, 7, 18, 0.98)); display: flex; align-items: center; justify-content: center; border: 1.5px solid rgba(59, 130, 246, 0.4); overflow: hidden; }',
+        '.fauth-radar-ring { position: absolute; inset: 2px; border-radius: 50%; border: 1px dashed rgba(56, 189, 248, 0.4); animation: fauth-radar-spin 14s linear infinite; }',
+        '.fauth-laser-beam { position: absolute; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, transparent, #38bdf8, #60a5fa, transparent); animation: fauth-laser-sweep 2.4s ease-in-out infinite; }',
+        '.fauth-face-gif { width: 58px; height: 58px; border-radius: 50%; object-fit: cover; }',
+        '.fauth-confetti-gif { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }',
+        '.fauth-meta { text-align: center; }',
+        '.fauth-badge-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(30, 58, 138, 0.45); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; font-size: 8.5px; font-weight: 600; padding: 2px 7px; border-radius: 9999px; margin-bottom: 5px; }',
+        '.fauth-title { font-size: 11.5px; font-weight: 700; color: #f1f5f9; margin: 0; }',
+        '.fauth-title span { color: #3b82f6; }'
+      ].join('\n');
+      $('<style id="face-auth-widget-styles">').text(css).appendTo('head');
+    },
+
+    buildHTML: function(options) {
+      return [
+        '<div id="face-auth-card-widget">',
+        '  <a href="' + options.linkUrl + '" class="fauth-link-box" id="fauthAnchorLink">',
+        '    <div class="fauth-top-bar">',
+        '      <span class="fauth-pill-new">NEW</span>',
+        '      <button type="button" class="fauth-close-btn" id="fauthCloseBtn" title="Close"><i class="bi bi-x"></i></button>',
+        '    </div>',
+        '    <div class="fauth-scan-frame">',
+        '      <div class="fauth-radar-ring"></div>',
+        '      <div class="fauth-laser-beam"></div>',
+        '      <img src="' + options.faceImg + '" alt="Face Biometric Scan" class="fauth-face-gif">',
+        '      <img src="' + options.confettiImg + '" alt="Confetti" class="fauth-confetti-gif">',
+        '    </div>',
+        '    <div class="fauth-meta">',
+        '      <div class="fauth-badge-tag"><i class="bi bi-shield-lock-fill" style="font-size: 8px;"></i> Biometric</div>',
+        '      <div class="fauth-title">Face <span>Authentication</span></div>',
+        '    </div>',
+        '  </a>',
+        '</div>'
+      ].join('\n');
+    },
+
+    bindEvents: function(options) {
+      var $widget = $('#face-auth-card-widget');
+      var $anchor = $('#fauthAnchorLink');
+      var isDragging = false, startY = 0;
+
+      if ($.fn.draggable) {
+        $widget.draggable({
+          axis: 'y',
+          containment: options.container,
+          scroll: false,
+          start: function(e, ui) { isDragging = false; startY = ui.position.top; },
+          drag: function(e, ui) { if (Math.abs(ui.position.top - startY) > 5) isDragging = true; },
+          stop: function() { setTimeout(function() { isDragging = false; }, 120); }
+        });
+      }
+
+      $anchor.on('click', function(e) {
+        if (isDragging) { e.preventDefault(); e.stopPropagation(); return false; }
+      });
+
+      $widget.find('#fauthCloseBtn').on('click', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        $widget.addClass('closing');
+        setTimeout(function() { $widget.remove(); }, 360);
+      });
+    }
+  };
+
+  window.FaceAuthWidget = FaceAuthWidget;
+  $(function() { FaceAuthWidget.init(); });
+})(window, jQuery);

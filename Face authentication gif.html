@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Authentication Widget Demo</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Mock Dashboard Layout (Matching the video background) */
+        .mock-page {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .mock-status-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .btn-sample {
+            background: #1e3a8a;
+            color: #ffffff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .btn-retest {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 12px;
+        }
+
+        .btn-retest:hover {
+            background: #fecaca;
+        }
+
+        /* =========================================================================
+           FACE AUTHENTICATION POPUP (EXACT MATCH TO VIDEO)
+           ========================================================================= */
+        .face-auth-popup {
+            position: fixed;
+            top: 45%;
+            right: -260px; /* Hidden offscreen by default */
+            width: 175px;
+            height: 205px;
+            background: #060b1e;
+            border-radius: 18px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 15px rgba(37, 99, 235, 0.3);
+            border: 1.5px solid rgba(59, 130, 246, 0.4);
+            z-index: 99999;
+            overflow: hidden;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: right 0.65s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        /* Slide-in State */
+        .face-auth-popup.active-slide {
+            right: 20px;
+        }
+
+        /* --- Diagonal "New" Corner Badge --- */
+        .face-auth-ribbon-wrap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 65px;
+            height: 65px;
+            overflow: hidden;
+            z-index: 8;
+            pointer-events: none;
+        }
+
+        .face-auth-ribbon {
+            position: absolute;
+            top: 10px;
+            left: -24px;
+            transform: rotate(-45deg);
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 3px 26px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            animation: ribbon-blink 1.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes ribbon-blink {
+            0% { opacity: 1; filter: drop-shadow(0 0 3px #60a5fa); }
+            100% { opacity: 0.4; filter: drop-shadow(0 0 0 transparent); }
+        }
+
+        /* --- Circular White Close Button (Top-Right) --- */
+        .face-auth-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            background: #ffffff;
+            border: 1px solid #94a3b8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0f172a;
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 10;
+            padding: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .face-auth-close:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+            transform: scale(1.15);
+        }
+
+        /* --- Face GIF & Scanning Reticle Area --- */
+        .face-auth-body {
+            position: relative;
+            width: 100%;
+            height: 165px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #030712;
+            overflow: hidden;
+        }
+
+        .face-auth-gif {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Animated Scanner Brackets [ ] */
+        .face-scan-brackets {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 105px;
+            height: 105px;
+            pointer-events: none;
+            z-index: 4;
+            animation: bracket-pulse 3s ease-in-out infinite;
+        }
+
+        .face-scan-brackets svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            filter: drop-shadow(0 0 4px #38bdf8);
+        }
+
+        @keyframes bracket-pulse {
+            0%, 100% {
+                opacity: 0.15;
+                transform: translate(-50%, -50%) scale(0.92);
+            }
+            40%, 70% {
+                opacity: 0.95;
+                transform: translate(-50%, -50%) scale(1.04);
+            }
+        }
+
+        /* --- Periodic Confetti Blast Overlay --- */
+        .face-auth-confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            z-index: 5;
+            mix-blend-mode: screen;
+            animation: confetti-cycle 4.5s ease-out infinite;
+        }
+
+        @keyframes confetti-cycle {
+            0%, 55% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            60% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            85% {
+                opacity: 0.9;
+                transform: scale(1.08);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.15);
+            }
+        }
+
+        /* --- Bottom Solid Blue Bar with Text --- */
+        .face-auth-bottom-bar {
+            width: 100%;
+            background: #2563eb;
+            color: #ffffff;
+            text-align: center;
+            padding: 7px 4px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mock-page">
+        <div class="mock-status-card">
+            <button class="btn-sample">Check Status</button>
+            <button class="btn-retest" onclick="resetPromoDemo()">↻ Reset Session & Test Popup</button>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;">
+            <h3>User Application Dashboard</h3>
+            <p style="color: #64748b; font-size: 14px;">
+                The Face Authentication card slides in on the right edge. Both GIF assets (Face AI scan & Confetti blast) are fully integrated.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Initialize Face Authentication Promotion Widget
+         * @param {string} redirectUrl - URL to navigate to when clicked
+         */
+        function showFaceAuthWidget(redirectUrl) {
+            // Check if closed in this session
+            if (sessionStorage.getItem("face_auth_dismissed") === "true") {
+                return;
+            }
+
+            var destination = redirectUrl || "/face-authentication-setup.html";
+
+            // Remove existing instance if present
+            var existing = document.getElementById("faceAuthPopup");
+            if (existing) existing.remove();
+
+            var widgetHtml = `
+                <div class="face-auth-popup" id="faceAuthPopup" title="Click to setup Face Authentication">
+                    <div class="face-auth-ribbon-wrap">
+                        <div class="face-auth-ribbon">New</div>
+                    </div>
+
+                    <button type="button" class="face-auth-close" id="faceAuthCloseBtn" title="Close">&times;</button>
+
+                    <div class="face-auth-body">
+                        <img class="face-auth-gif" 
+                             src="original-742ccef1de2f1256f4515bf0ffc23469 (1).gif" 
+                             alt="Face Authentication AI Scan">
+
+                        <div class="face-scan-brackets">
+                            <svg viewBox="0 0 100 100">
+                                <path d="M 8 26 V 8 H 26" />
+                                <path d="M 74 8 H 92 V 26" />
+                                <path d="M 8 74 V 92 H 26" />
+                                <path d="M 74 92 H 92 V 74" />
+                            </svg>
+                        </div>
+
+                        <img class="face-auth-confetti" 
+                             src="confetti on transparent background.gif" 
+                             alt="Confetti Blast">
+                    </div>
+
+                    <div class="face-auth-bottom-bar">
+                        Face Authentication
+                    </div>
+                </div>
+            `;
+
+            // Append to body to avoid clipping
+            document.body.insertAdjacentHTML("beforeend", widgetHtml);
+
+            var popup = document.getElementById("faceAuthPopup");
+            var closeBtn = document.getElementById("faceAuthCloseBtn");
+
+            // Slide in after brief delay
+            setTimeout(function () {
+                popup.classList.add("active-slide");
+            }, 300);
+
+            // Close button click: slide right and set session flag
+            closeBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                sessionStorage.setItem("face_auth_dismissed", "true");
+                popup.classList.remove("active-slide");
+                setTimeout(function () {
+                    if (popup.parentNode) popup.parentNode.removeChild(popup);
+                }, 700);
+            });
+
+            // Card body click: Redirect
+            popup.addEventListener("click", function () {
+                alert("Redirecting to: " + destination);
+                window.location.href = destination;
+            });
+        }
+
+        // Reset function for testing
+        function resetPromoDemo() {
+            sessionStorage.removeItem("face_auth_dismissed");
+            showFaceAuthWidget("/face-authentication-setup.html");
+        }
+
+        // Run when page loads
+        document.addEventListener("DOMContentLoaded", function () {
+            showFaceAuthWidget("/face-authentication-setup.html");
+        });
+    </script>
+</body>
+</html>
+

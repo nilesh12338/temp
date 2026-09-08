@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accordion - Arrow Only Toggle</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: Arial, sans-serif;
+            padding: 30px 15px;
+        }
+
+        .signal-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* 1. Header Bar (Non-clickable background) */
+        .custom-accordion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            cursor: default; /* Indicates whole bar is NOT clickable */
+        }
+
+        /* 2. Arrow Button (The ONLY element that triggers accordion collapse) */
+        .accordion-arrow-btn {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 1.15rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .accordion-arrow-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .accordion-arrow-btn i {
+            transition: transform 0.3s ease;
+        }
+
+        /* Rotates arrow down when accordion is collapsed */
+        .accordion-arrow-btn.collapsed i {
+            transform: rotate(180deg);
+        }
+
+        /* 3. Single-line truncation with ellipsis (...) by default */
+        .desc.shortened {
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90%;
+            vertical-align: middle;
+        }
+
+        /* 4. Multi-line full text when '+' is clicked */
+        .accordion-item.is-expanded .desc.shortened {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            max-width: 100%;
+        }
+
+        /* 5. Header Toggle Controls (+ and -) */
+        .line-toggle-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 14px;
+        }
+
+        .line-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            font-size: 13px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .line-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.15);
+        }
+
+        /* 6. List & Comment Styling */
+        .signal-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .signal-list li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            line-height: 1.5;
+            color: #2b2b2b;
+        }
+
+        .signal-list li::before {
+            content: "➡";
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 16px;
+        }
+
+        .positive-list li::before {
+            color: #2e7d32;
+        }
+
+        .negative-list li::before {
+            color: #c62828;
+        }
+
+        .comment-box {
+            margin-top: 6px;
+            margin-bottom: 10px;
+        }
+
+        .comment-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #444;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .comment-input {
+            width: 100%;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container signal-container">
+
+    <!-- ============================================================== -->
+    <!-- 1. POSITIVE SIGNALS ACCORDION                                 -->
+    <!-- ============================================================== -->
+    <div class="accordion mb-4" id="positiveAccordion">
+        <div class="accordion-item shadow-sm">
+            
+            <!-- Header Bar -->
+            <div class="custom-accordion-header bg-success text-white">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span class="fw-semibold">Positive Signals</span>
+
+                    <!-- Line Toggle Controls (+ and -) -->
+                    <span class="line-toggle-controls">
+                        <span class="line-toggle-btn btn-expand-lines" role="button" title="Expand lines">
+                            <i class="bi bi-plus-lg"></i>
+                        </span>
+                        <span class="line-toggle-btn btn-collapse-lines" role="button" title="Collapse lines">
+                            <i class="bi bi-dash-lg"></i>
+                        </span>
+                    </span>
+                </div>
+
+                <!-- Accordion Collapse Trigger Arrow ONLY -->
+                <button type="button" 
+                        class="accordion-arrow-btn" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#collapsePositive" 
+                        aria-expanded="true" 
+                        aria-controls="collapsePositive"
+                        title="Toggle Accordion">
+                    <i class="bi bi-chevron-up"></i>
+                </button>
+            </div>
+
+            <div id="collapsePositive" class="accordion-collapse collapse show">
+                <div class="accordion-body bg-white">
+                    <ul class="signal-list positive-list">
+                        <li>
+                            <span class="desc shortened">PAT improved from Rs. 5.54 lakh (FY2023) to Rs. 7.32 lakh (FY2025). Earnings strengthening</span>
+                        </li>
+                        <li>
+                            <span class="desc shortened">FY2025: cash accruals Rs. 7.46 lakh &gt; PAT Rs. 7.32 lakh. Profit translating to cash clean earnings</span>
+                        </li>
+                        <li>
+                            <span class="desc shortened">Interest coverage in FY2025 is 7.88x - strong cushion</span>
+                        </li>
+                        <li>
+                            <span class="desc shortened">TOL/TNW in FY2025 is 1.40x within SME comfort zone</span>
+                        </li>
+                        <li>
+                            <span class="desc shortened">Current ratio in FY2025 is 8.57x-healthy short-term liquidity</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 2. CONCERNS & WATCH ITEMS ACCORDION                           -->
+    <!-- ============================================================== -->
+    <div class="accordion mb-4" id="negativeAccordion">
+        <div class="accordion-item shadow-sm">
+            
+            <!-- Header Bar -->
+            <div class="custom-accordion-header bg-danger text-white">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span class="fw-semibold">Concerns &amp; Watch Items</span>
+
+                    <!-- Line Toggle Controls (+ and -) -->
+                    <span class="line-toggle-controls">
+                        <span class="line-toggle-btn btn-expand-lines" role="button" title="Expand lines">
+                            <i class="bi bi-plus-lg"></i>
+                        </span>
+                        <span class="line-toggle-btn btn-collapse-lines" role="button" title="Collapse lines">
+                            <i class="bi bi-dash-lg"></i>
+                        </span>
+                    </span>
+                </div>
+
+                <!-- Accordion Collapse Trigger Arrow ONLY -->
+                <button type="button" 
+                        class="accordion-arrow-btn" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#collapseConcerns" 
+                        aria-expanded="true" 
+                        aria-controls="collapseConcerns"
+                        title="Toggle Accordion">
+                    <i class="bi bi-chevron-up"></i>
+                </button>
+            </div>
+
+            <div id="collapseConcerns" class="accordion-collapse collapse show">
+                <div class="accordion-body bg-white">
+                    <ul class="signal-list negative-list">
+                        <li>
+                            <span class="desc shortened">TOL/TNW went from 0.93x in FY2023 to 1.40x in FY2025. Source of additional liabilities can be checked.</span>
+                            <div class="comment-box">
+                                <label class="comment-label">Comments</label>
+                                <input type="text" class="comment-input" maxlength="400" placeholder="Enter comments here...">
+                            </div>
+                        </li>
+                        <li>
+                            <span class="desc shortened">Sales flat: Rs. 2.00 cr (FY2023) vs Rs. 2.00 cr (FY2025). Growth thesis for new limit can be confirmed.</span>
+                            <div class="comment-box">
+                                <label class="comment-label">Comments</label>
+                                <input type="text" class="comment-input" maxlength="400" placeholder="Enter comments here...">
+                            </div>
+                        </li>
+                        <li>
+                            <span class="desc shortened">Operating margin in FY2025 is 4.27% thin margin, sensitive to cost shocks.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap 5 Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Line Expansion Toggle Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // 1. Click "+" icon -> Expand all multiple-line signals
+        document.querySelectorAll(".btn-expand-lines").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const accordionItem = this.closest(".accordion-item");
+                if (accordionItem) {
+                    accordionItem.classList.add("is-expanded");
+                }
+            });
+        });
+
+        // 2. Click "-" icon -> Collapse back to single line
+        document.querySelectorAll(".btn-collapse-lines").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const accordionItem = this.closest(".accordion-item");
+                if (accordionItem) {
+                    accordionItem.classList.remove("is-expanded");
+                }
+            });
+        });
+
+    });
+</script>
+
+</body>
+</html>

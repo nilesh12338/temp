@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Authentication - AI Version & Flower Blast Demo</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f1f5f9;
+            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        /* Mock Dashboard Layout */
+        .dashboard-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+        }
+
+        .main-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* =========================================================================
+           FACE AUTHENTICATION POPUP WIDGET STYLES
+           ========================================================================= */
+        .face-auth-wrapper {
+            position: fixed;
+            top: 60%; /* Slightly lower to accommodate larger complex visual */
+            right: -380px; /* Hidden offscreen by default */
+            z-index: 9999;
+            width: 250px;
+            background: linear-gradient(145deg, #0d1117, #1e293b);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-radius: 18px;
+            box-shadow: 0 16px 36px rgba(13, 17, 23, 0.6), 0 0 20px rgba(56, 189, 248, 0.25);
+            cursor: pointer;
+            user-select: none;
+            overflow: hidden;
+            transition: right 0.75s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+        }
+
+        /* Slide-in active state */
+        .face-auth-wrapper.show-slide {
+            right: 20px;
+        }
+
+        .face-auth-content {
+            padding: 24px 16px 18px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- Slanted Blinking "NEW" Ribbon --- */
+        .face-auth-ribbon {
+            position: absolute;
+            top: 14px;
+            left: -32px;
+            transform: rotate(-32deg);
+            background: linear-gradient(90deg, #ef4444, #f97316);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            padding: 4px 34px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+            animation: blinker-new 0.85s ease-in-out infinite alternate;
+        }
+
+        @keyframes blinker-new {
+            0%   { opacity: 1; filter: drop-shadow(0 0 4px #ef4444); }
+            100% { opacity: 0.3; filter: drop-shadow(0 0 0 transparent); }
+        }
+
+        /* --- Close Button --- */
+        .face-auth-close {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 4px 8px;
+            z-index: 10;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .face-auth-close:hover {
+            color: #f43f5e;
+            transform: scale(1.25);
+        }
+
+        /* --- AI Face Scanner Visual (New style) --- */
+        .face-scan-box {
+            position: relative;
+            width: 84px;
+            height: 110px; /* Increased height for larger visual and data streams */
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible; /* To allow blast particles to scatter */
+        }
+
+        .face-scan-svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: #38bdf8;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Framing Reticle (Classic corners) */
+        .reticle-path {
+            stroke: #0ea5e9;
+            stroke-width: 2.5;
+        }
+
+        /* AI Wireframe Face Structure */
+        .ai-face-grid {
+            stroke: rgba(56, 189, 248, 0.5);
+            stroke-width: 1;
+            animation: ai-face-pulse 2.5s ease-in-out infinite alternate;
+        }
+
+        .ai-vertex {
+            fill: #38bdf8;
+            stroke: none;
+            animation: vertex-glow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes vertex-glow {
+            0%   { filter: drop-shadow(0 0 2px #38bdf8); transform: scale(1); }
+            100% { filter: drop-shadow(0 0 5px #0ea5e9); transform: scale(1.2); }
+        }
+
+        @keyframes ai-face-pulse {
+            0%   { stroke: rgba(56, 189, 248, 0.3); }
+            100% { stroke: rgba(56, 189, 248, 0.8); }
+        }
+
+        /* Dynamic Scanning Data Streams through the face */
+        .face-scan-box::after {
+            content: '';
+            position: absolute;
+            left: 5%;
+            width: 90%;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, transparent, rgba(34, 211, 238, 0.1), rgba(34, 211, 238, 0.5), transparent, transparent);
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+            animation: ai-scan-streams 3s linear infinite;
+        }
+
+        @keyframes ai-scan-streams {
+            0%   { background-position-y: 0; }
+            100% { background-position-y: 200px; }
+        }
+
+        /* --- Flower Blast Celebratory Effect (Periodic, Infinite Loop) --- */
+        .flower-blast-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 1; /* Behind the face scan, but within the box */
+        }
+
+        .flower-blast-spark {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            opacity: 0;
+            background: radial-gradient(circle, #f472b6 0%, #db2777 60%, transparent 100%);
+            box-shadow: 0 0 8px #db2777;
+            animation: flower-blast 12s ease-out 2s infinite; /* Longer cycle with interval */
+        }
+
+        /* Define scattered particle animations with delays in keyframes */
+        @keyframes flower-blast {
+            /* Initial null period (2s - 10s) */
+            0%, 83.3% {
+                transform: scale(0) translate(0, 0);
+                opacity: 0;
+            }
+            /* The Blast happens (10s - 12s) */
+            83.4% {
+                transform: scale(0) translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2.2) translate(var(--dx, 35px), var(--dy, -30px));
+                opacity: 0;
+            }
+        }
+
+        /* Apply varying scatter patterns and delays */
+        .flower-blast-spark.s1 { --dx:-45px; --dy:-40px; animation-delay: 2.1s; background: radial-gradient(circle, #f9a8d4 0%, #ec4899 60%, transparent 100%); }
+        .flower-blast-spark.s2 { --dx:45px; --dy:-40px; animation-delay: 2.3s; background: radial-gradient(circle, #fb7185 0%, #f43f5e 60%, transparent 100%); }
+        .flower-blast-spark.s3 { --dx:-40px; --dy:40px; animation-delay: 2.1s; background: radial-gradient(circle, #f472b6 0%, #db2777 60%, transparent 100%); }
+        .flower-blast-spark.s4 { --dx:40px; --dy:40px; animation-delay: 2.5s; background: radial-gradient(circle, #fbbf24 0%, #d97706 60%, transparent 100%); }
+
+        /* --- Text Section --- */
+        .face-auth-title {
+            color: #f8fafc;
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.4px;
+            text-align: center;
+        }
+
+        .face-auth-subtext {
+            color: #38bdf8;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        .face-auth-wrapper:hover .face-auth-subtext {
+            transform: translateX(3px);
+            color: #7dd3fc;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Header -->
+    <header class="dashboard-header d-flex justify-content-between align-items-center">
+        <h4 class="m-0 fw-bold text-primary">AI Secure Portal</h4>
+        <div>
+            <button id="btnResetSession" class="btn btn-outline-danger btn-sm">
+                ↻ Reset Session & Re-test AI Promo
+            </button>
+        </div>
+    </header>
+
+    <!-- Page Body Layout -->
+    <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Left & Main Content Area -->
+            <div class="col-md-9">
+                <div class="main-card">
+                    <h2 class="h4 fw-bold mb-3">Welcome to your Portal Dashboard</h2>
+                    <p class="text-muted">
+                        This test environment showcases the new version of the animated <strong>Face Authentication</strong> promotional feature alert.
+                    </p>
+                    <div class="alert alert-info">
+                        <strong>AI & Flower Blast Version:</strong> This version features an infinite, periodic 'flower blast' congratulatory animation scattering pink and gold particles behind a more complex wireframe AI face scan. Click the close button <code>(&times;)</code> on the popup to slide it out. It will save a flag in <code>sessionStorage</code> so it won't appear again on page refreshes during this session.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column (.rghtCol) -->
+            <div class="col-md-3 rghtCol">
+                <div class="p-3 bg-white rounded border">
+                    <span class="text-muted small fw-semibold">Right Side Container (.rghtCol)</span>
+                    <p class="small text-secondary mt-1">The widget hooks directly to the page edge alongside this column.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Implementation -->
+    <script>
+        /**
+         * Initialize Face Authentication Promotion Widget (AI Version)
+         * @param {string} redirectUrl - URL to navigate to when clicked
+         */
+        function showFaceAuthPromo(redirectUrl) {
+            // Check if user has already dismissed the popup in the current session
+            if (sessionStorage.getItem("face_auth_promo_closed") === "true") {
+                console.log("Face Auth promo already dismissed for this session.");
+                return;
+            }
+
+            var targetUrl = redirectUrl || "#face-authentication";
+
+            var htmlStr = `
+                <div class="face-auth-wrapper" id="faceAuthWidget" title="Click to try Face Authentication">
+                    
+                    <!-- Slanted Blinking "NEW" Ribbon -->
+                    <div class="face-auth-ribbon">NEW</div>
+
+                    <!-- Close Button -->
+                    <button type="button" class="face-auth-close" id="closeFaceAuthBtn" title="Dismiss">&times;</button>
+
+                    <!-- Card Body -->
+                    <div class="face-auth-content">
+                        <!-- New Complex AI Face Scanner Visua -->
+                        <div class="face-scan-box">
+                            <!-- Flower Blast (Scatter Particles, Periodic Loop) -->
+                            <div class="flower-blast-container">
+                                <span class="flower-blast-spark s1"></span>
+                                <span class="flower-blast-spark s2"></span>
+                                <span class="flower-blast-spark s3"></span>
+                                <span class="flower-blast-spark s4"></span>
+                            </div>
+
+                            <svg class="face-scan-svg" viewBox="0 0 64 80">
+                                <!-- Scanner Reticle Corners (Framing) -->
+                                <path class="reticle-path" d="M 6 22 V 12 H 18" />
+                                <path class="reticle-path" d="M 46 12 H 58 V 22" />
+                                <path class="reticle-path" d="M 6 54 V 64 H 18" />
+                                <path class="reticle-path" d="M 46 64 H 58 V 54" />
+                                
+                                <!-- Complex AI Face Wireframe (Points & Lines) -->
+                                <circle class="ai-vertex v1" cx="32" cy="22" r="1.5" /> <!-- Forehead top -->
+                                <circle class="ai-vertex v2" cx="22" cy="28" r="1.5" /> <!-- Left eye area -->
+                                <circle class="ai-vertex v3" cx="42" cy="28" r="1.5" /> <!-- Right eye area -->
+                                <circle class="ai-vertex v4" cx="32" cy="38" r="1.5" /> <!-- Nose bridge -->
+                                <circle class="ai-vertex v5" cx="26" cy="46" r="1.5" /> <!-- Left cheekbone -->
+                                <circle class="ai-vertex v6" cx="38" cy="46" r="1.5" /> <!-- Right cheekbone -->
+                                <circle class="ai-vertex v7" cx="32" cy="54" r="1.5" /> <!-- Chin bottom -->
+                                <circle class="ai-vertex v8" cx="20" cy="42" r="1.5" /> <!-- Left jaw hinge -->
+                                <circle class="ai-vertex v9" cx="44" cy="42" r="1.5" /> <!-- Right jaw hinge -->
+
+                                <path class="ai-face-grid" d="
+                                    M 32 22 L 22 28 L 32 38 Z
+                                    M 32 22 L 42 28 L 32 38 Z
+                                    M 22 28 L 20 42 L 26 46 L 32 38 Z
+                                    M 42 28 L 44 42 L 38 46 L 32 38 Z
+                                    M 26 46 L 32 54 L 38 46 L 32 38 Z
+                                " />
+
+                                <!-- Main Face Outline (Fragmented data streams) -->
+                                <path d="M 22 28 C 22 19 42 19 42 28 C 42 36 38 45 32 45 C 26 45 22 36 22 28 Z" stroke="rgba(148, 163, 184, 0.3)" stroke-width="1" />
+                            </svg>
+                        </div>
+                        
+                        <!-- Labels -->
+                        <h4 class="face-auth-title">Face Authentication</h4>
+                        <span class="face-auth-subtext">Click to Set Up &rarr;</span>
+                    </div>
+                </div>
+            `;
+
+            // Append to .rghtCol or fallback to body
+            var $mount = $(".rghtCol").length ? $(".rghtCol") : $("body");
+            $mount.append(htmlStr);
+
+            var $widget = $("#faceAuthWidget");
+
+            // Trigger Entrance Slide-in
+            setTimeout(function () {
+                $widget.addClass("show-slide");
+            }, 300);
+
+            // Close button: Slide out to the right, record session flag, and remove
+            $("#closeFaceAuthBtn").on("click", function (e) {
+                e.stopPropagation(); // Avoid triggering card redirect
+                sessionStorage.setItem("face_auth_promo_closed", "true");
+                
+                // Slide out animation
+                $widget.removeClass("show-slide");
+                setTimeout(function () {
+                    $widget.remove();
+                }, 750);
+            });
+
+            // Card click: Trigger navigation to target page
+            $widget.on("click", function () {
+                alert("Navigating to: " + targetUrl);
+                window.location.href = targetUrl;
+            });
+        }
+
+        // Run when DOM is ready
+        $(document).ready(function () {
+            // Launch Face Authentication promo (AI Version)
+            showFaceAuthPromo("/face-auth-setup.html");
+
+            // Reset Session testing helper button
+            $("#btnResetSession").on("click", function () {
+                sessionStorage.removeItem("face_auth_promo_closed");
+                location.reload();
+            });
+        });
+    </script>
+</body>
+</html>

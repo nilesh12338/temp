@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Face Authentication Demo</title>
+    <style>
+        /* Base page reset */
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        /* Mock Application Layout */
+        .app-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 16px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .btn-reset {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-reset:hover { background-color: #fecaca; }
+
+        .app-body {
+            display: flex;
+            padding: 24px;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .left-col {
+            flex: 1;
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+        }
+
+        .rghtCol {
+            width: 320px;
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="app-header">
+        <h1 class="app-title">CBS Portal Dashboard</h1>
+        <button type="button" class="btn-reset" onclick="resetPromoSession()">
+            ↻ Clear Session & Force Show Popup
+        </button>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="app-body">
+        <div class="left-col">
+            <h2>Welcome to the Portal</h2>
+            <p>The <strong>Professional AI Face Authentication</strong> promotional card will slide in from the right edge of the window.</p>
+            <div style="background:#e0f2fe; padding:12px 16px; border-radius:6px; border-left:4px solid #0284c7; font-size:14px;">
+                <strong>Debug Tip:</strong> If you dismiss the popup, click the red <em>"Clear Session & Force Show Popup"</em> button at the top right to test it again immediately.
+            </div>
+        </div>
+
+        <div class="rghtCol">
+            <h4 style="margin-top:0; font-size:15px; color:#64748b;">Right Column Area (.rghtCol)</h4>
+            <p style="font-size:13px; color:#94a3b8;">Main sidebar container.</p>
+        </div>
+    </div>
+
+    <!-- Self-Contained Script (No external dependencies needed) -->
+    <script>
+        /* =========================================================================
+           Self-Injected Dynamic CSS (Following loadCssStyle pattern)
+           ========================================================================= */
+        function loadProfessionalFaceAuthStyles() {
+            if (document.getElementById("pro-face-auth-css")) return;
+
+            var css = `
+                /* Floating Widget Container */
+                .pro-face-widget {
+                    position: fixed !important;
+                    top: 55% !important;
+                    right: -380px !important; /* Start off-screen */
+                    z-index: 999999 !important;
+                    width: 250px;
+                    background: linear-gradient(145deg, #0f172a, #1e293b);
+                    border: 1px solid rgba(56, 189, 248, 0.45);
+                    border-radius: 18px;
+                    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.25);
+                    cursor: pointer;
+                    user-select: none;
+                    overflow: hidden;
+                    transition: right 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease;
+                    font-family: inherit;
+                    display: block !important;
+                }
+
+                /* Active Slide-in Class */
+                .pro-face-widget.slide-in-right {
+                    right: 20px !important;
+                }
+
+                .pro-face-widget:hover {
+                    transform: translateY(-2px);
+                }
+
+                /* Content Box */
+                .pro-face-inner {
+                    padding: 22px 16px 16px 16px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    position: relative;
+                    z-index: 2;
+                }
+
+                /* Slanted Blinking "NEW" Ribbon */
+                .pro-ribbon-tag {
+                    position: absolute;
+                    top: 14px;
+                    left: -32px;
+                    transform: rotate(-32deg);
+                    background: linear-gradient(90deg, #ef4444, #f97316);
+                    color: #ffffff;
+                    font-size: 10px;
+                    font-weight: 800;
+                    letter-spacing: 1.2px;
+                    padding: 4px 34px;
+                    text-transform: uppercase;
+                    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
+                    animation: pro-blink-ribbon 0.85s ease-in-out infinite alternate;
+                }
+
+                @keyframes pro-blink-ribbon {
+                    0%   { opacity: 1; filter: drop-shadow(0 0 4px #ef4444); }
+                    100% { opacity: 0.35; filter: drop-shadow(0 0 0 transparent); }
+                }
+
+                /* Clean Close Button */
+                .pro-close-btn {
+                    position: absolute;
+                    top: 8px;
+                    right: 10px;
+                    background: none;
+                    border: none;
+                    color: #94a3b8;
+                    font-size: 22px;
+                    line-height: 1;
+                    cursor: pointer;
+                    padding: 2px 6px;
+                    z-index: 10;
+                    transition: color 0.2s, transform 0.2s;
+                }
+
+                .pro-close-btn:hover {
+                    color: #f43f5e;
+                    transform: scale(1.2);
+                }
+
+                /* AI Scanner Graphic Stage */
+                .pro-scanner-box {
+                    position: relative;
+                    width: 82px;
+                    height: 82px;
+                    margin-bottom: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .pro-scan-svg {
+                    width: 74px;
+                    height: 74px;
+                    overflow: visible;
+                }
+
+                /* Moving Cyan Laser Sweep */
+                .pro-laser-bar {
+                    position: absolute;
+                    left: 5%;
+                    width: 90%;
+                    height: 2px;
+                    background: linear-gradient(90deg, transparent, #38bdf8, #818cf8, transparent);
+                    box-shadow: 0 0 10px #38bdf8, 0 0 16px #60a5fa;
+                    border-radius: 50%;
+                    animation: pro-laser-motion 2.2s ease-in-out infinite alternate;
+                }
+
+                @keyframes pro-laser-motion {
+                    0%   { top: 12%; opacity: 0.3; }
+                    50%  { opacity: 1; }
+                    100% { top: 88%; opacity: 0.3; }
+                }
+
+                /* Periodic Flower Blast Animation (Infinite Loop) */
+                .flower-blast-wrap {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 1px;
+                    height: 1px;
+                    pointer-events: none;
+                    z-index: 1;
+                }
+
+                .petal {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 10px;
+                    height: 20px;
+                    border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
+                    opacity: 0;
+                    transform-origin: bottom center;
+                    animation: flower-bloom-loop 5.5s ease-out infinite;
+                }
+
+                /* 8 Flower Petal Angles & Gradients */
+                .p1 { --deg: 0deg;   --dist: 55px; background: linear-gradient(to top, #38bdf8, #818cf8); }
+                .p2 { --deg: 45deg;  --dist: 60px; background: linear-gradient(to top, #818cf8, #c084fc); }
+                .p3 { --deg: 90deg;  --dist: 55px; background: linear-gradient(to top, #f43f5e, #fb7185); }
+                .p4 { --deg: 135deg; --dist: 60px; background: linear-gradient(to top, #fb7185, #f472b6); }
+                .p5 { --deg: 180deg; --dist: 55px; background: linear-gradient(to top, #38bdf8, #0ea5e9); }
+                .p6 { --deg: 225deg; --dist: 60px; background: linear-gradient(to top, #c084fc, #818cf8); }
+                .p7 { --deg: 270deg; --dist: 55px; background: linear-gradient(to top, #f43f5e, #fda4af); }
+                .p8 { --deg: 315deg; --dist: 60px; background: linear-gradient(to top, #38bdf8, #67e8f9); }
+
+                @keyframes flower-bloom-loop {
+                    0%, 65% {
+                        opacity: 0;
+                        transform: rotate(var(--deg)) translateY(0) scale(0.2);
+                    }
+                    68% {
+                        opacity: 1;
+                        transform: rotate(var(--deg)) translateY(0) scale(0.5);
+                    }
+                    82% {
+                        opacity: 0.85;
+                        transform: rotate(var(--deg)) translateY(calc(-1 * var(--dist))) scale(1.1);
+                    }
+                    100% {
+                        opacity: 0;
+                        transform: rotate(var(--deg)) translateY(calc(-1 * var(--dist) - 15px)) scale(0.3);
+                    }
+                }
+
+                /* Typography */
+                .pro-title-text {
+                    color: #f8fafc;
+                    font-size: 14px;
+                    font-weight: 700;
+                    margin: 0;
+                    text-align: center;
+                    letter-spacing: 0.3px;
+                }
+
+                .pro-sub-text {
+                    color: #38bdf8;
+                    font-size: 11px;
+                    margin-top: 5px;
+                    font-weight: 600;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+            `;
+
+            var styleEl = document.createElement("style");
+            styleEl.id = "pro-face-auth-css";
+            styleEl.type = "text/css";
+            if (styleEl.styleSheet) {
+                styleEl.styleSheet.cssText = css;
+            } else {
+                styleEl.appendChild(document.createTextNode(css));
+            }
+            document.head.appendChild(styleEl);
+        }
+
+        /* =========================================================================
+           Widget Initialization Function
+           ========================================================================= */
+        function showProfessionalFaceAuthModule(redirectUrl, forceShow) {
+            // Check session dismissal
+            if (!forceShow && sessionStorage.getItem("face_auth_promo_closed") === "true") {
+                console.log("[FaceAuth] Suppressed: User previously dismissed in this session.");
+                return;
+            }
+
+            // Ensure styles are loaded
+            loadProfessionalFaceAuthStyles();
+
+            // Remove existing instance if any
+            var existing = document.getElementById("proFaceAuthCard");
+            if (existing) existing.parentNode.removeChild(existing);
+
+            var destination = redirectUrl || "/face-authentication";
+
+            var html = `
+                <div class="pro-face-widget" id="proFaceAuthCard" title="Click to setup Face Authentication">
+                    <!-- Slanted Blinking NEW Ribbon -->
+                    <div class="pro-ribbon-tag">NEW</div>
+
+                    <!-- Dismiss Button -->
+                    <button type="button" class="pro-close-btn" id="proFaceAuthCloseBtn" title="Close">&times;</button>
+
+                    <!-- Periodic Infinite Flower Blast Bloom -->
+                    <div class="flower-blast-wrap">
+                        <span class="petal p1"></span>
+                        <span class="petal p2"></span>
+                        <span class="petal p3"></span>
+                        <span class="petal p4"></span>
+                        <span class="petal p5"></span>
+                        <span class="petal p6"></span>
+                        <span class="petal p7"></span>
+                        <span class="petal p8"></span>
+                    </div>
+
+                    <!-- Inner Content -->
+                    <div class="pro-face-inner">
+                        <div class="pro-scanner-box">
+                            <div class="pro-laser-bar"></div>
+                            <svg class="pro-scan-svg" viewBox="0 0 64 64">
+                                <!-- Target Reticle Corners -->
+                                <path d="M 6 18 V 8 H 18" stroke="#38bdf8" stroke-width="2" fill="none" stroke-linecap="round" />
+                                <path d="M 46 8 H 58 V 18" stroke="#38bdf8" stroke-width="2" fill="none" stroke-linecap="round" />
+                                <path d="M 6 46 V 56 H 18" stroke="#38bdf8" stroke-width="2" fill="none" stroke-linecap="round" />
+                                <path d="M 46 56 H 58 V 46" stroke="#38bdf8" stroke-width="2" fill="none" stroke-linecap="round" />
+
+                                <!-- AI Facial Biometric Structure -->
+                                <path d="M 22 28 C 22 19 42 19 42 28 C 42 36 38 45 32 45 C 26 45 22 36 22 28 Z" 
+                                      fill="none" stroke="rgba(148,163,184,0.4)" stroke-width="1.2" stroke-dasharray="2 2" />
+
+                                <!-- Facial Node Points -->
+                                <circle cx="27" cy="28" r="2" fill="#38bdf8" />
+                                <circle cx="37" cy="28" r="2" fill="#38bdf8" />
+                                <circle cx="32" cy="35" r="1.5" fill="#818cf8" />
+                                <circle cx="32" cy="41" r="2" fill="#38bdf8" />
+                            </svg>
+                        </div>
+
+                        <h4 class="pro-title-text">Face Authentication</h4>
+                        <span class="pro-sub-text">Setup Biometrics &rarr;</span>
+                    </div>
+                </div>
+            `;
+
+            // Always append directly to body to prevent container clipping issues
+            document.body.insertAdjacentHTML("beforeend", html);
+
+            var widgetEl = document.getElementById("proFaceAuthCard");
+            var closeBtnEl = document.getElementById("proFaceAuthCloseBtn");
+
+            // Slide in animation
+            setTimeout(function () {
+                widgetEl.classList.add("slide-in-right");
+            }, 100);
+
+            // Close button click
+            closeBtnEl.addEventListener("click", function (e) {
+                e.stopPropagation();
+                sessionStorage.setItem("face_auth_promo_closed", "true");
+                widgetEl.classList.remove("slide-in-right");
+                setTimeout(function () {
+                    if (widgetEl.parentNode) widgetEl.parentNode.removeChild(widgetEl);
+                }, 750);
+            });
+
+            // Card click redirect
+            widgetEl.addEventListener("click", function () {
+                alert("Redirecting to Face Authentication Page:\n" + destination);
+                window.location.href = destination;
+            });
+        }
+
+        // Helper button on page to clear session storage during testing
+        function resetPromoSession() {
+            sessionStorage.removeItem("face_auth_promo_closed");
+            showProfessionalFaceAuthModule("/face-auth-setup.html", true);
+        }
+
+        // Auto-run on DOM Ready
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", function () {
+                showProfessionalFaceAuthModule("/face-auth-setup.html");
+            });
+        } else {
+            showProfessionalFaceAuthModule("/face-auth-setup.html");
+        }
+    </script>
+</body>
+</html>

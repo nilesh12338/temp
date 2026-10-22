@@ -1,4 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SSO Landing Page</title>
+  <style>
+    /* Keep the entire page strictly hidden until session check passes */
+    body {
+      display: none;
+    }
+  </style>
+</head>
+<body>
 
+  <!-- Your Actual Landing Page Content -->
+  <h2>✅ Welcome to the Landing Page (SSO Active)</h2>
+  <p>You are actively logged in on this tab.</p>
+
+  <script>
+    // 1. Assign or recover this specific tab's unique ID
+    let myTabId = sessionStorage.getItem('sso_tab_id');
+    if (!myTabId) {
+      myTabId = 'tab_' + Math.random().toString(36).substring(2) + '_' + Date.now();
+      sessionStorage.setItem('sso_tab_id', myTabId);
+    }
+
+    let heartbeatTimer = null;
+
+    // 2. Check if another open tab currently owns the SSO session
+    function isAnotherTabActive() {
+      const ownerTabId = localStorage.getItem('active_sso_tab');
+      const lastPing = parseInt(localStorage.getItem('active_sso_ping') || '0', 10);
+      const isAlive = (Date.now() - lastPing) < 4000; // Alive within the last 4 seconds
+
+      return ownerTabId && ownerTabId !== myTabId && isAlive;
+    }
+
+    // 3. Unlock and reveal the page for the valid primary tab
+    function allowAccessAndClaimSession() {
+      // Reveal the landing page
+      document.body.style.display = 'block';
+
+      const sendHeartbeat = () => {
+        localStorage.setItem('active_sso_tab', myTabId);
+        localStorage.setItem('active_sso_ping', Date.now().toString());
+      };
+
+      sendHeartbeat();
+      if (!heartbeatTimer) {
+        heartbeatTimer = setInterval(sendHeartbeat, 1000);
+      }
+    }
+
+    // 4. Block the user with an alert and prevent landing on the page
+    function enforceSingleSession() {
+      if (isAnotherTabActive()) {
+        // Keep page blank and trigger native browser alert
+        document.body.style.display = 'none';
+        alert("⚠️ Access Denied: You are already logged in on another tab. Please close the other tab or use that one.");
+
+        // After clicking "OK" on the alert, re-check immediately.
+        // If the first tab is STILL open, keep blocking them (or redirect to about:blank).
+        if (isAnotherTabActive()) {
+          // Try closing the duplicate tab, or kick them off the page to a blank screen
+          window.close(); 
+          window.location.replace('about:blank'); 
+        } else {
+          // If they closed Tab 1 before clicking "OK", allow them in now
+          allowAccessAndClaimSession();
+        }
+      } else {
+        // Only one session is running -> let them land on the page
+        allowAccessAndClaimSession();
+      }
+    }
+
+    // 5. Run check immediately before page renders
+    window.addEventListener('DOMContentLoaded', enforceSingleSession);
+
+    // 6. Release the lock immediately when the primary tab is closed or refreshed
+    window.addEventListener('beforeunload', () => {
+      if (localStorage.getItem('active_sso_tab') === myTabId) {
+        localStorage.removeItem('active_sso_tab');
+        localStorage.removeItem('active_sso_ping');
+      }
+    });
+  </script>
+</body>
+</html>
+
++++++++++++++++++
 
 <!DOCTYPE html>
 <html lang="en">

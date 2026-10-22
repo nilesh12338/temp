@@ -1,4 +1,23 @@
+// Create or join a shared channel for your app
+const authChannel = new BroadcastChannel('app_auth_channel');
 
+// Listen for messages from other tabs
+authChannel.onmessage = (event) => {
+  if (event.data.type === 'LOGIN') {
+    console.log("User just logged in on another tab!");
+    // Update this tab's UI accordingly
+  }
+};
+
+// When a user logs in on this tab, broadcast it to all other tabs
+function notifyOtherTabsLogin(userData) {
+  authChannel.postMessage({ type: 'LOGIN', user: userData });
+}
+
+
+
+
+==========°°°°°°
 Hi [Manager Name],
 
 The mentioned URL is currently not accessible to the specified members.

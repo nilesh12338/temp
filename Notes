@@ -1,4 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cross-Tab Login Detection</title>
+</head>
+<body>
+  <h2 id="status-text">Status: Not Logged In</h2>
+  <button id="login-btn" onclick="login()">Log In Here</button>
+  <button id="logout-btn" onclick="logout()" style="display:none;">Log Out</button>
 
+  <script>
+    // Unique ID for THIS specific tab
+    const myTabId = Math.random().toString(36).substring(2);
+    let heartbeatTimer = null;
+
+    // Check if another tab is actively holding a logged-in session
+    function isAnotherTabLoggedIn() {
+      const activeTab = localStorage.getItem('active_login_tab');
+      const lastPing = parseInt(localStorage.getItem('active_login_ping') || '0', 10);
+      const isRecent = (Date.now() - lastPing) < 4000; // Alive within last 4 seconds
+
+      return activeTab && activeTab !== myTabId && isRecent;
+    }
+
+    // 1. Run immediately when URL is pasted / page loads
+    window.addEventListener('DOMContentLoaded', () => {
+      if (isAnotherTabLoggedIn()) {
+        document.getElementById('status-text').innerText = "⚠️ You are already logged in on another tab!";
+        document.getElementById('login-btn').style.display = 'none';
+      } else if (sessionStorage.getItem('logged_in_this_tab') === 'true') {
+        // If user refreshed the original logged-in tab, keep them logged in
+        startSessionInThisTab();
+      }
+    });
+
+    // 2. When user clicks Login on Tab 1
+    function login() {
+      if (isAnotherTabLoggedIn()) {
+        alert("Cannot log in: You are already logged in on another open tab!");
+        return;
+      }
+      sessionStorage.setItem('logged_in_this_tab', 'true');
+      startSessionInThisTab();
+    }
+
+    function startSessionInThisTab() {
+      document.getElementById('status-text').innerText = "✅ Logged in on THIS tab";
+      document.getElementById('login-btn').style.display = 'none';
+      document.getElementById('logout-btn').style.display = 'inline-block';
+
+      // Claim the session and update timestamp every 1 second so new tabs see it
+      const updateHeartbeat = () => {
+        localStorage.setItem('active_login_tab', myTabId);
+        localStorage.setItem('active_login_ping', Date.now().toString());
+      };
+      updateHeartbeat();
+      heartbeatTimer = setInterval(updateHeartbeat, 1000);
+    }
+
+    // 3. Clean up immediately if the logged-in tab is closed or logs out
+    function logout() {
+      clearInterval(heartbeatTimer);
+      sessionStorage.removeItem('logged_in_this_tab');
+      localStorage.removeItem('active_login_tab');
+      localStorage.removeItem('active_login_ping');
+      location.reload();
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (localStorage.getItem('active_login_tab') === myTabId) {
+        localStorage.removeItem('active_login_tab');
+        localStorage.removeItem('active_login_ping');
+      }
+    });
+
+    // 4. Listen in real-time if Tab 1 logs in/out while Tab 2 is already open
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'active_login_tab') {
+        if (event.newValue && event.newValue !== myTabId) {
+          document.getElementById('status-text').innerText = "⚠️ You just logged in on another tab!";
+          document.getElementById('login-btn').style.display = 'none';
+        } else if (!event.newValue && sessionStorage.getItem('logged_in_this_tab') !== 'true') {
+          location.reload();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+#########
 // Call this when the user logs in on Tab 1
 function holdLoginLock() {
   navigator.locks.request('active_user_session', () => {

@@ -1,3 +1,104 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SSO Landing Page</title>
+</head>
+<body>
+
+  <!-- Main App Content (Shown on Tab 1) -->
+  <div id="app-content" style="display: none;">
+    <h2>✅ Welcome to the Landing Page (SSO Active)</h2>
+    <p>You are actively logged in on this tab.</p>
+  </div>
+
+  <!-- Duplicate Tab Warning (Shown on Tab 2 when URL is pasted) -->
+  <div id="duplicate-tab-warning" style="display: none; color: #d9534f;">
+    <h2>⚠️ Already Logged In on Another Tab</h2>
+    <p>You already have an active SSO session open in another tab. Please use that tab instead.</p>
+  </div>
+
+  <script>
+    // 1. Assign or recover this specific tab's unique ID.
+    // Storing it in sessionStorage ensures Tab 1 keeps its identity on page refresh or navigation,
+    // while pasting the URL into a new tab always generates a brand new ID.
+    let myTabId = sessionStorage.getItem('sso_tab_id');
+    if (!myTabId) {
+      myTabId = 'tab_' + Math.random().toString(36).substring(2) + '_' + Date.now();
+      sessionStorage.setItem('sso_tab_id', myTabId);
+    }
+
+    let heartbeatTimer = null;
+
+    // 2. Check if ANOTHER open tab currently owns the SSO session
+    function isAnotherTabActive() {
+      const ownerTabId = localStorage.getItem('active_sso_tab');
+      const lastPing = parseInt(localStorage.getItem('active_sso_ping') || '0', 10);
+      const isAlive = (Date.now() - lastPing) < 4000; // Alive within the last 4 seconds
+
+      return ownerTabId && ownerTabId !== myTabId && isAlive;
+    }
+
+    // 3. Claim the session for THIS tab and keep the heartbeat running
+    function claimSessionForThisTab() {
+      document.getElementById('duplicate-tab-warning').style.display = 'none';
+      document.getElementById('app-content').style.display = 'block';
+
+      const sendHeartbeat = () => {
+        localStorage.setItem('active_sso_tab', myTabId);
+        localStorage.setItem('active_sso_ping', Date.now().toString());
+      };
+
+      sendHeartbeat();
+      if (!heartbeatTimer) {
+        heartbeatTimer = setInterval(sendHeartbeat, 1000);
+      }
+    }
+
+    // 4. Block this tab if another tab is already logged in
+    function showDuplicateWarning() {
+      if (heartbeatTimer) clearInterval(heartbeatTimer);
+      document.getElementById('app-content').style.display = 'none';
+      document.getElementById('duplicate-tab-warning').style.display = 'block';
+    }
+
+    // 5. Run immediately when the SSO landing page loads
+    window.addEventListener('DOMContentLoaded', () => {
+      if (isAnotherTabActive()) {
+        // Another tab is already open on the landing page!
+        showDuplicateWarning();
+      } else {
+        // No other active tab exists -> This tab is the primary SSO tab
+        claimSessionForThisTab();
+      }
+    });
+
+    // 6. Release the lock immediately when the primary tab is closed or refreshed
+    window.addEventListener('beforeunload', () => {
+      if (localStorage.getItem('active_sso_tab') === myTabId) {
+        localStorage.removeItem('active_sso_tab');
+        localStorage.removeItem('active_sso_ping');
+      }
+    });
+
+    // 7. Optional: If Tab 1 is closed while Tab 2 is showing the warning, 
+    // automatically promote Tab 2 to become the active tab
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'active_sso_tab' && !event.newValue) {
+        if (!isAnotherTabActive()) {
+          claimSessionForThisTab();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
+############
 <!DOCTYPE html>
 <html lang="en">
 <head>

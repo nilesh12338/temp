@@ -1,4 +1,28 @@
 
+// Call this when the user logs in on Tab 1
+function holdLoginLock() {
+  navigator.locks.request('active_user_session', () => {
+    // Returning a never-resolving Promise holds the lock until this tab is closed
+    return new Promise(() => {}); 
+  });
+}
+
+// Run this on page load in ANY new tab to check if another tab holds the lock
+async function checkIfLoggedInElsewhere() {
+  const state = await navigator.locks.query();
+  const isLocked = state.held.some(lock => lock.name === 'active_user_session');
+
+  if (isLocked) {
+    console.log("User is actively logged in on another open tab!");
+    alert("You already have an active session open in another tab.");
+  }
+}
+
+window.addEventListener('DOMContentLoaded', checkIfLoggedInElsewhere);
+###############
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const authToken = localStorage.getItem('auth_token');
   

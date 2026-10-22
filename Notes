@@ -1,3 +1,23 @@
+
+document.addEventListener("DOMContentLoaded", () => {
+  const authToken = localStorage.getItem('auth_token');
+  
+  if (authToken) {
+    // User is already logged in (even if they just pasted the URL)
+    console.log("Active session detected from another tab.");
+    
+    // Option A: Automatically redirect them to the dashboard
+    // window.location.href = '/dashboard';
+    
+    // Option B: Show a notice
+    showAlreadyLoggedInBanner();
+  }
+});
+
+
+========
+
+
 // Create or join a shared channel for your app
 const authChannel = new BroadcastChannel('app_auth_channel');
 

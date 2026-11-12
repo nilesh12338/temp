@@ -1,4 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Submissions & Sources</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f4f6;
+      padding: 32px;
+      color: #2c2c2e;
+    }
+
+    .page-container {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Section Header */
+    .section-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-heading {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6c6c70;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* 3-Column Card Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    /* Individual Card */
+    .doc-card {
+      background-color: #ffffff;
+      border: 1px solid #e2e2e6;
+      border-radius: 6px;
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .card-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex: 1;
+    }
+
+    /* Folder Icon */
+    .folder-icon {
+      width: 16px;
+      height: 16px;
+      stroke: #78787c;
+      stroke-width: 1.8;
+      fill: none;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    /* Title & Inline Badges */
+    .title-wrapper {
+      font-size: 14px;
+      font-weight: 600;
+      color: #242426;
+      line-height: 1.4;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Badges */
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      line-height: 1.2;
+    }
+
+    .badge-updated {
+      background-color: #d99b26;
+      color: #1f1705;
+    }
+
+    .badge-required {
+      background-color: #fceeee;
+      color: #b33939;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+
+    .badge-autofetched {
+      background-color: #e6f6f4;
+      color: #1b7a6e;
+      font-weight: 500;
+      font-size: 11.5px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* Period Chips (FY24, FY25, FY26) */
+    .periods-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .period-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background-color: #edf7ed;
+      border: 1px solid #cce8cc;
+      color: #2b6e2b;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .period-meta {
+      font-size: 12px;
+      color: #8e8e93;
+    }
+
+    .card-desc {
+      font-size: 12.5px;
+      color: #6c6c70;
+      line-height: 1.45;
+    }
+
+    /* Right Side Counter / Status */
+    .card-right {
+      flex-shrink: 0;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .count-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background-color: #f0f0f4;
+      color: #5a5a5e;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+      .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-container">
+
+    <!-- 1. CLIENT & BORROWER SUBMISSIONS -->
+    <div class="section-group">
+      <div class="section-heading">CLIENT &amp; BORROWER SUBMISSIONS</div>
+
+      <div class="cards-grid">
+
+        <!-- Card 1: Audited financial statements -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>Audited financial statements</span>
+                <span class="badge badge-updated">Updated</span>
+              </div>
+              <div>
+                <span class="badge badge-required">REQUIRED</span>
+              </div>
+              <div class="periods-row">
+                <span class="period-pill">&#10003; FY24</span>
+                <span class="period-pill">&#10003; FY25</span>
+                <span class="period-pill">&#10003; FY26</span>
+              </div>
+              <div class="period-meta">3 of 3 periods attached</div>
+              <p class="card-desc">Signed audited accounts and limited review statements.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">3</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Annual reports -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>Annual reports</span>
+                <span class="badge badge-updated">Updated</span>
+                <span class="badge badge-required">REQUIRED</span>
+              </div>
+              <div class="periods-row">
+                <span class="period-pill">&#10003; FY24</span>
+                <span class="period-pill">&#10003; FY25</span>
+                <span class="period-pill">&#10003; FY26</span>
+              </div>
+              <div class="period-meta">3 of 3 periods attached</div>
+              <p class="card-desc">Latest and prior-year annual reports of the borrower.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">3</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Investor presentation -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>Investor presentation</span>
+              </div>
+              <p class="card-desc">Quarterly or annual investor decks.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">0</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Concall transcripts -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>Concall transcripts</span>
+              </div>
+              <p class="card-desc">Earnings call transcripts and management commentary.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">0</span>
+          </div>
+        </div>
+
+        <!-- Card 5: BRSR -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>BRSR</span>
+              </div>
+              <p class="card-desc">Business Responsibility and Sustainability Report.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">0</span>
+          </div>
+        </div>
+
+        <!-- Card 6: Standard data request file -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>Standard data request file</span>
+              </div>
+              <p class="card-desc">The filled data request template shared with the client.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">0</span>
+          </div>
+        </div>
+
+        <!-- Card 7: Additional information shared by the client -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>Additional information shared by the client</span>
+              </div>
+              <p class="card-desc">Emails and supporting documents shared by the client.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">0</span>
+          </div>
+        </div>
+
+        <!-- Card 8: TIR and valuation reports -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>TIR and valuation reports</span>
+              </div>
+              <p class="card-desc">Title investigation and valuation reports on security.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">0</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 2. INTERNAL BANK RECORDS -->
+    <div class="section-group">
+      <div class="section-heading">INTERNAL BANK RECORDS</div>
+
+      <div class="cards-grid">
+
+        <!-- Card 1: Previous CAM and sanction resolution -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>Previous CAM and sanction resolution</span>
+                <span class="badge badge-updated">Updated</span>
+              </div>
+              <p class="card-desc">Internal &mdash; LLMS</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="badge badge-autofetched">Auto-fetched</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Quarterly certificates, including FFR/QRR and stock statements -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>Quarterly certificates, including FFR/QRR and stock statements</span>
+              </div>
+              <div>
+                <span class="badge badge-updated">Updated</span>
+              </div>
+              <p class="card-desc">Internal &mdash; LLMS</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="badge badge-autofetched">Auto-fetched</span>
+          </div>
+        </div>
+
+        <!-- Card 3: RMD reports -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>RMD reports</span>
+              </div>
+              <p class="card-desc">Risk management department reports.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">0</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Audit reports -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>Audit reports</span>
+              </div>
+              <p class="card-desc">Internal, concurrent and stock audit reports.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">0</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 3. EXTERNAL & REGULATORY SOURCES -->
+    <div class="section-group">
+      <div class="section-heading">EXTERNAL &amp; REGULATORY SOURCES</div>
+
+      <div class="cards-grid">
+
+        <!-- Card 1: Credit rating reports -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>Credit rating reports</span>
+                <span class="badge badge-updated">Updated</span>
+              </div>
+              <p class="card-desc">External &mdash; rating agency feed</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="badge badge-autofetched">Auto-fetched</span>
+          </div>
+        </div>
+
+        <!-- Card 2: SaveRisk & Probe42 files -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>SaveRisk &amp; Probe42 files</span>
+              </div>
+              <div class="title-wrapper">
+                <span class="badge badge-updated">Updated</span>
+                <span class="badge badge-required">REQUIRED</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="badge badge-autofetched">Auto-fetched</span>
+          </div>
+        </div>
+
+        <!-- Card 3: BSE/NSE filings -->
+        <div class="doc-card">
+          <div class="card-left">
+            <svg class="folder-icon" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <div class="card-body">
+              <div class="title-wrapper">
+                <span>BSE/NSE filings</span>
+              </div>
+              <p class="card-desc">Stock exchange disclosures and results filings.</p>
+            </div>
+          </div>
+          <div class="card-right">
+            <span class="count-pill">0</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
+
+₹₹₹₹₹₹₹₹₹
 <!DOCTYPE html>
 <html lang="en">
 <head>

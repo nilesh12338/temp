@@ -2,6 +2,516 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quality Checks</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f6f6f8;
+      padding: 32px;
+      color: #2c2c2e;
+    }
+
+    .quality-container {
+      max-width: 1180px;
+      margin: 0 auto;
+      background-color: #fafafa;
+      border: 1px solid #e2e2e6;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* Top Header Section */
+    .header-section {
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid #e5e5ea;
+      background-color: #ffffff;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #242426;
+      margin-bottom: 6px;
+    }
+
+    .header-subtitle {
+      font-size: 13.5px;
+      color: #78787c;
+    }
+
+    /* Alert Pill (8 of 8 items need review) */
+    .review-alert-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #fdf8ed;
+      border: 1px solid #e6d3a7;
+      color: #8c6218;
+      font-size: 13.5px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 6px;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 4px;
+      border: 1px solid #dcdce0;
+      background-color: #ffffff;
+      color: #5a5a5e;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      background-color: #f2f2f6;
+    }
+
+    .tab-btn.active {
+      background-color: #463759;
+      color: #ffffff;
+      border-color: #463759;
+    }
+
+    .hide-resolved {
+      font-size: 13px;
+      color: #78787c;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .hide-resolved:hover {
+      color: #2c2c2e;
+    }
+
+    /* Table Layout */
+    .checks-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #ffffff;
+    }
+
+    .checks-table th {
+      text-align: left;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #78787c;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 14px 20px;
+      border-bottom: 1px solid #e5e5ea;
+      background-color: #fafafa;
+    }
+
+    .checks-table td {
+      padding: 20px;
+      vertical-align: middle;
+      border-bottom: 1px solid #ebebf0;
+      font-size: 14px;
+    }
+
+    .checks-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Column Widths */
+    .col-status { width: 9%; }
+    .col-type { width: 17%; }
+    .col-field { width: 27%; }
+    .col-finding { width: 32%; }
+    .col-actions { width: 15%; }
+
+    /* Status Pill */
+    .status-open {
+      display: inline-block;
+      background-color: #fdf6e9;
+      color: #9c6e19;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+
+    /* Check Type Styling */
+    .check-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13.5px;
+      color: #3a3a3c;
+    }
+
+    .icon-amber {
+      width: 15px;
+      height: 15px;
+      stroke: #b58021;
+      stroke-width: 1.8;
+      fill: none;
+      flex-shrink: 0;
+    }
+
+    /* Field & Location Styling */
+    .field-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #242426;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .field-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag-section {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6c6c70;
+      background-color: #f0f0f4;
+      padding: 2px 7px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .tag-low-conf {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #a63a3a;
+      background-color: #fceeee;
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+
+    /* Finding Text */
+    .finding-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #3a3a3c;
+    }
+
+    /* Actions Column */
+    .actions-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .btn-review {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #3a3a3c;
+      background-color: #ffffff;
+      border: 1px solid #d8d8dc;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn-review:hover {
+      background-color: #f4f4f6;
+    }
+
+    .btn-resolve {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #ffffff;
+      background-color: #382a4a;
+      border: 1px solid #382a4a;
+      padding: 6px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn-resolve:hover {
+      background-color: #4a3861;
+    }
+
+    .btn-icon {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="quality-container">
+
+    <!-- Top Header & Filters -->
+    <div class="header-section">
+      <div class="header-top">
+        <div>
+          <h1 class="header-title">Quality checks</h1>
+          <p class="header-subtitle">Final review before the memo is tabled before the committee.</p>
+        </div>
+
+        <div class="review-alert-badge">
+          <svg class="icon-amber" viewBox="0 0 24 24">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          8 of 8 items need review
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="filter-tabs">
+          <button class="tab-btn active">All (8)</button>
+          <button class="tab-btn">Low confidence (2)</button>
+          <button class="tab-btn">Conflicting insights (2)</button>
+          <button class="tab-btn">Conflicting numbers (2)</button>
+          <button class="tab-btn">Blank fields (2)</button>
+        </div>
+
+        <button class="hide-resolved">Hide resolved</button>
+      </div>
+    </div>
+
+    <!-- Quality Checks Table -->
+    <table class="checks-table">
+      <thead>
+        <tr>
+          <th class="col-status">STATUS</th>
+          <th class="col-type">CHECK TYPE</th>
+          <th class="col-field">FIELD &amp; LOCATION</th>
+          <th class="col-finding">FINDING</th>
+          <th class="col-actions">ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Row 1 -->
+        <tr>
+          <td><span class="status-open">Open</span></td>
+          <td>
+            <div class="check-type">
+              <svg class="icon-amber" viewBox="0 0 24 24">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              Low confidence
+            </div>
+          </td>
+          <td>
+            <div class="field-title">C2 (b). Comments on Financial Management of the Company</div>
+            <div class="field-tags">
+              <span class="tag-section">SECTION C</span>
+              <span class="tag-low-conf">Low confidence</span>
+            </div>
+          </td>
+          <td>
+            <p class="finding-text">Scored 61% and has not been opened or edited by the analyst.</p>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-review">
+                <svg class="btn-icon" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Review details
+              </button>
+              <button class="btn-resolve">
+                <svg class="btn-icon" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+                Resolve
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 2 -->
+        <tr>
+          <td><span class="status-open">Open</span></td>
+          <td>
+            <div class="check-type">
+              <svg class="icon-amber" viewBox="0 0 24 24">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              Low confidence
+            </div>
+          </td>
+          <td>
+            <div class="field-title">C6 (a). Variations in Performance</div>
+            <div class="field-tags">
+              <span class="tag-section">SECTION C</span>
+              <span class="tag-low-conf">Low confidence</span>
+            </div>
+          </td>
+          <td>
+            <p class="finding-text">Scored 64% and has not been reviewed.</p>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-review">
+                <svg class="btn-icon" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Review details
+              </button>
+              <button class="btn-resolve">
+                <svg class="btn-icon" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+                Resolve
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 3 -->
+        <tr>
+          <td><span class="status-open">Open</span></td>
+          <td>
+            <div class="check-type">
+              <svg class="icon-amber" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Conflicting insights
+            </div>
+          </td>
+          <td>
+            <div class="field-title">C1 (c). Critical Risks vs C11 (b). Market Commentary</div>
+            <div class="field-tags">
+              <span class="tag-section">SECTION C</span>
+            </div>
+          </td>
+          <td>
+            <p class="finding-text">Two commentaries take opposite views of the same refining margin outlook.</p>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-review">
+                <svg class="btn-icon" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Review details
+              </button>
+              <button class="btn-resolve">
+                <svg class="btn-icon" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+                Resolve
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 4 -->
+        <tr>
+          <td><span class="status-open">Open</span></td>
+          <td>
+            <div class="check-type">
+              <svg class="icon-amber" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Conflicting insights
+            </div>
+          </td>
+          <td>
+            <div class="field-title">A9. Corporate Governance vs A13. Conduct of Account</div>
+            <div class="field-tags">
+              <span class="tag-section">SECTION A</span>
+            </div>
+          </td>
+          <td>
+            <p class="finding-text">Governance commentary reads clean while the conduct schedule records irregularities.</p>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-review">
+                <svg class="btn-icon" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Review details
+              </button>
+              <button class="btn-resolve">
+                <svg class="btn-icon" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+                Resolve
+              </button>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+
+  </div>
+
+</body>
+</html>
+
+
+
+
+################
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Extracted Fields UI</title>

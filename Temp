@@ -1,3 +1,525 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extracted Fields UI</title>
+<style>
+  :root {
+    --bg-main: #f3f2f5;
+    --text-main: #333;
+    --text-muted: #6b7280;
+    --purple-header: #6d6274;
+    --purple-border: #6d6274;
+    --border-color: #d1d5db;
+    --blue-active: #0ea5e9;
+    --blue-light: #e0f2fe;
+    --blue-border: #3b82f6;
+    --yellow-badge: #eab308;
+    --red-text: #ef4444;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    padding: 20px;
+    font-size: 14px;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Header Area */
+  .top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .top-header .title {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .link-open {
+    color: #4b5563;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .link-open:hover {
+    text-decoration: underline;
+  }
+
+  .btn-regenerate {
+    background-color: #8c909e;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  /* Alert Box */
+  .alert-box {
+    border: 1px solid var(--purple-border);
+    border-radius: 4px;
+    margin-bottom: 24px;
+    background: white;
+    overflow: hidden;
+  }
+
+  .alert-header {
+    background-color: var(--purple-header);
+    color: white;
+    padding: 8px 16px;
+    font-weight: 500;
+  }
+
+  .alert-body {
+    padding: 12px 16px;
+    color: var(--text-muted);
+    background-color: #f9f9fb;
+  }
+
+  .alert-body a {
+    color: var(--blue-active);
+    text-decoration: none;
+  }
+
+  /* Main Panel */
+  .main-panel {
+    background: #f9f9fb;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    background-color: var(--purple-header);
+    color: white;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: #eef0f3;
+  }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 6px 12px;
+    width: 280px;
+  }
+
+  .search-bar input {
+    border: none;
+    outline: none;
+    background: transparent;
+    margin-left: 8px;
+    width: 100%;
+    color: var(--text-main);
+  }
+
+  .filters {
+    display: flex;
+    gap: 8px;
+  }
+
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .filter-btn.active {
+    background-color: var(--blue-active);
+    color: white;
+    border-color: var(--blue-active);
+  }
+
+  .showing-text {
+    color: var(--text-muted);
+    margin-left: auto;
+    font-size: 13px;
+  }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  th {
+    padding: 12px 16px;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+  }
+
+  tr:hover {
+    background-color: #f1f5f9;
+  }
+
+  /* Updated Row Highlight */
+  .row-updated {
+    border: 1px solid var(--blue-border);
+    background-color: var(--blue-light) !important;
+    position: relative;
+  }
+  
+  .row-updated td {
+    border-bottom: none;
+  }
+
+  /* Specific Cell Styles */
+  .cell-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-weight: 500;
+  }
+
+  .tag-updated {
+    background-color: var(--yellow-badge);
+    color: #451a03;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-left: 8px;
+  }
+
+  .val-current {
+    font-weight: 500;
+  }
+
+  .val-old {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    font-size: 12px;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .source-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+  }
+  
+  .source-cell.empty {
+    color: #9ca3af;
+  }
+
+  .used-in {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .conf-not-found { color: var(--text-muted); }
+  .conf-low { color: var(--red-text); }
+  .conf-medium { color: var(--text-muted); }
+
+  /* Icons */
+  .icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    stroke-width: 0;
+    stroke: currentColor;
+    fill: currentColor;
+  }
+  .icon-warning { color: #d97706; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Top Header -->
+  <div class="top-header">
+    <div class="title">45 fields extracted</div>
+    <div class="top-actions">
+      <a href="#" class="link-open">Open the memo</a>
+      <button class="btn-regenerate">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+        Re-generate sections
+      </button>
+    </div>
+  </div>
+
+  <!-- Alert Box -->
+  <div class="alert-box">
+    <div class="alert-header">Values have been updated</div>
+    <div class="alert-body">
+      12 extracted values changed after the latest extraction. <a href="#">Show updated values only</a>
+    </div>
+  </div>
+
+  <!-- Main Panel -->
+  <div class="main-panel">
+    <div class="panel-header">
+      <span>Extracted fields — page 1 of 5</span>
+      <span style="font-size: 13px; opacity: 0.9;">45 fields extracted · 17 need verification</span>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-bar">
+        <svg class="icon" style="color:#9ca3af;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search fields, sources or sections">
+      </div>
+      <div class="filters">
+        <button class="filter-btn active">All (45)</button>
+        <button class="filter-btn">
+          <svg class="icon icon-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Low (2)
+        </button>
+        <button class="filter-btn">Medium (13)</button>
+        <button class="filter-btn">High (6)</button>
+        <button class="filter-btn">System (22)</button>
+      </div>
+      <div class="showing-text">Showing 45 of 45 fields</div>
+    </div>
+
+    <!-- Data Table -->
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 30%;">FIELD</th>
+          <th style="width: 15%;">VALUE</th>
+          <th style="width: 30%;">SOURCE</th>
+          <th style="width: 10%;">USED IN</th>
+          <th style="width: 15%;">CONFIDENCE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Row 1 -->
+        <tr>
+          <td><div class="cell-field">Date of last stock audit</div></td>
+          <td></td>
+          <td>
+            <div class="source-cell empty">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              —
+            </div>
+          </td>
+          <td>
+            <div class="used-in">
+              <span>C6(b)</span>
+              <span>F</span>
+            </div>
+          </td>
+          <td class="conf-not-found">Not found</td>
+        </tr>
+
+        <!-- Row 2 -->
+        <tr>
+          <td><div class="cell-field">Promoter pledge %</div></td>
+          <td></td>
+          <td>
+            <div class="source-cell empty">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              —
+            </div>
+          </td>
+          <td>
+            <div class="used-in">
+              <span>A2</span>
+              <span>C1(c)</span>
+            </div>
+          </td>
+          <td class="conf-not-found">Not found</td>
+        </tr>
+
+        <!-- Row 3 -->
+        <tr>
+          <td>
+            <div class="cell-field">
+              <svg class="icon icon-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Outstanding GST / Excise<br>Demand
+            </div>
+          </td>
+          <td><span class="val-current">₹968 Cr</span></td>
+          <td>
+            <div class="source-cell">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              Annual report FY25, notes to accou...
+            </div>
+          </td>
+          <td>
+            <div class="used-in">
+              <span>C1(c)</span>
+              <span>C6(b)</span>
+            </div>
+          </td>
+          <td class="conf-low">Low</td>
+        </tr>
+
+        <!-- Row 4 -->
+        <tr>
+          <td>
+            <div class="cell-field">
+              <svg class="icon icon-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Peer Average EBITDA Margin
+            </div>
+          </td>
+          <td><span class="val-current">8.1%</span></td>
+          <td>
+            <div class="source-cell">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              RMD industry study, p.4
+            </div>
+          </td>
+          <td><div class="used-in"><span>C7</span></div></td>
+          <td class="conf-low">Low</td>
+        </tr>
+
+        <!-- Row 5 (Updated) -->
+        <tr class="row-updated">
+          <td>
+            <div class="cell-field">
+              <svg class="icon icon-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Peer 2 Turnover<br>(BPCL)
+              <span class="tag-updated">Updated</span>
+            </div>
+          </td>
+          <td>
+            <span class="val-current">₹4,43,218 Cr</span>
+            <span class="val-old">₹4,29,921 Cr</span>
+          </td>
+          <td>
+            <div class="source-cell">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              BSE filing, FY25
+            </div>
+          </td>
+          <td><div class="used-in"><span>C7</span></div></td>
+          <td class="conf-medium">Medium</td>
+        </tr>
+
+        <!-- Row 6 -->
+        <tr>
+          <td>
+            <div class="cell-field">
+              <svg class="icon icon-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Peer 1 Turnover (IOCL)
+            </div>
+          </td>
+          <td><span class="val-current">₹7,55,949 Cr</span></td>
+          <td>
+            <div class="source-cell">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              BSE filing, FY25
+            </div>
+          </td>
+          <td><div class="used-in"><span>C7</span></div></td>
+          <td class="conf-medium">Medium</td>
+        </tr>
+
+        <!-- Row 7 (Updated) -->
+        <tr class="row-updated" style="border-top: none;">
+          <td>
+            <div class="cell-field">
+              <svg class="icon icon-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Outstanding IT<br>Demand
+              <span class="tag-updated">Updated</span>
+            </div>
+          </td>
+          <td>
+            <span class="val-current">₹1,742 Cr</span>
+            <span class="val-old">₹1,690 Cr</span>
+          </td>
+          <td>
+            <div class="source-cell">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              Annual report FY25, notes to accou...
+            </div>
+          </td>
+          <td>
+            <div class="used-in">
+              <span>C1(c)</span>
+              <span>C6(b)</span>
+            </div>
+          </td>
+          <td class="conf-medium">Medium</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Simple interaction for the filter buttons to toggle active state
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Remove active class from all buttons
+        filterButtons.forEach(b => b.classList.remove('active'));
+        // Add active class to the clicked button
+        btn.classList.add('active');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
+
+##########
 <!DOCTYPE html>
 <html lang="en">
 <head>

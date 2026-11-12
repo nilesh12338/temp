@@ -1,3 +1,248 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financial Management Review Panel</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f4f6;
+      padding: 40px;
+      color: #2c2c2e;
+    }
+
+    /* Main Panel Container */
+    .drawer-panel {
+      position: relative;
+      width: 680px;
+      min-height: 750px;
+      background-color: #fafafa;
+      border: 1px solid #d1d1d6;
+      padding: 16px 20px;
+      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Section 4.3 Box */
+    .finding-box {
+      position: relative;
+      border: 1.5px solid #4a55a2;
+      padding: 24px 28px;
+      margin-bottom: 18px;
+      background-color: #ffffff;
+    }
+
+    /* Annotation Badges (4.3 & 4.4) */
+    .annotation-badge {
+      position: absolute;
+      background-color: #5b4b7a;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1.5px solid #ffffff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+    }
+
+    .badge-4-3 {
+      top: 16px;
+      left: -18px;
+    }
+
+    .badge-4-4 {
+      top: -12px;
+      left: -48px;
+    }
+
+    /* Close Button */
+    .close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 30px;
+      height: 30px;
+      border: 1px solid #8e9aaf;
+      background-color: #f8f9fa;
+      color: #6c757d;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+
+    .close-btn:hover {
+      background-color: #e9ecef;
+    }
+
+    /* Typography */
+    .title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #2b2b2b;
+      margin-bottom: 8px;
+      padding-right: 36px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #7a7a7a;
+      margin-bottom: 26px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #7a7a7a;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+
+    .body-text {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #3a3a3c;
+      margin-bottom: 24px;
+    }
+
+    /* Indented Evidence Block */
+    .evidence-block {
+      border-left: 2px solid #e0e0e0;
+      padding-left: 16px;
+      margin-bottom: 26px;
+    }
+
+    .evidence-block p {
+      font-size: 14.5px;
+      line-height: 1.5;
+      color: #4a4a4c;
+    }
+
+    .evidence-block p + p {
+      margin-top: 16px;
+    }
+
+    .resolution-text {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #3a3a3c;
+      margin-bottom: 4px;
+    }
+
+    /* Section 4.4 Actions Box */
+    .actions-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      border: 1.5px solid #4a55a2;
+      padding: 8px 12px;
+      margin-left: 28px;
+      background-color: #ffffff;
+    }
+
+    .btn {
+      font-size: 14.5px;
+      font-weight: 500;
+      padding: 9px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: #3a3a3c;
+      border: 1px solid #d1d1d6;
+    }
+
+    .btn-secondary:hover {
+      background-color: #f2f2f7;
+    }
+
+    .btn-primary {
+      background-color: #261b3d;
+      color: #ffffff;
+      border: 1px solid #261b3d;
+    }
+
+    .btn-primary:hover {
+      background-color: #382859;
+    }
+
+    .check-icon {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="drawer-panel">
+    <!-- 4.3 Badge -->
+    <span class="annotation-badge badge-4-3">4.3</span>
+
+    <!-- Main Content Box -->
+    <div class="finding-box">
+      <button class="close-btn" aria-label="Close">&#10005;</button>
+
+      <h2 class="title">C2 (b). Comments on Financial Management of the Company</h2>
+      <div class="subtitle">Low confidence &middot; Section C &middot; Low confidence</div>
+
+      <div class="section-label">FINDING</div>
+      <p class="body-text">Scored 61% and has not been opened or edited by the analyst.</p>
+
+      <div class="section-label">EVIDENCE</div>
+      <div class="evidence-block">
+        <p>Synthesised across the Internal Financial Controls report (p.72) and the CARO annexure (p.76).</p>
+        <p>The two annexures differ on whether the control weaknesses are material.</p>
+      </div>
+
+      <div class="section-label">SUGGESTED RESOLUTION</div>
+      <p class="resolution-text">Read both annexures and reword the commentary, or accept it to clear the flag.</p>
+    </div>
+
+    <!-- Action Buttons Container -->
+    <div class="actions-wrapper">
+      <!-- 4.4 Badge -->
+      <span class="annotation-badge badge-4-4">4.4</span>
+
+      <button class="btn btn-secondary">
+        Open in memo <span>&rarr;</span>
+      </button>
+
+      <button class="btn btn-primary">
+        <svg class="check-icon" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"></circle>
+          <polyline points="9 12 11 14 15 10"></polyline>
+        </svg>
+        Resolve
+      </button>
+    </div>
+  </div>
+
+</body>
+</html>
+#######
+
+
 <div class="input-group">
     <input type="text" class="form-control" placeholder="Enter Captcha">
 

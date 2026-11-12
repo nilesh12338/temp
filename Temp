@@ -1,4 +1,621 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financial Review Sections</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f3f3f5;
+      padding: 32px;
+      color: #2c2c2e;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Section Card */
+    .section-card {
+      background-color: #fafafa;
+      border: 1px solid #d8d8dc;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    /* Purple Header Bar */
+    .section-header {
+      background-color: #463759;
+      color: #ffffff;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .header-title {
+      letter-spacing: 0.01em;
+    }
+
+    /* Badges inside Header */
+    .tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .tag-medium {
+      background-color: #d99b26;
+      color: #1f1705;
+    }
+
+    .tag-change {
+      background-color: #d99b26;
+      color: #1f1705;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* Header Icons */
+    .header-icons {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #b5acc4;
+      margin-left: 2px;
+    }
+
+    .header-icons svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+      cursor: pointer;
+    }
+
+    .header-icons svg:hover {
+      color: #ffffff;
+    }
+
+    /* Subtitle / Prompt Guide */
+    .section-subtitle {
+      padding: 10px 16px;
+      font-size: 12.5px;
+      color: #78787c;
+      border-bottom: 1px solid #e4e4e8;
+      background-color: #f7f7f9;
+    }
+
+    /* Content Area */
+    .section-body {
+      padding: 14px 16px 16px;
+    }
+
+    /* Tracked Changes Box */
+    .tracked-changes-box {
+      border: 1.5px solid #4a55a2;
+      background-color: #ffffff;
+      padding: 12px 16px 18px;
+    }
+
+    /* Action Buttons Row (Accept / Reject / Modify) */
+    .review-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .btn-action {
+      font-size: 12.5px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #3a3a3c;
+    }
+
+    .btn-accept {
+      background-color: #3b2a54;
+      color: #ffffff;
+    }
+
+    .btn-accept:hover {
+      background-color: #4d386d;
+    }
+
+    .btn-reject:hover,
+    .btn-modify:hover {
+      background-color: #f0f0f4;
+    }
+
+    /* Diff / Serif Text Content */
+    .serif-content {
+      font-family: Georgia, "Times New Roman", Times, serif;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #2c2c2e;
+    }
+
+    .diff-deleted {
+      color: #b33939;
+      text-decoration: line-through;
+      background-color: #fdf0f0;
+    }
+
+    .diff-added {
+      color: #1e6b3b;
+      text-decoration: underline;
+      background-color: #eef8f1;
+    }
+
+    /* Footer Links inside Card */
+    .card-footer-left {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: #6c6c70;
+      cursor: pointer;
+    }
+
+    .card-footer-left:hover {
+      color: #2c2c2e;
+    }
+
+    .card-footer-right {
+      margin-top: 14px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: #5a5a5e;
+      cursor: pointer;
+    }
+
+    .card-footer-right:hover {
+      color: #1c1c1e;
+    }
+
+    .editor-box {
+      background-color: #ffffff;
+      border: 1px solid #e2e2e6;
+      padding: 16px;
+    }
+
+    .icon-sm {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- SECTION C1 (c) -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="header-title">C1 (c). Critical Risks Including Change in Accounting Policies</span>
+        <span class="tag tag-medium">Medium</span>
+        <div class="header-icons">
+          <!-- Unlock Icon -->
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+          </svg>
+        </div>
+        <span class="tag tag-change">1 CHANGE TO REVIEW</span>
+        <div class="header-icons">
+          <!-- Clock / History Icon -->
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <!-- Document Icon -->
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+        </div>
+      </div>
+
+      <div class="section-subtitle">
+        Changes in accounting policies during the year and their impact on P&amp;L. Low capacity utilisation, stagnant growth in sales / profitability (other than project funding).
+      </div>
+
+      <div class="section-body">
+        <div class="tracked-changes-box">
+          <div class="review-actions">
+            <button class="btn-action btn-accept">
+              <span>&#10003;</span> Accept
+            </button>
+            <button class="btn-action btn-reject">
+              <span>&#10005;</span> Reject
+            </button>
+            <button class="btn-action btn-modify">
+              <span>&#9998;</span> Modify
+            </button>
+          </div>
+
+          <div class="serif-content">
+            <span class="diff-deleted">
+              No material change in accounting policies. Capacity utilisation is maintained at optimum level, with throughput of 80.5 MMT in FY25 against 78.2 MMT in FY24. Detailed comments on the individual financial parameters are furnished under C2.
+            </span>
+            <span class="diff-added">
+              Refining throughput for FY25 stands revised to 81.2 MMT (earlier 80.5 MMT) following updated schedules. Gross refining margins remain exposed to crude price volatility and freight costs; the O2C segment continues to absorb feedstock swings through captive cracker integration. Leverage remains comfortable with net debt to EBITDA at 1.44x (earlier 1.51x). No change in the rating outlook; CRISIL reaffirms AAA/Stable.
+            </span>
+          </div>
+        </div>
+
+        <div class="card-footer-left">
+          <svg class="icon-sm" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Questions to probe with the client</span>
+          <span>&rarr;</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION C1 (d) -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="header-title">C1 (d). Reasonability of Estimates / Projections for Current Year and Next Year</span>
+        <span class="tag tag-medium">Medium</span>
+        <div class="header-icons">
+          <!-- Unlock Icon -->
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+          </svg>
+          <!-- Clock / History Icon -->
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <!-- Document Icon -->
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+        </div>
+      </div>
+
+      <div class="section-subtitle">
+        Estimates and projections should be backed by facts and logic.
+      </div>
+
+      <div class="section-body">
+        <div class="editor-box">
+          <p class="serif-content">
+            Net sales are estimated to decline about 8% in FY26 on account of the planned shutdown in Q1FY26 and lower crude / product prices; dated Brent averaged $78.2/bbl in FY25. EBITDA is estimated at Rs.82210 cr for FY26, of which Rs.34464 cr was achieved in H1FY26 (Rs.25540 cr excluding exceptional income), i.e. 97% pro-rata achievement of adjusted estimates. The estimates and projections are considered reasonable.
+          </p>
+        </div>
+
+        <div class="card-footer-right">
+          <svg class="icon-sm" viewBox="0 0 24 24">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          <span>Restore last saved version</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
+
+
+_____________
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financial Review Sections</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f3f3f5;
+      padding: 32px;
+      color: #2c2c2e;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Section Card */
+    .section-card {
+      background-color: #fafafa;
+      border: 1px solid #d8d8dc;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    /* Purple Header Bar */
+    .section-header {
+      background-color: #463759;
+      color: #ffffff;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .header-title {
+      letter-spacing: 0.01em;
+    }
+
+    /* Badges inside Header */
+    .tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .tag-medium {
+      background-color: #d99b26;
+      color: #1f1705;
+    }
+
+    .tag-change {
+      background-color: #d99b26;
+      color: #1f1705;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* Header Icons */
+    .header-icons {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #b5acc4;
+      margin-left: 2px;
+    }
+
+    .header-icons svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+      cursor: pointer;
+    }
+
+    .header-icons svg:hover {
+      color: #ffffff;
+    }
+
+    /* Subtitle / Prompt Guide */
+    .section-subtitle {
+      padding: 10px 16px;
+      font-size: 12.5px;
+      color: #78787c;
+      border-bottom: 1px solid #e4e4e8;
+      background-color: #f7f7f9;
+    }
+
+    /* Content Area */
+    .section-body {
+      padding: 14px 16px 16px;
+    }
+
+    /* Tracked Changes Box */
+    .tracked-changes-box {
+      border: 1.5px solid #4a55a2;
+      background-color: #ffffff;
+      padding: 12px 16px 18px;
+    }
+
+    /* Action Buttons Row (Accept / Reject / Modify) */
+    .review-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .btn-action {
+      font-size: 12.5px;
+      font-weight: 500;
+      paddin
+
+######
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financial Review Sections</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f3f3f5;
+      padding: 32px;
+      color: #2c2c2e;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Section Card */
+    .section-card {
+      background-color: #fafafa;
+      border: 1px solid #d8d8dc;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    /* Purple Header Bar */
+    .section-header {
+      background-color: #463759;
+      color: #ffffff;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .header-title {
+      letter-spacing: 0.01em;
+    }
+
+    /* Badges inside Header */
+    .tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .tag-medium {
+      background-color: #d99b26;
+      color: #1f1705;
+    }
+
+    .tag-change {
+      background-color: #d99b26;
+      color: #1f1705;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* Header Icons */
+    .header-icons {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #b5acc4;
+      margin-left: 2px;
+    }
+
+    .header-icons svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+      cursor: pointer;
+    }
+
+    .header-icons svg:hover {
+      color: #ffffff;
+    }
+
+    /* Subtitle / Prompt Guide */
+    .section-subtitle {
+      padding: 10px 16px;
+      font-size: 12.5px;
+      color: #78787c;
+      border-bottom: 1px solid #e4e4e8;
+      background-color: #f7f7f9;
+    }
+
+    /* Content Area */
+    .section-body {
+      padding: 14px 16px 16px;
+    }
+
+    /* Tracked Changes Box */
+    .tracked-changes-box {
+      border: 1.5px solid #4a55a2;
+      background-color: #ffffff;
+      padding: 12px 16px 18px;
+    }
+
+    /* Action Buttons Row (Accept / Reject / Modify) */
+    .review-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .btn-action {
+      font-size: 12.5px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

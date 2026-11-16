@@ -1,3 +1,64 @@
+
+Added. Here is the updated list with new point:
+
+*Development Tasks:*
+
+*1) OTP Login*
+
+*2) RM SSO LDAP* - Need to confirm
+
+*3) New Login Design*
+
+*4) Dashboard*
+- Application redirect with application ID
+- Disable direct page access
+
+*5) JWT Token Implementation*
+
+*6) Basic Entity Page - NTB and ETB Customer Implementation*
+- Option to change PAN if he wishes to change after verified
+- For ETB customer - OTP verification
+- Carry Application ID to next steps
+- Basic entity page should be in disabled mode for preview (condition wise)
+
+*7) Promoter and Director Page - PAN Verification*
+- Show form only after PAN verified
+- Need to check Back and Next button
+
+*8) Logout Implementation*
+
+*9) Notifications Implementation*
+
+*10) All Hard Coded Data Should Be Removed*
+- All data needs to be integrated with API
+
+*11) Address Field*
+- Based on PIN code fetched
+- If needed, we can take help from Ninad
+
+*12) Page Navigation*
+- Navigation should happen only by stepper and navigation option given at bottom of page
+
+*13) Step 7 - Loan Status Display*
+- What should to show for Step 7 if loan is already approved or pending?
+
+*14) GST Page - PAN Validation*
+- On GST page, PAN field should be checked with applicant's PAN number
+
+---
+
+*My Monday Activity:*
+- Optimization - repetitive call
+- Reduce turnaround time
+
+*Important Note:*
+- *Without my approval, no one commit code*
+
+
+
+
+#########
+
 Note: The changes are limited to UI enhancements only. No existing functionality has been added, modified, or impacted.
 
 

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>jQuery HTML to PDF</title>
+  <!-- 1. Include jQuery -->
+  <script src="https://jquery.com"></script>
+  <!-- 2. Include html2pdf.js -->
+  <script src="https://cloudflare.com"></script>
+</head>
+<body>
+
+  <div id="invoice-box" style="padding: 20px; border: 1px solid #ccc;">
+    <h2>Order Receipt</h2>
+    <p>Customer: Jane Doe</p>
+    <p>Total Paid: $120.00</p>
+  </div>
+
+  <br>
+  <button id="btn-export">Download PDF</button>
+
+  <script>
+    $(document).ready(function() {
+      $('#btn-export').on('click', function() {
+        // Use [0] to extract the native DOM element from the jQuery object
+        const element = $('#invoice-box')[0];
+
+        const options = {
+          margin:       10,
+          filename:     'receipt.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2 },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Generate and save the PDF
+        html2pdf().set(options).from(element).save();
+      });
+    });
+  </script>
+
+</body>
+</html>

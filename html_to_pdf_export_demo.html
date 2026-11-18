@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTML to PDF Export Demo</title>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Bootstrap 5.3 CSS via CDN -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  />
+
+  <!-- Bootstrap Icons via CDN -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  />
+
+  <style>
+    /* =========================================================================
+       Base & Theme Variables
+       ========================================================================= */
+    :root {
+      --app-bg: #f1f5f9;
+      --paper-bg: #ffffff;
+      --paper-border: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --accent-blue: #2563eb;
+      --accent-emerald: #059669;
+      --accent-indigo: #4f46e5;
+      --accent-amber: #d97706;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--app-bg);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* =========================================================================
+       Top Action Bar (Excluded from PDF Export)
+       ========================================================================= */
+    .action-bar {
+      background-color: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--paper-border);
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+      flex-shrink: 0;
+    }
+
+    .demo-pill {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background-color: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+    }
+
+    .btn-export {
+      font-weight: 600;
+      border-radius: 0.5rem;
+      padding: 0.48rem 1.15rem;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .btn-export:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+    }
+
+    /* =========================================================================
+       Printable Report Container (#pdf-content)
+       ========================================================================= */
+    .report-wrapper {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    #pdf-content {
+      background-color: var(--paper-bg);
+      border: 1px solid var(--paper-border);
+      border-radius: 0.85rem;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06),
+                  0 4px 10px -6px rgba(15, 23, 42, 0.04);
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+
+    /* Report Header Styling */
+    .report-header {
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .report-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #1d4ed8;
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    .report-meta {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* =========================================================================
+       KPI Summary Cards
+       ========================================================================= */
+    .kpi-card {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-top-width: 3px;
+      border-left-width: 4px;
+      border-radius: 0.65rem;
+      padding: 1.05rem 1.15rem;
+      height: 100%;
+    }
+
+    .kpi-card.accent-blue {
+      border-top-color: var(--accent-blue);
+      border-left-color: var(--accent-blue);
+    }
+    .kpi-card.accent-emerald {
+      border-top-color: var(--accent-emerald);
+      border-left-color: var(--accent-emerald);
+    }
+    .kpi-card.accent-indigo {
+      border-top-color: var(--accent-indigo);
+      border-left-color: var(--accent-indigo);
+    }
+    .kpi-card.accent-amber {
+      border-top-color: var(--accent-amber);
+      border-left-color: var(--accent-amber);
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .kpi-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+
+    .trend-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .trend-up {
+      background-color: #ecfdf5;
+      color: #047857;
+    }
+
+    .trend-neutral {
+      background-color: #fef3c7;
+      color: #b45309;
+    }
+
+    /* =========================================================================
+       Detail Info Cards
+       ========================================================================= */
+    .info-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 0.7rem;
+      background-color: #f8fafc;
+      height: 100%;
+    }
+
+    .info-card .card-header {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      border-top-left-radius: 0.7rem;
+      border-top-right-radius: 0.7rem;
+      padding: 0.8rem 1.1rem;
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--text-primary);
+    }
+
+    .info-card .card-body {
+      padding: 0.95rem 1.15rem;
+    }
+
+    .structured-list {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 0;
+    }
+
+    .structured-list li {
+      position: relative;
+      padding-left: 1.15rem;
+      margin-bottom: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.48;
+    }
+
+    .structured-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .structured-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.48rem;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent-blue);
+    }
+
+    .structured-list.action-list li::before {
+      background-color: var(--accent-amber);
+    }
+
+    /* =========================================================================
+       Data Table Card
+       ========================================================================= */
+    .table-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 0.7rem;
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    .table-card .card-header {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0.9rem 1.15rem;
+    }
+
+    .report-table {
+      width: 100%;
+      margin-bottom: 0;
+      font-size: 0.84rem;
+      border-collapse: collapse;
+    }
+
+    .report-table thead th {
+      background-color: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      border-bottom: 1px solid #cbd5e1;
+      padding: 0.7rem 0.75rem;
+      vertical-align: middle;
+    }
+
+    .report-table tbody td {
+      padding: 0.68rem 0.75rem;
+      vertical-align: middle;
+      color: var(--text-primary);
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .report-table tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .report-table tfoot td {
+      background-color: #f1f5f9;
+      font-weight: 700;
+      color: var(--text-primary);
+      border-top: 2px solid #cbd5e1;
+      padding: 0.75rem 0.75rem;
+    }
+
+    .branch-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.78rem;
+      color: #334155;
+      background-color: #f1f5f9;
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.3rem;
+      display: inline-block;
+    }
+
+    .status-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      display: inline-block;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .status-exceeding {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .status-ontrack {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-review {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .report-footer {
+      margin-top: 1.4rem;
+      padding-top: 0.85rem;
+      border-top: 1px dashed #cbd5e1;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    /* =========================================================================
+       PDF Page-Break Control Rules
+       Prevents cards, headers, and table rows from splitting across PDF pages.
+       ========================================================================= */
+    .kpi-card,
+    .info-card,
+    .report-header,
+    .report-footer,
+    .report-table thead,
+    .report-table tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    /* =========================================================================
+       EXACT PAGE-SIZE PDF EXPORT OVERRIDES
+       Temporarily applied to #pdf-content during html2pdf() rendering.
+       ========================================================================= */
+    #pdf-content.pdf-exporting {
+      margin: 0 !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      background-color: #ffffff !important;
+    }
+
+    #pdf-content.pdf-exporting .table-responsive {
+      overflow: visible !important;
+    }
+
+    #pdf-content.pdf-exporting table {
+      width: 100% !important;
+      table-layout: fixed !important;
+      border-collapse: collapse !important;
+    }
+
+    #pdf-content.pdf-exporting th,
+    #pdf-content.pdf-exporting td {
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+      white-space: normal !important;
+    }
+
+    #pdf-content.pdf-exporting .status-pill {
+      white-space: normal !important;
+    }
+
+    /* A4 Portrait printable width at 96 DPI minus 10mm left/right margins = 718px */
+    #pdf-content.pdf-portrait {
+      width: 718px !important;
+      max-width: 718px !important;
+      min-width: 718px !important;
+      padding: 14px !important;
+    }
+
+    #pdf-content.pdf-portrait .kpi-col {
+      flex: 0 0 50% !important;
+      max-width: 50% !important;
+    }
+
+    #pdf-content.pdf-portrait .detail-col {
+      flex: 0 0 50% !important;
+      max-width: 50% !important;
+    }
+
+    #pdf-content.pdf-portrait .kpi-card {
+      padding: 0.85rem 0.95rem !important;
+    }
+
+    #pdf-content.pdf-portrait .kpi-value {
+      font-size: 1.3rem !important;
+    }
+
+    #pdf-content.pdf-portrait .structured-list li {
+      font-size: 11.5px !important;
+      line-height: 1.4 !important;
+      margin-bottom: 0.45rem !important;
+    }
+
+    #pdf-content.pdf-portrait .report-table,
+    #pdf-content.pdf-portrait .report-table thead th,
+    #pdf-content.pdf-portrait .report-table tbody td,
+    #pdf-content.pdf-portrait .report-table tfoot td {
+      font-size: 11px !important;
+      padding: 6px 5px !important;
+    }
+
+    #pdf-content.pdf-portrait .branch-code {
+      font-size: 10px !important;
+      padding: 1px 3px !important;
+    }
+
+    #pdf-content.pdf-portrait .status-pill {
+      font-size: 10px !important;
+      padding: 2px 5px !important;
+    }
+
+    /* A4 Landscape printable width at 96 DPI minus 10mm left/right margins = 1047px */
+    #pdf-content.pdf-landscape {
+      width: 1047px !important;
+      max-width: 1047px !important;
+      min-width: 1047px !important;
+      padding: 20px !important;
+    }
+
+    #pdf-content.pdf-landscape .kpi-col {
+      flex: 0 0 25% !important;
+      max-width: 25% !important;
+    }
+
+    #pdf-content.pdf-landscape .detail-col {
+      flex: 0 0 50% !important;
+      max-width: 50% !important;
+    }
+
+    #pdf-content.pdf-landscape .report-table,
+    #pdf-content.pdf-landscape .report-table thead th,
+    #pdf-content.pdf-landscape .report-table tbody td,
+    #pdf-content.pdf-landscape .report-table tfoot td {
+      font-size: 12.5px !important;
+      padding: 8px 8px !important;
+    }
+
+    /* Responsive adjustments for mobile viewing */
+    @media (max-width: 576px) {
+      #pdf-content {
+        padding: 1.2rem;
+      }
+      .kpi-value {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =======================================================================
+       1. STICKY TOP ACTION BAR (Excluded from PDF Export)
+       ======================================================================= -->
+  <header class="action-bar py-3 mb-4" data-html2canvas-ignore="true">
+    <div class="container report-wrapper">
+      <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+        <!-- App Title & Badge -->
+        <div class="d-flex align-items-center gap-3">
+          <div class="brand-icon" aria-hidden="true">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+          </div>
+          <div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <h1 class="h5 fw-bold mb-0 text-dark">HTML to PDF Export Demo</h1>
+              <span class="demo-pill">Auto-Fit Page Width</span>
+            </div>
+            <p class="small text-muted mb-0">
+              Responsive A4 Portrait &amp; Landscape export with zero horizontal table clipping
+            </p>
+          </div>
+        </div>
+
+        <!-- Orientation Selector + Export Button -->
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <label for="pdfOrientation" class="small fw-semibold text-secondary mb-0 text-nowrap">
+              <i class="bi bi-aspect-ratio me-1"></i>Page Size:
+            </label>
+            <select
+              id="pdfOrientation"
+              class="form-select form-select-sm"
+              style="width: auto; border-radius: 0.5rem;"
+              aria-label="Select PDF page orientation"
+            >
+              <option value="portrait" selected>A4 Portrait (210mm x 297mm)</option>
+              <option value="landscape">A4 Landscape (297mm x 210mm)</option>
+            </select>
+          </div>
+
+          <button
+            id="exportPdfBtn"
+            type="button"
+            class="btn btn-primary btn-sm btn-export d-inline-flex align-items-center gap-2"
+          >
+            <span id="btnDefaultContent" class="d-inline-flex align-items-center gap-2">
+              <i class="bi bi-download"></i>
+              <span>Export to PDF</span>
+            </span>
+            <span id="btnLoadingContent" class="d-none d-inline-flex align-items-center gap-2">
+              <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              <span>Generating PDF...</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =======================================================================
+       2. PRINTABLE REPORT CONTAINER (#pdf-content)
+       ======================================================================= -->
+  <main class="container report-wrapper pb-5">
+    <div id="pdf-content">
+
+      <!-- Report Header -->
+      <section class="report-header">
+        <div class="row align-items-start gy-2">
+          <div class="col-md-8">
+            <span class="report-badge mb-2">
+              <i class="bi bi-building-check"></i> Western Zone Credit &amp; Operations
+            </span>
+            <h2 class="h3 fw-bold text-dark mb-1">
+              Regional Branch Performance Report
+            </h2>
+            <p class="text-secondary small mb-0">
+              Branch-wise loan sanctions, disbursements, proposal conversion rates, and turnaround SLAs.
+            </p>
+          </div>
+          <div class="col-md-4 text-md-end report-meta">
+            <div class="mb-1">
+              <span class="text-muted">Report ID:</span>
+              <strong class="text-dark ms-1">RPT-MH-2026-Q4</strong>
+            </div>
+            <div class="mb-1">
+              <span class="text-muted">Generated On:</span>
+              <strong id="reportDateDisplay" class="text-dark ms-1">November 18, 2026</strong>
+            </div>
+            <div>
+              <span class="text-muted">Reporting Unit:</span>
+              <strong class="text-dark ms-1">INR (₹ Crores)</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Row of 4 KPI Summary Cards -->
+      <section class="mb-4" aria-label="Key Performance Indicators">
+        <div class="row g-3">
+          <!-- KPI 1: Total Disbursed -->
+          <div class="col-12 col-sm-6 col-lg-3 kpi-col">
+            <div class="kpi-card accent-blue">
+              <div class="kpi-label">Total Disbursed</div>
+              <div class="kpi-value">₹ 148.60 Cr</div>
+              <span class="trend-badge trend-up">
+                <i class="bi bi-arrow-up-right"></i> 86.9% of Sanctioned
+              </span>
+            </div>
+          </div>
+
+          <!-- KPI 2: Active Proposals -->
+          <div class="col-12 col-sm-6 col-lg-3 kpi-col">
+            <div class="kpi-card accent-emerald">
+              <div class="kpi-label">Active Proposals</div>
+              <div class="kpi-value">1,428</div>
+              <span class="trend-badge trend-up">
+                <i class="bi bi-arrow-up-right"></i> +11.4% vs Last Qtr
+              </span>
+            </div>
+          </div>
+
+          <!-- KPI 3: Approval Rate % -->
+          <div class="col-12 col-sm-6 col-lg-3 kpi-col">
+            <div class="kpi-card accent-indigo">
+              <div class="kpi-label">Approval Rate</div>
+              <div class="kpi-value">76.4%</div>
+              <span class="trend-badge trend-up">
+                <i class="bi bi-arrow-up-right"></i> +3.1 pts YoY
+              </span>
+            </div>
+          </div>
+
+          <!-- KPI 4: Avg. Turnaround Time -->
+          <div class="col-12 col-sm-6 col-lg-3 kpi-col">
+            <div class="kpi-card accent-amber">
+              <div class="kpi-label">Avg. Turnaround Time</div>
+              <div class="kpi-value">2.4 Days</div>
+              <span class="trend-badge trend-neutral">
+                <i class="bi bi-clock-history"></i> Target: &le; 2.5 Days
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Row of 2 Detail Info Cards -->
+      <section class="mb-4" aria-label="Highlights and Action Items">
+        <div class="row g-3">
+          <!-- Card 1: Regional Highlights -->
+          <div class="col-12 col-md-6 detail-col">
+            <div class="card info-card">
+              <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-geo-alt-fill text-primary"></i>
+                <span>Regional Highlights</span>
+              </div>
+              <div class="card-body">
+                <ul class="structured-list">
+                  <li>
+                    <strong>MMR Cluster Leadership:</strong> Mumbai BKC, Thane West, and Navi Mumbai Vashi
+                    collectively delivered <strong>₹ 74.60 Cr</strong> (50.2% of regional disbursements).
+                  </li>
+                  <li>
+                    <strong>Strong Pune Velocity:</strong> Pune Shivajinagar achieved an <strong>89.1%</strong>
+                    sanction-to-disbursement ratio led by MSME term-loan demand.
+                  </li>
+                  <li>
+                    <strong>Faster Digital Processing:</strong> e-Sign and GST-based underwriting lowered
+                    average turnaround time across tier-1 branches to 2.1 days.
+                  </li>
+                  <li>
+                    <strong>Steady Tier-2 Growth:</strong> Nagpur Civil Lines and Nashik Road exceeded
+                    quarterly proposal intake targets by 9.5%.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Key Action Items -->
+          <div class="col-12 col-md-6 detail-col">
+            <div class="card info-card">
+              <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-check2-square text-warning"></i>
+                <span>Key Action Items</span>
+              </div>
+              <div class="card-body">
+                <ul class="structured-list action-list">
+                  <li>
+                    <strong>South MH Follow-Up:</strong> Review pending collateral documentation at
+                    Kolhapur Rajarampuri and Solapur Saat Rasta to lift achievement above 82%.
+                  </li>
+                  <li>
+                    <strong>Clear Sanction Backlog:</strong> Convert ₹ 22.40 Cr of sanctioned-but-undisbursed
+                    cases across all branches before quarter-end closing.
+                  </li>
+                  <li>
+                    <strong>Credit Officer Allocation:</strong> Deploy one additional credit underwriter to
+                    Thane West and Pune Shivajinagar to handle peak Q4 volumes.
+                  </li>
+                  <li>
+                    <strong>Compliance Audit:</strong> Complete pre-disbursement KYC and CERSAI checks
+                    for all newly onboarded SME accounts.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Full-Width Branch Performance Summary Table Card -->
+      <section aria-label="Branch Performance Summary">
+        <div class="card table-card">
+          <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div>
+              <h3 class="h6 fw-bold mb-0 text-dark">
+                <i class="bi bi-table text-primary me-2"></i>Branch Performance Summary
+              </h3>
+              <span class="small text-muted">
+                Branch-wise proposals, sanctioned limits, disbursements (₹ Cr), and target achievement
+              </span>
+            </div>
+            <span class="badge text-bg-light border text-secondary fw-medium">
+              9 Active Branches
+            </span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table report-table align-middle">
+              <!-- Explicit percentage widths ensure exact fitting in Portrait & Landscape PDFs -->
+              <colgroup>
+                <col style="width: 11%;" />
+                <col style="width: 18%;" />
+                <col style="width: 11%;" />
+                <col style="width: 9%;" />
+                <col style="width: 13%;" />
+                <col style="width: 13%;" />
+                <col style="width: 12%;" />
+                <col style="width: 13%;" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th scope="col">Branch Code</th>
+                  <th scope="col">Branch Name</th>
+                  <th scope="col">Region</th>
+                  <th scope="col" class="text-end">Proposals</th>
+                  <th scope="col" class="text-end">Sanctioned (₹ Cr)</th>
+                  <th scope="col" class="text-end">Disbursed (₹ Cr)</th>
+                  <th scope="col" class="text-end">Achievement %</th>
+                  <th scope="col" class="text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="branch-code">MH-MUM-01</span></td>
+                  <td class="fw-semibold">Mumbai BKC</td>
+                  <td class="text-secondary">MMR</td>
+                  <td class="text-end">246</td>
+                  <td class="text-end">₹ 34.50</td>
+                  <td class="text-end fw-medium">₹ 31.90</td>
+                  <td class="text-end text-success fw-semibold">92.5%</td>
+                  <td class="text-center">
+                    <span class="status-pill status-exceeding">Exceeding</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="branch-code">MH-THN-02</span></td>
+                  <td class="fw-semibold">Thane West</td>
+                  <td class="text-secondary">MMR</td>
+                  <td class="text-end">218</td>
+                  <td class="text-end">₹ 28.40</td>
+                  <td class="text-end fw-medium">₹ 25.80</td>
+                  <td class="text-end text-success fw-semibold">90.8%</td>
+                  <td class="text-center">
+                    <span class="status-pill status-exceeding">Exceeding</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="branch-code">MH-PUN-03</span></td>
+                  <td class="fw-semibold">Pune Shivajinagar</td>
+                  <td class="text-secondary">West MH</td>
+                  <td class="text-end">195</td>
+                  <td class="text-end">₹ 24.80</td>
+                  <td class="text-end fw-medium">₹ 22.10</td>
+                  <td class="text-end text-success fw-semibold">89.1%</td>
+                  <td class="text-center">
+                    <span class="status-pill status-exceeding">Exceeding</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="branch-code">MH-NVM-04</span></td>
+                  <td class="fw-semibold">Navi Mumbai Vashi</td>
+                  <td class="text-secondary">MMR</td>
+                  <td class="text-end">164</td>
+                  <td class="text-end">₹ 19.20</td>
+                  <td class="text-end fw-medium">₹ 16.90</td>
+                  <td class="text-end text-primary fw-semibold">88.0%</td>
+                  <td class="text-center">
+                    <span class="status-pill status-ontrack">On Track</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="branch-code">MH-NGP-05</span></td>
+                  <td class="fw-semibold">Nagpur Civil Lines</td>
+                  <td class="text-secondary">Vidarbha</td>
+                  <td class="text-end">148</td>
+                  <td class="text-end">₹ 16.40</td>
+                  <td class="text-end fw-medium">₹ 13.80</td>
+                  <td class="text-end text-primary fw-semibold">84.1%</td>
+                  <td class="text-center">
+                    <span class="status-pill status-ontrack">On Track</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="branch-code">MH-NSK-06</span></td>
+                  <td class="fw-semibold">Nashik Road</td>
+                  <td class="text-secondary">North MH</td>
+                  <td class="text-end">136</td>
+                  <td class="text-end">₹ 14.90</td>
+                  <td class="text-end fw-medium">₹ 12.40</td>
+                  <td class="text-end text-primary fw-semibold">83.2%</td>
+                  <td class="text-center">
+                    <span class="status-pill status-ontrack">On Track</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="branch-code">MH-AUR-07</span></td>
+                  <td class="fw-semibold">Aurangabad CIDCO</td>
+                  <td class="text-secondary">Marathwada</td>
+                  <td class="text-end">118</td>
+                  <td class="text-end">₹ 12.10</td>
+                  <td class="text-end fw-medium">₹ 9.60</td>
+                  <td class="text-end text-primary fw-semibold">79.3%</td>
+                  <td class="text-center">
+                    <span class="status-pill status-ontrack">On Track</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="branch-code">MH-KLP-08</span></td>
+                  <td class="fw-semibold">Kolhapur Rajarampuri</td>
+                  <td class="text-secondary">South MH</td>
+                  <td class="text-end">109</td>
+                  <td class="text-end">₹ 10.80</td>
+                  <td class="text-end fw-medium">₹ 8.40</td>
+                  <td class="text-end text-warning fw-semibold">77.8%</td>
+                  <td class="text-center">
+                    <span class="status-pill status-review">Needs Review</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="branch-code">MH-SLP-09</span></td>
+                  <td class="fw-semibold">Solapur Saat Rasta</td>
+                  <td class="text-secondary">South MH</td>
+                  <td class="text-end">94</td>
+                  <td class="text-end">₹ 9.90</td>
+                  <td class="text-end fw-medium">₹ 7.70</td>
+                  <td class="text-end text-warning fw-semibold">77.8%</td>
+                  <td class="text-center">
+                    <span class="status-pill status-review">Needs Review</span>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3">Total / Regional Portfolio</td>
+                  <td class="text-end">1,428</td>
+                  <td class="text-end">₹ 171.00</td>
+                  <td class="text-end">₹ 148.60</td>
+                  <td class="text-end text-success">86.9%</td>
+                  <td class="text-center">
+                    <span class="status-pill status-exceeding">Healthy</span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Document Footer -->
+      <footer class="report-footer d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-1">
+        <span>Confidential &bull; Regional Credit &amp; Operations Management</span>
+        <span>System-generated PDF export &bull; All values in INR (₹ Crores)</span>
+      </footer>
+
+    </div>
+  </main>
+
+  <!-- =======================================================================
+       STATUS TOAST NOTIFICATION (Excluded from PDF)
+       ======================================================================= -->
+  <div
+    class="toast-container position-fixed bottom-0 end-0 p-3"
+    data-html2canvas-ignore="true"
+  >
+    <div
+      id="exportStatusToast"
+      class="toast align-items-center border-0 shadow-lg"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div id="toastMessageBody" class="toast-body d-flex align-items-center gap-2 fw-medium">
+          <!-- Populated dynamically via JS -->
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          data-bs-dismiss="toast"
+          aria-label="Close"
+        ></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5.3 JS Bundle (includes Popper for Toasts) -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
+  ></script>
+
+  <!-- html2pdf.js Bundle via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- =======================================================================
+       3. JAVASCRIPT FUNCTIONALITY
+       ======================================================================= -->
+  <script>
+    (function () {
+      'use strict';
+
+      // DOM Element References
+      const exportBtn = document.getElementById('exportPdfBtn');
+      const btnDefaultContent = document.getElementById('btnDefaultContent');
+      const btnLoadingContent = document.getElementById('btnLoadingContent');
+      const orientationSelect = document.getElementById('pdfOrientation');
+      const reportElement = document.getElementById('pdf-content');
+      const reportDateDisplay = document.getElementById('reportDateDisplay');
+      const toastElement = document.getElementById('exportStatusToast');
+      const toastMessageBody = document.getElementById('toastMessageBody');
+
+      // Initialize Bootstrap Toast instance
+      const statusToast = new bootstrap.Toast(toastElement, {
+        delay: 4200
+      });
+
+      /**
+       * Formats the current date for report display and filename timestamping.
+       * @returns {{ display: string, fileStamp: string }}
+       */
+      function getFormattedDate() {
+        const now = new Date();
+        const display = now.toLocaleDateString('en-IN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const fileStamp = `${year}-${month}-${day}`;
+
+        return { display, fileStamp };
+      }
+
+      /**
+       * Displays a Bootstrap Toast notification with success or error styling.
+       * @param {string} message - Message text to display.
+       * @param {'success'|'error'} type - Visual style of the toast.
+       */
+      function showToast(message, type = 'success') {
+        toastElement.classList.remove('text-bg-success', 'text-bg-danger');
+        if (type === 'success') {
+          toastElement.classList.add('text-bg-success');
+          toastMessageBody.innerHTML = `<i class="bi bi-check-circle-fill fs-5"></i><span>${message}</span>`;
+        } else {
+          toastElement.classList.add('text-bg-danger');
+          toastMessageBody.innerHTML = `<i class="bi bi-exclamation-triangle-fill fs-5"></i><span>${message}</span>`;
+        }
+        statusToast.show();
+      }
+
+      /**
+       * Toggles the loading spinner and disables controls during PDF generation.
+       * @param {boolean} isLoading - True while PDF generation is in progress.
+       */
+      function setButtonLoading(isLoading) {
+        exportBtn.disabled = isLoading;
+        orientationSelect.disabled = isLoading;
+
+        if (isLoading) {
+          btnDefaultContent.classList.add('d-none');
+          btnLoadingContent.classList.remove('d-none');
+        } else {
+          btnDefaultContent.classList.remove('d-none');
+          btnLoadingContent.classList.add('d-none');
+        }
+      }
+
+      /**
+       * Waits for the browser to complete layout reflow and paint.
+       * @returns {Promise<void>}
+       */
+      function waitForReflow() {
+        return new Promise((resolve) => {
+          requestAnimationFrame(() => {
+            setTimeout(resolve, 120);
+          });
+        });
+      }
+
+      /**
+       * Converts #pdf-content to an A4 PDF with exact page-width adjustment
+       * so cards and table columns never overflow or clip horizontally.
+       */
+      async function handlePdfExport() {
+        if (typeof html2pdf === 'undefined') {
+          showToast('PDF library failed to load. Please check your internet connection.', 'error');
+          return;
+        }
+
+        const orientation = orientationSelect.value === 'landscape' ? 'landscape' : 'portrait';
+        const isLandscape = orientation === 'landscape';
+
+        // Exact A4 printable widths at 96 DPI minus 10mm left + 10mm right margins
+        const exportWidth = isLandscape ? 1047 : 718;
+        const orientationClass = isLandscape ? 'pdf-landscape' : 'pdf-portrait';
+        const { fileStamp } = getFormattedDate();
+        const filename = `Regional_Branch_Report_${orientation}_${fileStamp}.pdf`;
+
+        const opt = {
+          margin: 10,
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            scrollX: 0,
+            scrollY: 0,
+            width: exportWidth,
+            windowWidth: exportWidth
+          },
+          jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: orientation
+          },
+          pagebreak: {
+            mode: ['css', 'legacy']
+          }
+        };
+
+        setButtonLoading(true);
+
+        // Temporarily apply exact PDF width & fixed table-layout classes
+        reportElement.classList.add('pdf-exporting', orientationClass);
+
+        try {
+          // Wait a frame for the browser to reflow the container & table to exact PDF width
+          await waitForReflow();
+
+          // Render and download the PDF
+          await html2pdf().set(opt).from(reportElement).save();
+
+          showToast(
+            `PDF exported cleanly in A4 ${isLandscape ? 'Landscape' : 'Portrait'} (${filename})`,
+            'success'
+          );
+        } catch (error) {
+          console.error('HTML to PDF Export Error:', error);
+          showToast('Failed to generate PDF. Please try again.', 'error');
+        } finally {
+          // Always restore normal responsive layout and button state
+          reportElement.classList.remove('pdf-exporting', 'pdf-portrait', 'pdf-landscape');
+          setButtonLoading(false);
+        }
+      }
+
+      // Populate dynamic current date on page load
+      document.addEventListener('DOMContentLoaded', () => {
+        const { display } = getFormattedDate();
+        if (reportDateDisplay) {
+          reportDateDisplay.textContent = display;
+        }
+      });
+
+      // Bind Export button click handler
+      exportBtn.addEventListener('click', handlePdfExport);
+    })();
+  </script>
+</body>
+</html>
